@@ -179,3 +179,4 @@ set_clock_groups -physically_exclusive -group [get_clocks -include_generated_clo
 set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks gmii_clk_25m_out] -group [get_clocks -include_generated_clocks gmii_clk_125m_out]
 set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks gmii_clk_2_5m_out] -group [get_clocks -include_generated_clocks gmii_clk_25m_out]
 
+create_clock -period 8.000 -name ref_clk_p[0] -waveform {0.000 4.000} [get_ports {ref_clk_p[0]}]
