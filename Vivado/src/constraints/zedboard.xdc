@@ -157,6 +157,7 @@ set_property PACKAGE_PIN A22 [get_ports reset_port_3]
 
 current_instance design_1_i/gmii_to_rgmii_0/U0
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *design_1_gmii_to_rgmii_0_0_core/*delay_rgmii_rxd*            }]
+set_property IDELAY_VALUE 16 [get_cells -hier -filter {name =~ *design_1_gmii_to_rgmii_0_0_core/*delay_rgmii_rxd*}]
 current_instance -quiet
 create_clock -period 8.000 -name design_1_eth_mac_3_rgmii_rx_clk -waveform {0.000 4.000} [get_ports rgmii_port_3_rxc]
 
@@ -170,8 +171,10 @@ current_instance design_1_i/axi_ethernet_2/eth_mac/U0
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells {rgmii_interface/delay_rgmii_rx* rgmii_interface/rxdata_bus[*].delay_rgmii_rx*}]
 current_instance -quiet
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells design_1_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/design_1_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/delay_rgmii_rx_ctl]
+set_property IDELAY_VALUE 16 [get_cells design_1_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/design_1_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/delay_rgmii_rx_ctl]
 
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells design_1_i/axi_ethernet_0/eth_mac/U0/tri_mode_ethernet_mac_idelayctrl_common_i]
+# IODELAY group for GMII-to-RGMII block
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells design_1_i/gmii_to_rgmii_0/U0/i_design_1_gmii_to_rgmii_0_0_idelayctrl]
 
 
@@ -182,3 +185,15 @@ set_clock_groups -logically_exclusive -group [get_clocks -include_generated_cloc
 set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks gmii_clk_2_5m_out] -group [get_clocks -include_generated_clocks gmii_clk_25m_out]
 
 create_clock -period 8.000 -name ref_clk_p[0] -waveform {0.000 4.000} [get_ports {ref_clk_p[0]}]
+
+#False path constraints to async inputs coming directly to synchronizer
+set_false_path -to [get_pins -hier -filter {name =~ *idelayctrl_reset_gen/*reset_sync*/PRE }]
+set_false_path -to [get_pins -of [get_cells -hier -filter { name =~ *i_MANAGEMENT/SYNC_*/data_sync* }] -filter { name =~ *D }]
+set_false_path -to [get_pins -hier -filter {name =~ *reset_sync*/PRE }]
+#False path constraints from Control Register outputs
+set_false_path -from [get_pins -hier -filter {name =~ *i_MANAGEMENT/DUPLEX_MODE_REG*/C }]
+set_false_path -from [get_pins -hier -filter {name =~ *i_MANAGEMENT/SPEED_SELECTION_REG*/C }]
+set_case_analysis 0 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk_25m_2_5m/CE0}]
+set_case_analysis 0 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk_25m_2_5m/S0}]
+set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk_25m_2_5m/CE1}]
+set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk_25m_2_5m/S1}]
