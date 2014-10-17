@@ -194,7 +194,7 @@ proc create_root_design { parentCell } {
 
   # Create instance: ref_clk_fsel, and set properties
   set ref_clk_fsel [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 ref_clk_fsel ]
-  set_property -dict [ list CONFIG.CONST_VAL {0}  ] $ref_clk_fsel
+  set_property -dict [ list CONFIG.CONST_VAL {1}  ] $ref_clk_fsel
 
   # Create instance: ref_clk_oe, and set properties
   set ref_clk_oe [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 ref_clk_oe ]
