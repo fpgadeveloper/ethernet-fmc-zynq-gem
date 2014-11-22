@@ -12,7 +12,7 @@ Each of the 3 soft Ethernet MACs are configured with DMAs.
 
 ### Requirements
 
-* Vivado 2014.2
+* Vivado 2014.3.1
 * ZedBoard
 
 ### License

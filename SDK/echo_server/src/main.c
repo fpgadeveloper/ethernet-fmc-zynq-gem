@@ -55,8 +55,8 @@
  * version of the code.
  */
 #define EMAC_BASEADDR XPAR_AXIETHERNET_0_BASEADDR  // Eth FMC Port 0
-//#define EMAC_BASEADDR XPAR_AXIETHERNET_1_BASEADDR  // Eth FMC Port 0
-//#define EMAC_BASEADDR XPAR_AXIETHERNET_2_BASEADDR  // Eth FMC Port 0
+//#define EMAC_BASEADDR XPAR_AXIETHERNET_1_BASEADDR  // Eth FMC Port 1
+//#define EMAC_BASEADDR XPAR_AXIETHERNET_2_BASEADDR  // Eth FMC Port 2
 //#define EMAC_BASEADDR XPAR_XEMACPS_1_BASEADDR  // Eth FMC Port 3
 
 /* defined by each RAW mode application */
