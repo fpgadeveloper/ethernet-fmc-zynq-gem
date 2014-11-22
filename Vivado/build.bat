@@ -1,1 +1,1 @@
-C:\Xilinx\Vivado\2014.2\bin\vivado.bat -mode batch -source build.tcl
+C:\Xilinx\Vivado\2014.3.1\bin\vivado.bat -mode batch -source build.tcl
