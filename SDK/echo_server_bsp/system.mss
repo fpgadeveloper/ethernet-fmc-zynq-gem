@@ -1,6 +1,4 @@
 
- PARAMETER NAME = E:\Github\fpgadeveloper\zedboard-qgige2\SDK\echo_server_bsp\system.mss
-
  PARAMETER VERSION = 2.2.0
 
 
