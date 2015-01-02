@@ -47,17 +47,39 @@
 #endif
 
 #include "ethfmc_axie.h"
+#include "xlwipconfig.h"
 
-/* Set the following DEFINE to the base address
- * of the Ethernet MAC that you want to hook up
- * to the lwIP echo server. Unfortunately, only
- * one port can be connected to it in this
- * version of the code.
+/* Set the following DEFINE to the port number (0,1,2 or 3)
+ * of the Ethernet FMC that you want to hook up
+ * to the lwIP echo server. Only one port can be connected
+ * to it in this version of the code.
  */
+#define ETH_FMC_PORT 0
+
+/*
+ * NOTE: When using ports 0..2 the BSP setting "use_axieth_on_zynq"
+ * must be set to 1. When using port 3, it must be set to 0.
+ * To change BSP settings: right click on the BSP and click
+ * "Board Support Package Settings" from the context menu.
+ */
+#ifdef XLWIP_CONFIG_INCLUDE_AXIETH_ON_ZYNQ
+#if ETH_FMC_PORT == 0
 #define EMAC_BASEADDR XPAR_AXIETHERNET_0_BASEADDR  // Eth FMC Port 0
-//#define EMAC_BASEADDR XPAR_AXIETHERNET_1_BASEADDR  // Eth FMC Port 1
-//#define EMAC_BASEADDR XPAR_AXIETHERNET_2_BASEADDR  // Eth FMC Port 2
-//#define EMAC_BASEADDR XPAR_XEMACPS_1_BASEADDR  // Eth FMC Port 3
+#endif
+#if ETH_FMC_PORT == 1
+#define EMAC_BASEADDR XPAR_AXIETHERNET_1_BASEADDR  // Eth FMC Port 1
+#endif
+#if ETH_FMC_PORT == 2
+#define EMAC_BASEADDR XPAR_AXIETHERNET_2_BASEADDR  // Eth FMC Port 2
+#endif
+#endif
+
+#ifdef XLWIP_CONFIG_INCLUDE_GEM
+#if ETH_FMC_PORT == 3
+#define EMAC_BASEADDR XPAR_XEMACPS_1_BASEADDR  // Eth FMC Port 3
+#endif
+#endif
+
 
 /* defined by each RAW mode application */
 void print_app_header();
@@ -112,8 +134,10 @@ int main()
 
 	init_platform();
 
+#ifdef XLWIP_CONFIG_INCLUDE_AXIETH_ON_ZYNQ
 	/* PHY Autoneg and EMAC configuration */
 	EthFMC_init_axiemac(EMAC_BASEADDR,mac_ethernet_address);
+#endif
 
 #if LWIP_DHCP==1
     ipaddr.addr = 0;
