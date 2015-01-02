@@ -1,11 +1,11 @@
 zedboard-qgige
 ==============
 
-Example design for the Quad Gigabit Ethernet FMC on the ZedBoard
+Example design for the [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC") on the [ZedBoard](http://zedboard.org "ZedBoard")
 
 ### Description
 
-This project demonstrates the use of the Opsero Quad Gigabit Ethernet FMC.
+This project demonstrates the use of the Opsero [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC").
 The design contains 3 soft Tri-mode Ethernet MACs plus one RGMII-to-GMII
 IP core to make use of the spare hard Ethernet MAC in the PS of the Zynq.
 Each of the 3 soft Ethernet MACs are configured with DMAs.
@@ -14,9 +14,9 @@ Each of the 3 soft Ethernet MACs are configured with DMAs.
 
 * Vivado 2014.3.1 (see Library modifications below)
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
-* ZedBoard
+* [ZedBoard](http://zedboard.org "ZedBoard")
 
-### Library modifications
+### Library modifications for Vivado 2014.3.1
 
 To use this project, two modifications must be made to the lwIP libraries
 provided by the Xilinx SDK. These modifications can be made either to the
