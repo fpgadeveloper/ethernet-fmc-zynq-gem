@@ -24,7 +24,7 @@ BSP code of your SDK workspace, or to the SDK sources. I personally
 recommend modifying the SDK sources as every rebuild of the BSP results
 in the BSP sources being overwritten with the SDK sources.
 
-#### Modifications to xaxiemacif_dma.c 
+#### Modification to xaxiemacif_dma.c 
 
 Open the following file:
 
@@ -38,7 +38,7 @@ With this one:
 
 `DMAConfig = XAxiDma_LookupConfig(xemac->topology_index);`
 
-#### Modifications to xemacpsif_physpeed.c
+#### Modification to xemacpsif_physpeed.c
 
 Open the following file:
 
@@ -65,8 +65,8 @@ website. The more people that benefit, the better.
 
 ### About the author
 
-I'm an FPGA consultant and I provide FPGA design services and training to
-innovative companies around the world. I believe in sharing knowledge and
+I'm an FPGA consultant and I provide FPGA design services to innovative
+companies around the world. I believe in sharing knowledge and
 I regularly contribute to the open source community.
 
 Jeff Johnson
