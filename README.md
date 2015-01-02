@@ -12,8 +12,46 @@ Each of the 3 soft Ethernet MACs are configured with DMAs.
 
 ### Requirements
 
-* Vivado 2014.3.1
+* Vivado 2014.3.1 (see Library modifications below)
+* [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * ZedBoard
+
+### Library modifications
+
+To use this project, two modifications must be made to the lwIP libraries
+provided by the Xilinx SDK. These modifications can be made either to the
+BSP code of your SDK workspace, or to the SDK sources. I personally
+recommend modifying the SDK sources as every rebuild of the BSP results
+in the BSP sources being overwritten with the SDK sources.
+
+#### Modifications to xaxiemacif_dma.c 
+
+Open the following file:
+
+`C:\Xilinx\SDK\2014.3.1\data\embeddedsw\ThirdParty\sw_services\lwip140_v2_2\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
+
+Replace this line of code:
+
+`DMAConfig = XAxiDma_LookupConfig(XPAR_AXIDMA_0_DEVICE_ID);`
+
+With this one:
+
+`DMAConfig = XAxiDma_LookupConfig(xemac->topology_index);`
+
+#### Modifications to xemacpsif_physpeed.c
+
+Open the following file:
+
+`C:\Xilinx\SDK\2014.3.1\data\embeddedsw\ThirdParty\sw_services\lwip140_v2_2\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
+
+Add the following define statement to the code:
+
+`#define XPAR_GMII2RGMIICON_0N_ETH1_ADDR 8`
+
+That defines the "PHY address" of the GMII-to-RGMII converter so that the
+Phy_Setup function can properly set the converter's link speed once the
+autonegotiation sequence has completed. See the datasheet of the
+GMII-to-RGMII converter for more details.
 
 ### License
 
@@ -32,4 +70,4 @@ innovative companies around the world. I believe in sharing knowledge and
 I regularly contribute to the open source community.
 
 Jeff Johnson
-http://www.fpgadeveloper.com
+[FPGA Developer](http://www.fpgadeveloper.com "FPGA Developer")
