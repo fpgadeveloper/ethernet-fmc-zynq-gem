@@ -10,11 +10,14 @@ The design contains 3 soft Tri-mode Ethernet MACs plus one RGMII-to-GMII
 IP core to make use of the spare hard Ethernet MAC in the PS of the Zynq.
 Each of the 3 soft Ethernet MACs are configured with DMAs.
 
+![Ethernet FMC Quad Gig AXI Ethernet](http://ethernetfmc.com/wp-content/uploads/2014/10/qgige_gmii_to_rgmii.png "Zynq Quad Gig Ethernet All AXI Ethernet")
+
 ### Requirements
 
 * Vivado 2014.3.1 (see Library modifications below)
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * [ZedBoard](http://zedboard.org "ZedBoard")
+* [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
 ### Library modifications for Vivado 2014.3.1
 
