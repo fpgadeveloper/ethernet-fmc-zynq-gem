@@ -124,14 +124,12 @@ timer_callback(XScuTimer * TimerInstance)
 	 * the Rx path cannot become unresponsive for more than 100
 	 * milliseconds.
 	 */
-	/*
 #ifndef USE_SOFTETH_ON_ZYNQ
 	if (ResetRxCntr >= RESET_RX_CNTR_LIMIT) {
 		xemacpsif_resetrx_on_no_rxdata(echo_netif);
 		ResetRxCntr = 0;
 	}
 #endif
-	*/
 	XScuTimer_ClearInterruptStatus(TimerInstance);
 }
 

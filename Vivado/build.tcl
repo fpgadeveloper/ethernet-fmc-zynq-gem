@@ -3,8 +3,11 @@
 #
 #*****************************************************************************************
 
-# Set the reference directory to where the script is
-set origin_dir [file dirname [info script]]
+# Set the reference directory for source file relative paths (by default the value is script directory path)
+set origin_dir "."
+
+# Set the directory path for the original project from where this script was exported
+set orig_proj_dir "[file normalize "$origin_dir/zedboard_qgige"]"
 
 # Create project
 create_project zedboard_qgige $origin_dir/zedboard_qgige
@@ -14,7 +17,7 @@ set proj_dir [get_property directory [current_project]]
 
 # Set project properties
 set obj [get_projects zedboard_qgige]
-set_property "board_part" "em.avnet.com:zed:part0:1.0" $obj
+set_property "board_part" "em.avnet.com:zed:part0:1.2" $obj
 set_property "default_lib" "xil_defaultlib" $obj
 set_property "simulator_language" "Mixed" $obj
 set_property "target_language" "VHDL" $obj
@@ -23,6 +26,7 @@ set_property "target_language" "VHDL" $obj
 if {[string equal [get_filesets -quiet sources_1] ""]} {
   create_fileset -srcset sources_1
 }
+
 
 # Set 'sources_1' fileset properties
 set obj [get_filesets sources_1]
@@ -46,7 +50,7 @@ set_property "file_type" "XDC" $file_obj
 
 # Set 'constrs_1' fileset properties
 set obj [get_filesets constrs_1]
-set_property "target_constrs_file" "$origin_dir/src/constraints/zedboard.xdc" $obj
+set_property "target_constrs_file" "[file normalize "$origin_dir/src/constraints/zedboard.xdc"]" $obj
 
 # Create 'sim_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sim_1] ""]} {
