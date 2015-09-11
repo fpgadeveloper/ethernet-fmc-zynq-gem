@@ -23,8 +23,8 @@ _UNDEF_STACK_SIZE = DEFINED(_UNDEF_STACK_SIZE) ? _UNDEF_STACK_SIZE : 1024;
 
 MEMORY
 {
-   ps7_ram_0_S_AXI_BASEADDR : ORIGIN = 0x00000000, LENGTH = 0x00030000
    ps7_ddr_0_S_AXI_BASEADDR : ORIGIN = 0x00100000, LENGTH = 0x1FF00000
+   ps7_ram_0_S_AXI_BASEADDR : ORIGIN = 0x00000000, LENGTH = 0x00030000
    ps7_ram_1_S_AXI_BASEADDR : ORIGIN = 0xFFFF0000, LENGTH = 0x0000FE00
 }
 
@@ -37,7 +37,7 @@ ENTRY(_vector_table)
 SECTIONS
 {
 .text : {
-   *(.vectors)
+   KEEP (*(.vectors))
    *(.boot)
    *(.text)
    *(.text.*)
@@ -256,11 +256,13 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
    . = ALIGN(16);
    _stack_end = .;
    . += _STACK_SIZE;
+   . = ALIGN(16);
    _stack = .;
    __stack = _stack;
    . = ALIGN(16);
    _irq_stack_end = .;
    . += _IRQ_STACK_SIZE;
+   . = ALIGN(16);
    __irq_stack = .;
    _supervisor_stack_end = .;
    . += _SUPERVISOR_STACK_SIZE;
