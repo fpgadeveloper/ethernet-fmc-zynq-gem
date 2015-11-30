@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>echo_server</name>
-	<comment>Created by SDK v2015.3. echo_server_bsp - ps7_cortexa9_0</comment>
+	<comment>Created by SDK v2015.4. echo_server_bsp - ps7_cortexa9_0</comment>
 	<projects>
 		<project>echo_server_bsp</project>
 	</projects>

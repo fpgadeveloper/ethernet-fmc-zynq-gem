@@ -14,7 +14,7 @@ Each of the 3 soft Ethernet MACs are configured with DMAs.
 
 ### Requirements
 
-* Vivado 2015.3 (see Library modifications below)
+* Vivado 2015.4 (see Library modifications below)
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * [ZedBoard](http://zedboard.org "ZedBoard")
 * [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -31,7 +31,7 @@ Valid values for `ETH_FMC_PORT` are 0,1,2 or 3.
 The application will not compile if the correct BSP settings have not been set. To change BSP settings:
 right click on the BSP and click `Board Support Package Settings` from the context menu.
 
-### Library modifications for Vivado 2015.3
+### Library modifications for Vivado 2015.4
 
 To use this project, some modifications must be made to the lwIP libraries
 provided by the Xilinx SDK. These modifications can be made either to the
@@ -43,7 +43,7 @@ in the BSP sources being overwritten with the SDK sources.
 
 Open the following file:
 
-`C:\Xilinx\SDK\2015.3\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_2\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
+`C:\Xilinx\SDK\2015.4\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
 
 Replace this line of code:
 
@@ -57,7 +57,7 @@ With this one:
 
 Open the following file:
 
-`C:\Xilinx\SDK\2015.3\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_2\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
+`C:\Xilinx\SDK\2015.4\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
 
 Add the following define statement to the code:
 
@@ -72,7 +72,7 @@ GMII-to-RGMII converter for more details.
 
 Open the following file:
 
-`C:\Xilinx\SDK\2015.3\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_2\src\contrib\ports\xilinx\netif\xaxiemacif_physpeed.c`
+`C:\Xilinx\SDK\2015.4\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_physpeed.c`
 
 Add the following define statement to the code:
 
@@ -201,27 +201,6 @@ and replace it with this block of code:
 ```
 
 We have just added an extra else-if statement to call our custom PHY speed function added earlier.
-
-#### Modification to xemacpsif_dma.c
-
-This modification is required for lwIP to work on port 3 which connects to the Zynq GEM1 through the
-GMII-to-RGMII converter. At this point in time, it is not completely understood why the modification "works",
-but it has so far been the only way to get port 3 to work in this example.
-
-Open the following file:
-
-`C:\Xilinx\SDK\2015.3\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_2\src\contrib\ports\xilinx\netif\xemacpsif_dma.c`
-
-Find the 7 blocks of code that look like the following and comment them out. They all consist of an if statement that
-checks if we are using GEM1 and creates an offset index if we are. Search for them using `XPAR_XEMACPS_0_BASEADDR` as search term:
-
-```c
-	if (xemacpsif->emacps.Config.BaseAddress != XPAR_XEMACPS_0_BASEADDR) {
-		index = sizeof(s32_t) * XLWIP_CONFIG_N_TX_DESC;
-	}
-```
-
-This modification has been necessary since lwip141_v1_0.
 
 ### License
 
