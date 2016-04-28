@@ -14,7 +14,7 @@ Each of the 3 soft Ethernet MACs are configured with DMAs.
 
 ### Requirements
 
-* Vivado 2015.4 (see Library modifications below)
+* Vivado 2016.1 (see Library modifications below)
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * [ZedBoard](http://zedboard.org "ZedBoard")
 * [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -31,7 +31,7 @@ Valid values for `ETH_FMC_PORT` are 0,1,2 or 3.
 The application will not compile if the correct BSP settings have not been set. To change BSP settings:
 right click on the BSP and click `Board Support Package Settings` from the context menu.
 
-### Library modifications for Vivado 2015.4
+### Library modifications for Vivado 2016.1
 
 To use this project, some modifications must be made to the lwIP libraries
 provided by the Xilinx SDK. These modifications can be made either to the
@@ -43,7 +43,7 @@ in the BSP sources being overwritten with the SDK sources.
 
 Open the following file:
 
-`C:\Xilinx\SDK\2015.4\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
+`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
 
 Replace this line of code:
 
@@ -57,7 +57,7 @@ With this one:
 
 Open the following file:
 
-`C:\Xilinx\SDK\2015.4\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
+`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
 
 Add the following define statement to the code:
 
@@ -72,7 +72,7 @@ GMII-to-RGMII converter for more details.
 
 Open the following file:
 
-`C:\Xilinx\SDK\2015.4\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_physpeed.c`
+`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_physpeed.c`
 
 Add the following define statement to the code:
 
@@ -87,16 +87,9 @@ Add the following function code just above the function called `get_IEEE_phy_spe
 unsigned int get_phy_speed_88E1510(XAxiEthernet *xaxiemacp, u32 phy_addr)
 {
 	u16 temp;
-	u16 phy_identifier;
-	u16 phy_model;
 	u16 control;
 	u16 status;
 	u16 partner_capabilities;
-
-	/* Get the PHY Identifier and Model number */
-	XAxiEthernet_PhyRead(xaxiemacp, phy_addr, 2, &phy_identifier);
-	XAxiEthernet_PhyRead(xaxiemacp, phy_addr, 3, &phy_model);
-	phy_model = phy_model & PHY_MODEL_NUM_MASK;
 
 	xil_printf("Start PHY autonegotiation \r\n");
 
