@@ -43,7 +43,7 @@ in the BSP sources being overwritten with the SDK sources.
 
 Open the following file:
 
-`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
+`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_4\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
 
 Replace this line of code:
 
@@ -57,7 +57,7 @@ With this one:
 
 Open the following file:
 
-`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
+`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_4\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
 
 Add the following define statement to the code:
 
@@ -72,7 +72,7 @@ GMII-to-RGMII converter for more details.
 
 Open the following file:
 
-`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_physpeed.c`
+`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_4\src\contrib\ports\xilinx\netif\xaxiemacif_physpeed.c`
 
 Add the following define statement to the code:
 
