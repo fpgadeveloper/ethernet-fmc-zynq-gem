@@ -1,14 +1,27 @@
-zedboard-qgige
-==============
+ethernet-fmc-zynq-gem
+=====================
 
-Example design for the [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC") on the [ZedBoard](http://zedboard.org "ZedBoard")
+Example design for using the [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC") with the Zynq PS hard 
+Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
+
+### Supported boards
+
+* Zynq-7000 [ZedBoard](http://zedboard.org "ZedBoard")
+  * LPC connector (use zedboard.xdc)
+* Zynq UltraScale+ [ZCU102 Evaluation board](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board")
+  * HPC0 connector (use zcu102-hpc0.xdc)
+  * HPC1 connector (use zcu102-hpc1.xdc)
+
+### Particularities and special notes
+
+* The ZCU102 board does not route LA01_CC and LA18_CC signals of the HPC0 and HPC1 connectors to clock capable pins, so the designs for the ZCU102
+board use only 2 ports: Port 0 and 2.
 
 ### Description
 
 This project demonstrates the use of the Opsero [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC").
-The design contains 3 soft Tri-mode Ethernet MACs plus one RGMII-to-GMII
-IP core to make use of the spare hard Ethernet MAC in the PS of the Zynq.
-Each of the 3 soft Ethernet MACs are configured with DMAs.
+The design demonstrates use of the GMII-to-RGMII IP core to connect the hard GEMs of the Zynq PS to the Ethernet FMC
+PHYs. All designs use the hard GEMs but some also use AXI Ethernet Subsystem IP.
 
 ![Ethernet FMC Quad Gig AXI Ethernet](http://ethernetfmc.com/wp-content/uploads/2014/10/qgige_gmii_to_rgmii.png "Zynq Quad Gig Ethernet All AXI Ethernet")
 
@@ -16,8 +29,8 @@ Each of the 3 soft Ethernet MACs are configured with DMAs.
 
 * Vivado 2016.1 (see Library modifications below)
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
-* [ZedBoard](http://zedboard.org "ZedBoard")
-* [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
+* One of the above listed Zynq boards
+* For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
 ### Single port limit
 
