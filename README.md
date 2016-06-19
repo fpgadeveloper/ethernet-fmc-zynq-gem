@@ -8,6 +8,8 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 
 * Zynq-7000 [ZedBoard](http://zedboard.org "ZedBoard")
   * LPC connector (use zedboard.xdc)
+* [MicroZed FMC Carrier](http://zedboard.org/product/microzed-fmc-carrier "MicroZed FMC Carrier") with [MicroZed 7Z010 or 7Z020](http://microzed.org "MicroZed")
+  * LPC connector (use mzfmc-7z010-7z020.xdc)
 * Zynq UltraScale+ [ZCU102 Evaluation board](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
@@ -43,6 +45,40 @@ Valid values for `ETH_FMC_PORT` are 0,1,2 or 3.
 
 The application will not compile if the correct BSP settings have not been set. To change BSP settings:
 right click on the BSP and click `Board Support Package Settings` from the context menu.
+
+### ZedBoard and MicroZed specific notes
+
+When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
+you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
+Zynq configurations that are not compatible with the GEM1 configuration.
+
+### MicroZed specific notes
+
+#### Uses Zynq Fabric clocks
+
+To generate the 125MHz and 200MHz clocks required by the AXI Ethernet IPs, this design uses two Zynq
+fabric clocks rather than using the Ethernet FMC's on-board 125MHz clock. Generally this is due to resource
+limitations of the MicroZed 7Z010, but to be more specific:
+
+* Using the on-board 125MHz clock + Zynq fabric 200MHz clock leads to a timing closure problem that I have not
+yet been able to get around.
+* Using the on-board 125MHz clock into a clock wizard to generate the 200MHz clock is not possible due to the Zynq 7Z010
+only containing two MMCMs.
+
+#### Installation of MicroZed board definition files
+
+To use this project, you must first install the board definition files
+for the MicroZed into your Vivado installation.
+
+The following folders contain the board definition files and can be found in this project repository at this location:
+
+https://github.com/fpgadeveloper/microzed-qgige/tree/master/Vivado/boards/board_files
+
+* `microzed_7010`
+* `microzed_7020`
+
+Copy those folders and their contents into the `C:\Xilinx\Vivado\2016.1\data\boards\board_files` folder (this may
+be different on your machine, depending on your Vivado installation directory).
 
 ### Library modifications for Vivado 2016.1
 
