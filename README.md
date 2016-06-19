@@ -14,11 +14,6 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
 
-### Particularities and special notes
-
-* The ZCU102 board does not route LA01_CC and LA18_CC signals of the HPC0 and HPC1 connectors to clock capable pins, so the designs for the ZCU102
-board use only 2 ports: Port 0 and 2.
-
 ### Description
 
 This project demonstrates the use of the Opsero [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC").
@@ -45,6 +40,11 @@ Valid values for `ETH_FMC_PORT` are 0,1,2 or 3.
 
 The application will not compile if the correct BSP settings have not been set. To change BSP settings:
 right click on the BSP and click `Board Support Package Settings` from the context menu.
+
+### ZCU102 specific notes
+
+* The ZCU102 board does not route LA01_CC and LA18_CC signals of the HPC0 and HPC1 connectors to clock capable pins, so the designs for the ZCU102
+board use only 2 ports: Port 0 and 2.
 
 ### ZedBoard and MicroZed specific notes
 
