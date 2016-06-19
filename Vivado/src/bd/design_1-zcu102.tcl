@@ -50,7 +50,7 @@ current_bd_instance $parentObj
 
 # Add the Processor System and apply board preset
 startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:1.1 zynq_ultra_ps_e_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e zynq_ultra_ps_e_0
 endgroup
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1" }  [get_bd_cells zynq_ultra_ps_e_0]
 
@@ -64,8 +64,8 @@ connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_p
 
 # Add the GMII-to-RGMIIs
 startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii:4.0 gmii_to_rgmii_0
-create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii:4.0 gmii_to_rgmii_2
+create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii gmii_to_rgmii_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii gmii_to_rgmii_2
 endgroup
 set_property -dict [list CONFIG.C_USE_IDELAY_CTRL {false}] [get_bd_cells gmii_to_rgmii_0]
 set_property -dict [list CONFIG.C_USE_IDELAY_CTRL {true} CONFIG.SupportLevel {Include_Shared_Logic_in_Core}] [get_bd_cells gmii_to_rgmii_2]
@@ -106,7 +106,7 @@ endgroup
 # PHY RESET for GMII-to-RGMII ports 0 and 2
 
 startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_reduced_logic:2.0 util_reduced_logic_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:util_reduced_logic util_reduced_logic_0
 endgroup
 startgroup
 set_property -dict [list CONFIG.C_SIZE {1}] [get_bd_cells util_reduced_logic_0]
@@ -121,7 +121,7 @@ endgroup
 
 # Invert reset signal to get active HIGH reset
 startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic util_vector_logic_0
 endgroup
 startgroup
 set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {not} CONFIG.LOGO_FILE {data/sym_notgate.png}] [get_bd_cells util_vector_logic_0]
@@ -136,7 +136,7 @@ connect_bd_net [get_bd_pins util_vector_logic_0/Res] [get_bd_pins gmii_to_rgmii_
 
 # Create clock wizard for the Ethernet FMC 125MHz clock and the 200MHz clock
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.3 clk_wiz_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz clk_wiz_0
 set_property -dict [list CONFIG.PRIM_IN_FREQ.VALUE_SRC USER] [get_bd_cells clk_wiz_0]
 set_property -dict [list CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} CONFIG.PRIM_IN_FREQ {125} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {200} CONFIG.USE_LOCKED {false} CONFIG.USE_RESET {false} CONFIG.CLKIN1_JITTER_PS {80.0} CONFIG.MMCM_DIVCLK_DIVIDE {5} CONFIG.MMCM_CLKFBOUT_MULT_F {48.000} CONFIG.MMCM_CLKIN1_PERIOD {8.0} CONFIG.MMCM_CLKOUT0_DIVIDE_F {6.000} CONFIG.CLKOUT1_JITTER {161.295} CONFIG.CLKOUT1_PHASE_ERROR {222.305}] [get_bd_cells clk_wiz_0]
 
@@ -149,14 +149,14 @@ create_bd_port -dir I -from 0 -to 0 ref_clk_n
 connect_bd_net [get_bd_pins /clk_wiz_0/clk_in1_n] [get_bd_ports ref_clk_n]
 
 # Create IDELAYCTRL for the GMII-to-RGMII without shared logic
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_idelay_ctrl:1.0 util_idelay_ctrl_0
+create_bd_cell -type ip -vlnv xilinx.com:ip:util_idelay_ctrl util_idelay_ctrl_0
 connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins util_idelay_ctrl_0/ref_clk]
 connect_bd_net [get_bd_pins util_vector_logic_0/Res] [get_bd_pins util_idelay_ctrl_0/rst]
 
 # Create Ethernet FMC reference clock output enable and frequency select
 
 startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 ref_clk_oe
+create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant ref_clk_oe
 endgroup
 startgroup
 create_bd_port -dir O -from 0 -to 0 ref_clk_oe
@@ -164,7 +164,7 @@ connect_bd_net [get_bd_pins /ref_clk_oe/dout] [get_bd_ports ref_clk_oe]
 endgroup
 
 startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 ref_clk_fsel
+create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant ref_clk_fsel
 endgroup
 startgroup
 create_bd_port -dir O -from 0 -to 0 ref_clk_fsel
