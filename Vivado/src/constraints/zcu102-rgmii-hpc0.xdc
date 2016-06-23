@@ -9,15 +9,15 @@
 # overriden by the following. We need to test the design on hardware to find out if the built-in constraints are actually good. 
 
 # Use these constraints to modify input delay on RGMII signals
-#set_input_delay -clock [get_clocks design_1_gmii_to_rgmii_0_0_rgmii_rx_clk] -max -1.5 [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
-#set_input_delay -clock [get_clocks design_1_gmii_to_rgmii_0_0_rgmii_rx_clk] -min -2.6 [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
-#set_input_delay -clock [get_clocks design_1_gmii_to_rgmii_0_0_rgmii_rx_clk] -clock_fall -max -1.5 -add_delay [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
-#set_input_delay -clock [get_clocks design_1_gmii_to_rgmii_0_0_rgmii_rx_clk] -clock_fall -min -2.6 -add_delay [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
+#set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -max -1.5 [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
+#set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -min -2.6 [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
+#set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -clock_fall -max -1.5 -add_delay [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
+#set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -clock_fall -min -2.6 -add_delay [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
 
-#set_input_delay -clock [get_clocks design_1_gmii_to_rgmii_2_0_rgmii_rx_clk] -max -1.5 [get_ports {rgmii_port_2_rd[*] rgmii_port_2_rx_ctl}]
-#set_input_delay -clock [get_clocks design_1_gmii_to_rgmii_2_0_rgmii_rx_clk] -min -2.6 [get_ports {rgmii_port_2_rd[*] rgmii_port_2_rx_ctl}]
-#set_input_delay -clock [get_clocks design_1_gmii_to_rgmii_2_0_rgmii_rx_clk] -clock_fall -max -1.5 -add_delay [get_ports {rgmii_port_2_rd[*] rgmii_port_2_rx_ctl}]
-#set_input_delay -clock [get_clocks design_1_gmii_to_rgmii_2_0_rgmii_rx_clk] -clock_fall -min -2.6 -add_delay [get_ports {rgmii_port_2_rd[*] rgmii_port_2_rx_ctl}]
+#set_input_delay -clock [get_clocks *_gmii_to_rgmii_2_0_rgmii_rx_clk] -max -1.5 [get_ports {rgmii_port_2_rd[*] rgmii_port_2_rx_ctl}]
+#set_input_delay -clock [get_clocks *_gmii_to_rgmii_2_0_rgmii_rx_clk] -min -2.6 [get_ports {rgmii_port_2_rd[*] rgmii_port_2_rx_ctl}]
+#set_input_delay -clock [get_clocks *_gmii_to_rgmii_2_0_rgmii_rx_clk] -clock_fall -max -1.5 -add_delay [get_ports {rgmii_port_2_rd[*] rgmii_port_2_rx_ctl}]
+#set_input_delay -clock [get_clocks *_gmii_to_rgmii_2_0_rgmii_rx_clk] -clock_fall -min -2.6 -add_delay [get_ports {rgmii_port_2_rd[*] rgmii_port_2_rx_ctl}]
 
 # The following set_output_delay constraints have been commented out because the same constraints can be found in the ..._clocks.xdc file
 # that is built into the GMII-to-RGMII core.

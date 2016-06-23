@@ -1,17 +1,6 @@
 ################################################################
-# Check if script is running in correct Vivado version.
+# Block diagram build script
 ################################################################
-set scripts_vivado_version 2016.1
-set current_vivado_version [version -short]
-
-if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
-   puts ""
-   puts "ERROR: This script was generated using Vivado <$scripts_vivado_version> and is being run in <$current_vivado_version> of Vivado. Please run the script in Vivado <$scripts_vivado_version> then open the design in Vivado <$current_vivado_version>. Upgrade the design by running \"Tools => Report => Report IP Status...\", then run write_bd_tcl to create an updated script."
-
-   return 1
-}
-
-set design_name design_1
 
 # CHECKING IF PROJECT EXISTS
 if { [get_projects -quiet] eq "" } {
@@ -62,6 +51,11 @@ endgroup
 # Connect the PL_CLK0 to the HPM0
 connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_lpd_aclk]
 
+# Add a processor system reset
+create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_zynq_ultra_ps_e_0_100M
+connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins rst_zynq_ultra_ps_e_0_100M/slowest_sync_clk]
+connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins rst_zynq_ultra_ps_e_0_100M/ext_reset_in]
+
 # Add the GMII-to-RGMIIs
 startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii gmii_to_rgmii_0
@@ -104,35 +98,16 @@ connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_2/RGMII] [get_bd_intf_ports 
 endgroup
 
 # PHY RESET for GMII-to-RGMII ports 0 and 2
-
-startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_reduced_logic util_reduced_logic_0
-endgroup
-startgroup
-set_property -dict [list CONFIG.C_SIZE {1}] [get_bd_cells util_reduced_logic_0]
-endgroup
-connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins util_reduced_logic_0/Op1]
-startgroup
 create_bd_port -dir O reset_port_0
-connect_bd_net [get_bd_pins /util_reduced_logic_0/Res] [get_bd_ports reset_port_0]
+connect_bd_net [get_bd_pins /rst_zynq_ultra_ps_e_0_100M/peripheral_aresetn] [get_bd_ports reset_port_0]
 create_bd_port -dir O reset_port_2
-connect_bd_net [get_bd_pins /util_reduced_logic_0/Res] [get_bd_ports reset_port_2]
-endgroup
-
-# Invert reset signal to get active HIGH reset
-startgroup
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic util_vector_logic_0
-endgroup
-startgroup
-set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {not} CONFIG.LOGO_FILE {data/sym_notgate.png}] [get_bd_cells util_vector_logic_0]
-endgroup
-connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins util_vector_logic_0/Op1]
+connect_bd_net [get_bd_pins /rst_zynq_ultra_ps_e_0_100M/peripheral_aresetn] [get_bd_ports reset_port_2]
 
 # Connect GMII-to-RGMII resets
-connect_bd_net [get_bd_pins util_vector_logic_0/Res] [get_bd_pins gmii_to_rgmii_0/tx_reset]
-connect_bd_net [get_bd_pins util_vector_logic_0/Res] [get_bd_pins gmii_to_rgmii_0/rx_reset]
-connect_bd_net [get_bd_pins util_vector_logic_0/Res] [get_bd_pins gmii_to_rgmii_2/tx_reset]
-connect_bd_net [get_bd_pins util_vector_logic_0/Res] [get_bd_pins gmii_to_rgmii_2/rx_reset]
+connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_0/tx_reset]
+connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_0/rx_reset]
+connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_2/tx_reset]
+connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_2/rx_reset]
 
 # Create clock wizard for the Ethernet FMC 125MHz clock and the 200MHz clock
 
@@ -151,7 +126,7 @@ connect_bd_net [get_bd_pins /clk_wiz_0/clk_in1_n] [get_bd_ports ref_clk_n]
 # Create IDELAYCTRL for the GMII-to-RGMII without shared logic
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_idelay_ctrl util_idelay_ctrl_0
 connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins util_idelay_ctrl_0/ref_clk]
-connect_bd_net [get_bd_pins util_vector_logic_0/Res] [get_bd_pins util_idelay_ctrl_0/rst]
+connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins util_idelay_ctrl_0/rst]
 
 # Create Ethernet FMC reference clock output enable and frequency select
 

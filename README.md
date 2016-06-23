@@ -24,37 +24,27 @@ PHYs. All designs use the hard GEMs but some also use AXI Ethernet Subsystem IP.
 
 ### Requirements
 
-* Vivado 2016.1 (see Library modifications below)
+* Vivado 2016.2 (see Library modifications below)
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the above listed Zynq boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
-### Single port limit
+### Board specific notes
 
-This example supports lwIP running on only one port of the Ethernet FMC. You can configure the port
-on which to run lwIP by setting the `ETH_FMC_PORT` define in the `main.c` file of the SDK application.
-Valid values for `ETH_FMC_PORT` are 0,1,2 or 3.
-
-* When using ports 0..2 the BSP setting "use_axieth_on_zynq" must be set to 1.
-* When using port 3, the BSP setting "use_axieth_on_zynq" must be set to 0.
-
-The application will not compile if the correct BSP settings have not been set. To change BSP settings:
-right click on the BSP and click `Board Support Package Settings` from the context menu.
-
-### ZCU102 specific notes
+#### ZCU102
 
 * The ZCU102 board does not route LA01_CC and LA18_CC signals of the HPC0 and HPC1 connectors to clock capable pins, so the designs for the ZCU102
 board use only 2 ports: Port 0 and 2.
 
-### ZedBoard and MicroZed specific notes
+#### ZedBoard and MicroZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
 you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
 Zynq configurations that are not compatible with the GEM1 configuration.
 
-### MicroZed specific notes
+#### MicroZed
 
-#### Uses Zynq Fabric clocks
+##### Uses Zynq Fabric clocks
 
 To generate the 125MHz and 200MHz clocks required by the AXI Ethernet IPs, this design uses two Zynq
 fabric clocks rather than using the Ethernet FMC's on-board 125MHz clock. Generally this is due to resource
@@ -65,7 +55,7 @@ yet been able to get around.
 * Using the on-board 125MHz clock into a clock wizard to generate the 200MHz clock is not possible due to the Zynq 7Z010
 only containing two MMCMs.
 
-#### Installation of MicroZed board definition files
+##### Installation of MicroZed board definition files
 
 To use this project, you must first install the board definition files
 for the MicroZed into your Vivado installation.
@@ -77,10 +67,36 @@ https://github.com/fpgadeveloper/microzed-qgige/tree/master/Vivado/boards/board_
 * `microzed_7010`
 * `microzed_7020`
 
-Copy those folders and their contents into the `C:\Xilinx\Vivado\2016.1\data\boards\board_files` folder (this may
+Copy those folders and their contents into the `C:\Xilinx\Vivado\2016.2\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory).
 
-### Library modifications for Vivado 2016.1
+### lwIP Echo Server application
+
+The SDK folder in this repository contains an example application for each of the hardware designs. The
+application is a slightly modified version of the lwIP echo server example design that is built into the
+Xilinx SDK. The modifications allow the application to be used on each of the ports of the Ethernet FMC.
+Please note that for the application to work, you must perform some modifications to the lwIP library files
+which are outlined further below in this readme.
+
+#### Single port limit
+
+This example supports lwIP running on only one port of the Ethernet FMC. You can configure the port
+on which to run lwIP by setting the `ETH_FMC_PORT` define in the `main.c` file of the SDK application.
+Valid values for `ETH_FMC_PORT` are 0,1,2 or 3.
+
+* When using ports that use AXI Ethernet IP, the BSP setting "use_axieth_on_zynq" must be set to 1.
+* When using ports that use Zynq GEM, the BSP setting "use_axieth_on_zynq" must be set to 0.
+
+The application will not compile if the correct BSP settings have not been set. To change BSP settings:
+right click on the BSP and click `Board Support Package Settings` from the context menu.
+
+#### Uses lwip141_v1_3
+
+The echo server application has been configured to use lwIP 141 Version 1.3 because the higher versions have
+been found to cause a problem when used with the Zynq GEM. The specific problems noticed are missing pings and
+not all packets being echoed.
+
+### Library modifications for Vivado 2016.2
 
 To use this project, some modifications must be made to the lwIP libraries
 provided by the Xilinx SDK. These modifications can be made either to the
@@ -92,7 +108,7 @@ in the BSP sources being overwritten with the SDK sources.
 
 Open the following file:
 
-`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_4\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
+`C:\Xilinx\SDK\2016.2\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_dma.c`
 
 Replace this line of code:
 
@@ -106,7 +122,7 @@ With this one:
 
 Open the following file:
 
-`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_4\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
+`C:\Xilinx\SDK\2016.2\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xemacpsif_physpeed.c`
 
 Add the following define statement to the code:
 
@@ -121,7 +137,7 @@ GMII-to-RGMII converter for more details.
 
 Open the following file:
 
-`C:\Xilinx\SDK\2016.1\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_4\src\contrib\ports\xilinx\netif\xaxiemacif_physpeed.c`
+`C:\Xilinx\SDK\2016.2\data\embeddedsw\ThirdParty\sw_services\lwip141_v1_3\src\contrib\ports\xilinx\netif\xaxiemacif_physpeed.c`
 
 Add the following define statement to the code:
 

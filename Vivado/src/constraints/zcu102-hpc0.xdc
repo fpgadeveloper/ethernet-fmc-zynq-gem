@@ -166,18 +166,18 @@ set_property PACKAGE_PIN K12 [get_ports reset_port_2]
 #set_property PACKAGE_PIN T11 [get_ports reset_port_3]
 
 # Port 0: gmii_to_rgmii_0 - IODELAY_GROUP 0
-current_instance design_1_i/gmii_to_rgmii_0/U0
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *design_1_gmii_to_rgmii_0_0_core/*delay_rgmii_rxd*            }]
+current_instance *_i/gmii_to_rgmii_0/U0
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_gmii_to_rgmii_0_0_core/*delay_rgmii_rxd*}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
 current_instance -quiet
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells design_1_i/util_idelay_ctrl_0/inst/dlyctrl]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells design_1_i/gmii_to_rgmii_0/U0/design_1_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells *_i/util_idelay_ctrl_0/inst/dlyctrl]
 
 # Port 2: gmii_to_rgmii_2 - IODELAY_GROUP 1
-current_instance design_1_i/gmii_to_rgmii_2/U0
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *design_1_gmii_to_rgmii_2_0_core/*delay_rgmii_rxd*            }]
+current_instance *_i/gmii_to_rgmii_2/U0
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_gmii_to_rgmii_2_0_core/*delay_rgmii_rxd*}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_gmii_to_rgmii_2_0_idelayctrl}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
 current_instance -quiet
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells design_1_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/design_1_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells design_1_i/gmii_to_rgmii_2/U0/i_design_1_gmii_to_rgmii_2_0_idelayctrl]
 
 # The following constraints come from the GMII to RGMII product guide
 # http://www.xilinx.com/support/documentation/ip_documentation/gmii_to_rgmii/v4_0/pg160-gmii-to-rgmii.pdf
@@ -237,14 +237,14 @@ set_property SLEW FAST [get_ports rgmii_port_2_tx_ctl]
 
 # Rename the gmii_to_rgmii_0_gmii_clk_125m_out clock to gmii_clk_125m_out so that the in-built constraints will find it
 # Based on AR57197: http://www.xilinx.com/support/answers/57197.html
-create_generated_clock -name gmii_clk_125m_out [get_pins design_1_i/gmii_to_rgmii_2/U0/i_design_1_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst/CLKOUT0]
+create_generated_clock -name gmii_clk_125m_out [get_pins *_i/gmii_to_rgmii_2/U0/i_*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst/CLKOUT0]
 
 # From AR65947 : http://www.xilinx.com/support/answers/65947.html
 
 # BUFG on 200 MHz input clock
 #set_property CLOCK_REGION X3Y0      [get_cells {example_clocks/bufg_clkin1}]
 # BUFG on GTX Clock
-set_property CLOCK_REGION X3Y2      [get_cells design_1_i/clk_wiz_0/inst/clkout1_buf]
+set_property CLOCK_REGION X3Y2      [get_cells *_i/clk_wiz_0/inst/clkout1_buf]
 # BUFG on RX Clock input
-set_property CLOCK_REGION X3Y3      [get_cells design_1_i/gmii_to_rgmii_2/U0/i_design_1_gmii_to_rgmii_2_0_clocking/clk10_div_buf]
+set_property CLOCK_REGION X3Y3      [get_cells *_i/gmii_to_rgmii_2/U0/i_*_gmii_to_rgmii_2_0_clocking/clk10_div_buf]
 

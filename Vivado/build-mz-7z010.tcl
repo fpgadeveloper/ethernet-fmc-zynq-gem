@@ -3,21 +3,23 @@
 #
 #*****************************************************************************************
 
+set design_name mz_7z010_qgige
+
 # Set the reference directory for source file relative paths (by default the value is script directory path)
 set origin_dir "."
 
 # Set the directory path for the original project from where this script was exported
-set orig_proj_dir "[file normalize "$origin_dir/mz_7z010_qgige"]"
+set orig_proj_dir "[file normalize "$origin_dir/$design_name"]"
 
 # Create project
-create_project mz_7z010_qgige $origin_dir/mz_7z010_qgige
+create_project $design_name $origin_dir/$design_name
 
 # Set the directory path for the new project
 set proj_dir [get_property directory [current_project]]
 
 # Set project properties
-set obj [get_projects mz_7z010_qgige]
-set_property "board_part" "em.avnet.com:microzed_7010:part0:1.0" $obj
+set obj [get_projects $design_name]
+set_property "board_part" "em.avnet.com:microzed_7010:part0:1.1" $obj
 set_property "default_lib" "xil_defaultlib" $obj
 set_property "simulator_language" "Mixed" $obj
 set_property "target_language" "VHDL" $obj
@@ -30,7 +32,7 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
 
 # Set 'sources_1' fileset properties
 set obj [get_filesets sources_1]
-set_property "top" "design_1_wrapper" $obj
+set_property "top" "${design_name}_wrapper" $obj
 
 # Create 'constrs_1' fileset (if not found)
 if {[string equal [get_filesets -quiet constrs_1] ""]} {
@@ -63,7 +65,7 @@ set obj [get_filesets sim_1]
 
 # Set 'sim_1' fileset properties
 set obj [get_filesets sim_1]
-set_property "top" "design_1_wrapper" $obj
+set_property "top" "${design_name}_wrapper" $obj
 
 # Create 'synth_1' run (if not found)
 if {[string equal [get_runs -quiet synth_1] ""]} {
@@ -89,12 +91,16 @@ set obj [get_runs impl_1]
 # set the current impl run
 current_run -implementation [get_runs impl_1]
 
-puts "INFO: Project created:mz_7z010_qgige"
+puts "INFO: Project created:${design_name}"
 
 # Create block design
 source $origin_dir/src/bd/design_1-mz7010.tcl
 
 # Generate the wrapper
-set design_name [get_bd_designs]
-make_wrapper -files [get_files $design_name.bd] -top -import
+make_wrapper -files [get_files *${design_name}.bd] -top
+add_files -norecurse ${design_name}/${design_name}.srcs/sources_1/bd/${design_name}/hdl/${design_name}_wrapper.vhd
+
+# Update the compile order
+update_compile_order -fileset sources_1
+update_compile_order -fileset sim_1
 
