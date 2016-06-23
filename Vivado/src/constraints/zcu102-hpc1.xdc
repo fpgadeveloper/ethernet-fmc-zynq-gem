@@ -160,6 +160,17 @@ set_property PACKAGE_PIN AH11 [get_ports reset_port_2]
 #set_property PACKAGE_PIN T13 [get_ports {rgmii_port_3_td[1]}]
 #set_property PACKAGE_PIN R13 [get_ports rgmii_port_3_txc]
 
+# -----------------------------------------
+# IODELAY_GROUP constraints - COMMENTED OUT
+# -----------------------------------------
+# The below constraints are intended for grouping the IDELAY/ODELAY/IDELAY_CTRLs of different I/O banks.
+# They are commented out because they produce errors due to the fact that the FMC pins associated with port 2 of the
+# Ethernet FMC are routed to two different I/O banks on the ZCU102 HPC1 connector. We cannot create an IODELAY_GROUP
+# containing primitives from different I/O banks. With these constraints commented out, we are able to get a bitstream,
+# which indicates that the tools are able to correctly group the IDELAY/ODELAY/IDELAY_CTRLs. However, it might
+# be a better practice to eventually revise these constraints so that they create the IODELAY_GROUPs based on their 
+# bank assignment and not on their port assignment.
+
 # Port 0: gmii_to_rgmii_0 - IODELAY_GROUP 0
 #current_instance *_i/gmii_to_rgmii_0/U0
 #set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_gmii_to_rgmii_0_0_core/*delay_rgmii_rxd*}]
