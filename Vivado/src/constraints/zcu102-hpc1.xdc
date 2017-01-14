@@ -254,3 +254,24 @@ create_generated_clock -name gmii_clk_125m_out [get_pins *_i/gmii_to_rgmii_2/U0/
 # BUFG on RX Clock input
 #set_property CLOCK_REGION X3Y3      [get_cells *_i/gmii_to_rgmii_2/U0/i_*_gmii_to_rgmii_2_0_clocking/clk10_div_buf]
 
+# CRITICAL WARNING: [DRC 23-20] Rule violation (PDRC-203) BITSLICE0 not available during BISC - 
+# The port rgmii_port_2_tx_ctl is assigned to a PACKAGE_PIN that uses BITSLICE_0 of a Byte that 
+# will be using calibration. The signal connected to rgmii_port_2_tx_ctl will not be available 
+# during calibration and will only be available after RDY asserts. If this condition is not 
+# acceptable for your design and board layout, rgmii_port_2_tx_ctl will have to be moved to 
+# another PACKAGE_PIN that is not undergoing calibration or be moved to a PACKAGE_PIN location 
+# that is not BITSLICE_0 or BITSLICE_6 on that same Byte. If this condition is acceptable for 
+# your design and board layout, this DRC can be bypassed by acknowledging the condition and 
+# setting the following XDC constraint: 
+set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_2_tx_ctl]
+
+# CRITICAL WARNING: [DRC 23-20] Rule violation (PDRC-203) BITSLICE0 not available during BISC - 
+# The port rgmii_port_2_txc is assigned to a PACKAGE_PIN that uses BITSLICE_0 of a Byte that will 
+# be using calibration. The signal connected to rgmii_port_2_txc will not be available during 
+# calibration and will only be available after RDY asserts. If this condition is not acceptable 
+# for your design and board layout, rgmii_port_2_txc will have to be moved to another PACKAGE_PIN 
+# that is not undergoing calibration or be moved to a PACKAGE_PIN location that is not BITSLICE_0 
+# or BITSLICE_6 on that same Byte. If this condition is acceptable for your design and board 
+# layout, this DRC can be bypassed by acknowledging the condition and setting the following XDC 
+# constraint: 
+set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_2_txc]

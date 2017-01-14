@@ -71,9 +71,14 @@ startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_ethernet axi_ethernet_2
 endgroup
 
-# Configure ports 1,2 and 3 for "Don't include shared logic"
+# Configure ports 1 and 2 for "Don't include shared logic"
 set_property -dict [list CONFIG.SupportLevel {0}] [get_bd_cells axi_ethernet_2]
 set_property -dict [list CONFIG.SupportLevel {0}] [get_bd_cells axi_ethernet_1]
+
+# Configure all AXI Ethernet for no frame filter and no statistics counter (saves LUTs)
+set_property -dict [list CONFIG.Frame_Filter {false} CONFIG.Statistics_Counters {false}] [get_bd_cells axi_ethernet_0]
+set_property -dict [list CONFIG.Frame_Filter {false} CONFIG.Statistics_Counters {false}] [get_bd_cells axi_ethernet_1]
+set_property -dict [list CONFIG.Frame_Filter {false} CONFIG.Statistics_Counters {false}] [get_bd_cells axi_ethernet_2]
 
 # Apply block automation for all AXI Ethernet: RGMII with DMA
 startgroup

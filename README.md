@@ -9,7 +9,7 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 * Zynq-7000 [ZedBoard](http://zedboard.org "ZedBoard")
   * LPC connector (use zedboard.xdc)
 * [MicroZed FMC Carrier](http://zedboard.org/product/microzed-fmc-carrier "MicroZed FMC Carrier") with [MicroZed 7Z010 or 7Z020](http://microzed.org "MicroZed")
-  * LPC connector (use mzfmc-7z010-7z020.xdc)
+  * LPC connector (use mzfmc-7z010.xdc or mzfmc-7z020.xdc)
 * Zynq UltraScale+ [ZCU102 Evaluation board](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
@@ -24,7 +24,7 @@ PHYs. All designs use the hard GEMs but some also use AXI Ethernet Subsystem IP.
 
 ### Requirements
 
-* Vivado 2016.3
+* Vivado 2016.4
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the above listed Zynq boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -67,7 +67,7 @@ https://github.com/fpgadeveloper/microzed-qgige/tree/master/Vivado/boards/board_
 * `microzed_7010`
 * `microzed_7020`
 
-Copy those folders and their contents into the `C:\Xilinx\Vivado\2016.3\data\boards\board_files` folder (this may
+Copy those folders and their contents into the `C:\Xilinx\Vivado\2016.4\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory).
 
 ### Building the SDK workspace

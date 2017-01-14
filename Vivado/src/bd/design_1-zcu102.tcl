@@ -45,11 +45,12 @@ apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_boar
 
 # Configure the PS: Enable GEM0, GEM1
 startgroup
-set_property -dict [list CONFIG.PSU__ENET0__PERIPHERAL__ENABLE {1} CONFIG.PSU__ENET0__PERIPHERAL__IO {EMIO} CONFIG.PSU__ENET1__PERIPHERAL__ENABLE {1} CONFIG.PSU__ENET1__PERIPHERAL__IO {EMIO} CONFIG.PSU__TTC0__PERIPHERAL__ENABLE {1} CONFIG.PSU__TTC0__PERIPHERAL__IO {EMIO}] [get_bd_cells zynq_ultra_ps_e_0]
+set_property -dict [list CONFIG.PSU__ENET0__PERIPHERAL__ENABLE {1} CONFIG.PSU__ENET0__PERIPHERAL__IO {EMIO} CONFIG.PSU__ENET1__PERIPHERAL__ENABLE {1} CONFIG.PSU__ENET1__PERIPHERAL__IO {EMIO} CONFIG.PSU__ENET0__GRP_MDIO__ENABLE {1} CONFIG.PSU__ENET0__GRP_MDIO__IO {EMIO} CONFIG.PSU__ENET1__GRP_MDIO__ENABLE {1} CONFIG.PSU__ENET1__GRP_MDIO__IO {EMIO} CONFIG.PSU__TTC0__PERIPHERAL__ENABLE {1} CONFIG.PSU__TTC0__PERIPHERAL__IO {EMIO}] [get_bd_cells zynq_ultra_ps_e_0]
 endgroup
 
 # Connect the PL_CLK0 to the HPM0
-connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_lpd_aclk]
+connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk]
+connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/maxihpm1_fpd_aclk]
 
 # Add a processor system reset
 create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_zynq_ultra_ps_e_0_100M
