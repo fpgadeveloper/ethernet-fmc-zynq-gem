@@ -3,10 +3,9 @@
 # contraints in the GMII-to-RGMII IP's in-built XDC files. These constraints come from the GMII to RGMII product guide 
 # http://www.xilinx.com/support/documentation/ip_documentation/gmii_to_rgmii/v4_0/pg160-gmii-to-rgmii.pdf
 
-# These set_input_delay constraints have been commented out because the design never passes timing when they are enabled.
-# Instead, we get timing closure when we rely on the set_input_delay constraints built into the GMII-to-RGMII IP (..._clocks.xdc).
-# The built in constraints seem to have illogical values for min and max which is why I was certain that they should be
-# overriden by the following. We need to test the design on hardware to find out if the built-in constraints are actually good. 
+# These set_input_delay constraints have been commented out because the design has been tested to work fine without them.
+# In other words, the set_input_delay constraints built into the GMII-to-RGMII IP (..._clocks.xdc) are already sufficient.
+# These constraints are left here as a guide for customers that require extra fine-tuning.
 
 # Use these constraints to modify input delay on RGMII signals
 #set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -max -1.5 [get_ports {rgmii_port_0_rd[*] rgmii_port_0_rx_ctl}]
