@@ -10,7 +10,7 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
   * LPC connector (use zedboard.xdc)
 * [MicroZed FMC Carrier](http://zedboard.org/product/microzed-fmc-carrier "MicroZed FMC Carrier") with [MicroZed 7Z010 or 7Z020](http://microzed.org "MicroZed")
   * LPC connector (use mzfmc-7z010.xdc or mzfmc-7z020.xdc)
-* Zynq UltraScale+ [ZCU102 Evaluation board](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board")
+* Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
 
@@ -64,8 +64,9 @@ local SDK repository to the SDK workspace. See the readme in the SDK directory f
 
 #### ZCU102
 
-* The ZCU102 board does not route LA01_CC and LA18_CC signals of the HPC0 and HPC1 connectors to clock capable pins, so the designs for the ZCU102
-board use only 2 ports: Port 0 and 2.
+* This design supports the ZCU102 Rev 1.0 board. Use a commit before 2016-02-13 for the older Rev-D board design.
+Note that the FMC pinouts differ between Rev 1.0 and Rev D: https://www.xilinx.com/support/answers/68050.html
+* This design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected.
 
 #### ZedBoard and MicroZed
 
@@ -118,7 +119,8 @@ to one of the following values depending on the port you want to target, and the
 ##### ZCU102 designs (HPC0 and HPC1)
 
 * Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
-* Ethernet FMC Port 2: `XPAR_XEMACPS_1_BASEADDR`
+* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
+* Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
 
 ##### BSP Setting
 

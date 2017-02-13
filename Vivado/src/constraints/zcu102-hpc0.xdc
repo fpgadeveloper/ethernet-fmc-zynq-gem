@@ -1,5 +1,11 @@
+# These constraints are suitable for ZCU102 Rev 1.0 (use earlier commits for Rev D)
+# ---------------------------------------------------------------------------------
+# Note that FMC pinout for ZCU102 Rev 1.0 (first released with the ES2 device) differs
+# from the ZCU102 Rev D (released with the ES1 device). See answer record for
+# more information: https://www.xilinx.com/support/answers/68050.html
+
 # These constraints are for the ZCU102-HPC0-QGIGE design which
-# uses 3x GEMs (with GMII-to-RGMII) and 1x AXI Ethernet Subsystem IP
+# uses 3x GEMs (with GMII-to-RGMII)
 
 # Notes on ZCU102 HPC0 connector
 # ------------------------------
@@ -35,23 +41,23 @@ set_property DIFF_TERM TRUE [get_ports {ref_clk_p[0]}]
 set_property DIFF_TERM TRUE [get_ports {ref_clk_n[0]}]
 
 # Define I/O standards
-#set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[0]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports mdio_io_port_0_mdio_io]
-#set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[2]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[2]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {ref_clk_fsel[0]}]
-#set_property IOSTANDARD LVCMOS18 [get_ports mdio_io_port_1_mdio_io]
+set_property IOSTANDARD LVCMOS18 [get_ports mdio_io_port_1_mdio_io]
 #set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_3_rxc]
 #set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_3_rx_ctl]
 #set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_3_rd[1]}]
 #set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_3_rd[3]}]
-#set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_1_rxc]
-#set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_1_rx_ctl]
+set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_1_rxc]
+set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_1_rx_ctl]
 set_property IOSTANDARD LVCMOS18 [get_ports mdio_io_port_0_mdc]
 set_property IOSTANDARD LVCMOS18 [get_ports reset_port_0]
-#set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[1]}]
-#set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[3]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[1]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[3]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {ref_clk_oe[0]}]
-#set_property IOSTANDARD LVCMOS18 [get_ports mdio_io_port_1_mdc]
+set_property IOSTANDARD LVCMOS18 [get_ports mdio_io_port_1_mdc]
 set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_2_rxc]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_2_rd[2]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_2_rd[3]}]
@@ -63,9 +69,9 @@ set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_rd[2]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_rd[3]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_td[1]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_td[2]}]
-#set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_td[0]}]
-#set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_td[2]}]
-#set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_td[3]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_td[0]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_td[2]}]
+set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_td[3]}]
 set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_2_rx_ctl]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_2_rd[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_2_td[1]}]
@@ -83,10 +89,10 @@ set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_td[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_0_txc]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_td[3]}]
 set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_0_tx_ctl]
-#set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_td[1]}]
-#set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_1_txc]
-#set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_1_tx_ctl]
-#set_property IOSTANDARD LVCMOS18 [get_ports reset_port_1]
+set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_td[1]}]
+set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_1_txc]
+set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_1_tx_ctl]
+set_property IOSTANDARD LVCMOS18 [get_ports reset_port_1]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_2_rd[1]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_2_td[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports rgmii_port_2_txc]
@@ -100,37 +106,37 @@ set_property IOSTANDARD LVCMOS18 [get_ports reset_port_2]
 #set_property IOSTANDARD LVCMOS18 [get_ports mdio_io_port_3_mdio_io]
 #set_property IOSTANDARD LVCMOS18 [get_ports reset_port_3]
 
-#set_property PACKAGE_PIN AC2 [get_ports {rgmii_port_1_rd[0]}]
+set_property PACKAGE_PIN AC2 [get_ports {rgmii_port_1_rd[0]}]
 set_property PACKAGE_PIN AC1 [get_ports mdio_io_port_0_mdio_io]
-#set_property PACKAGE_PIN W4 [get_ports {rgmii_port_1_rd[2]}]
+set_property PACKAGE_PIN W4 [get_ports {rgmii_port_1_rd[2]}]
 set_property PACKAGE_PIN AC7 [get_ports {ref_clk_fsel[0]}]
-#set_property PACKAGE_PIN AC6 [get_ports mdio_io_port_1_mdio_io]
-#set_property PACKAGE_PIN L15 [get_ports rgmii_port_3_rxc]
-#set_property PACKAGE_PIN K15 [get_ports rgmii_port_3_rx_ctl]
+set_property PACKAGE_PIN AC6 [get_ports mdio_io_port_1_mdio_io]
+#set_property PACKAGE_PIN N9 [get_ports rgmii_port_3_rxc]
+#set_property PACKAGE_PIN N8 [get_ports rgmii_port_3_rx_ctl]
 #set_property PACKAGE_PIN M10 [get_ports {rgmii_port_3_rd[1]}]
 #set_property PACKAGE_PIN L10 [get_ports {rgmii_port_3_rd[3]}]
-#set_property PACKAGE_PIN W2 [get_ports rgmii_port_1_rxc]
-#set_property PACKAGE_PIN W1 [get_ports rgmii_port_1_rx_ctl]
+set_property PACKAGE_PIN AB4 [get_ports rgmii_port_1_rxc]
+set_property PACKAGE_PIN AC4 [get_ports rgmii_port_1_rx_ctl]
 set_property PACKAGE_PIN AB3 [get_ports mdio_io_port_0_mdc]
 set_property PACKAGE_PIN AC3 [get_ports reset_port_0]
-#set_property PACKAGE_PIN AB4 [get_ports {rgmii_port_1_rd[1]}]
-#set_property PACKAGE_PIN AC4 [get_ports {rgmii_port_1_rd[3]}]
+set_property PACKAGE_PIN W2 [get_ports {rgmii_port_1_rd[1]}]
+set_property PACKAGE_PIN W1 [get_ports {rgmii_port_1_rd[3]}]
 set_property PACKAGE_PIN AB8 [get_ports {ref_clk_oe[0]}]
-#set_property PACKAGE_PIN AC8 [get_ports mdio_io_port_1_mdc]
+set_property PACKAGE_PIN AC8 [get_ports mdio_io_port_1_mdc]
 set_property PACKAGE_PIN P11 [get_ports rgmii_port_2_rxc]
 set_property PACKAGE_PIN L16 [get_ports {rgmii_port_2_rd[2]}]
 set_property PACKAGE_PIN K16 [get_ports {rgmii_port_2_rd[3]}]
-#set_property PACKAGE_PIN N9 [get_ports {rgmii_port_3_rd[0]}]
-#set_property PACKAGE_PIN N8 [get_ports {rgmii_port_3_rd[2]}]
+#set_property PACKAGE_PIN L15 [get_ports {rgmii_port_3_rd[0]}]
+#set_property PACKAGE_PIN K15 [get_ports {rgmii_port_3_rd[2]}]
 set_property PACKAGE_PIN Y4 [get_ports rgmii_port_0_rxc]
 set_property PACKAGE_PIN Y3 [get_ports rgmii_port_0_rx_ctl]
 set_property PACKAGE_PIN Y2 [get_ports {rgmii_port_0_rd[2]}]
 set_property PACKAGE_PIN Y1 [get_ports {rgmii_port_0_rd[3]}]
 set_property PACKAGE_PIN V4 [get_ports {rgmii_port_0_td[1]}]
 set_property PACKAGE_PIN V3 [get_ports {rgmii_port_0_td[2]}]
-#set_property PACKAGE_PIN W6 [get_ports {rgmii_port_1_td[0]}]
-#set_property PACKAGE_PIN Y12 [get_ports {rgmii_port_1_td[2]}]
-#set_property PACKAGE_PIN AA12 [get_ports {rgmii_port_1_td[3]}]
+set_property PACKAGE_PIN W6 [get_ports {rgmii_port_1_td[0]}]
+set_property PACKAGE_PIN Y12 [get_ports {rgmii_port_1_td[2]}]
+set_property PACKAGE_PIN AA12 [get_ports {rgmii_port_1_td[3]}]
 set_property PACKAGE_PIN N13 [get_ports rgmii_port_2_rx_ctl]
 set_property PACKAGE_PIN M13 [get_ports {rgmii_port_2_rd[0]}]
 set_property PACKAGE_PIN M15 [get_ports {rgmii_port_2_td[1]}]
@@ -148,10 +154,10 @@ set_property PACKAGE_PIN AA2 [get_ports {rgmii_port_0_td[0]}]
 set_property PACKAGE_PIN AA1 [get_ports rgmii_port_0_txc]
 set_property PACKAGE_PIN U5 [get_ports {rgmii_port_0_td[3]}]
 set_property PACKAGE_PIN U4 [get_ports rgmii_port_0_tx_ctl]
-#set_property PACKAGE_PIN AB6 [get_ports {rgmii_port_1_td[1]}]
-#set_property PACKAGE_PIN AB5 [get_ports rgmii_port_1_txc]
-#set_property PACKAGE_PIN Y10 [get_ports rgmii_port_1_tx_ctl]
-#set_property PACKAGE_PIN Y9 [get_ports reset_port_1]
+set_property PACKAGE_PIN AB6 [get_ports {rgmii_port_1_td[1]}]
+set_property PACKAGE_PIN AB5 [get_ports rgmii_port_1_txc]
+set_property PACKAGE_PIN Y10 [get_ports rgmii_port_1_tx_ctl]
+set_property PACKAGE_PIN Y9 [get_ports reset_port_1]
 set_property PACKAGE_PIN L13 [get_ports {rgmii_port_2_rd[1]}]
 set_property PACKAGE_PIN K13 [get_ports {rgmii_port_2_td[0]}]
 set_property PACKAGE_PIN P12 [get_ports rgmii_port_2_txc]
@@ -168,6 +174,8 @@ set_property PACKAGE_PIN K12 [get_ports reset_port_2]
 # Port 0: gmii_to_rgmii_0 - IODELAY_GROUP 0
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_0_0_core/*delay_rgmii_rxd*}]
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/*delay_rgmii_rxd*}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells *_i/util_idelay_ctrl_0/inst/dlyctrl]
 
 # Port 2: gmii_to_rgmii_2 - IODELAY_GROUP 1
@@ -180,6 +188,7 @@ set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -
 
 # Clock Period Constraints
 create_clock -period 8.000 -name rgmii_port_0_rxc -add [get_ports rgmii_port_0_rxc]
+create_clock -period 8.000 -name rgmii_port_1_rxc -add [get_ports rgmii_port_1_rxc]
 create_clock -period 8.000 -name rgmii_port_2_rxc -add [get_ports rgmii_port_2_rxc]
 
 # Clock constraint if parameter C_EXTERNAL_CLOCK = 1
@@ -224,6 +233,12 @@ set_property SLEW FAST [get_ports {rgmii_port_0_td[1]}]
 set_property SLEW FAST [get_ports {rgmii_port_0_td[0]}]
 set_property SLEW FAST [get_ports rgmii_port_0_txc]
 set_property SLEW FAST [get_ports rgmii_port_0_tx_ctl]
+set_property SLEW FAST [get_ports {rgmii_port_1_td[3]}]
+set_property SLEW FAST [get_ports {rgmii_port_1_td[2]}]
+set_property SLEW FAST [get_ports {rgmii_port_1_td[1]}]
+set_property SLEW FAST [get_ports {rgmii_port_1_td[0]}]
+set_property SLEW FAST [get_ports rgmii_port_1_txc]
+set_property SLEW FAST [get_ports rgmii_port_1_tx_ctl]
 set_property SLEW FAST [get_ports {rgmii_port_2_td[3]}]
 set_property SLEW FAST [get_ports {rgmii_port_2_td[2]}]
 set_property SLEW FAST [get_ports {rgmii_port_2_td[1]}]
@@ -244,3 +259,16 @@ set_property CLOCK_REGION X3Y2      [get_cells *_i/clk_wiz_0/inst/clkout1_buf]
 # BUFG on RX Clock input
 set_property CLOCK_REGION X3Y3      [get_cells *_i/gmii_to_rgmii_2/U0/i_*_gmii_to_rgmii_2_0_clocking/clk10_div_buf]
 
+# Sub-optimal placement for a global clock-capable IO pin and BUFG pair.If this sub optimal condition
+# is acceptable for this design, you may use the CLOCK_DEDICATED_ROUTE constraint in the .xdc file to 
+# demote this message to a WARNING. However, the use of this override is highly discouraged.
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets zcu102_hpc0_qgige_i/gmii_to_rgmii_1/U0/rgmii_rxc_ibuf_i/O]
+
+# BITSLICE0 not available during BISC - The port rgmii_port_1_rxc is assigned to a PACKAGE_PIN that uses BITSLICE_1 of a
+# Byte that will be using calibration. The signal connected to rgmii_port_1_rxc will not be available during calibration 
+# and will only be available after RDY asserts. If this condition is not acceptable for your design and board layout, 
+# rgmii_port_1_rxc will have to be moved to another PACKAGE_PIN that is not undergoing calibration or be moved to a 
+# PACKAGE_PIN location that is not BITSLICE_0 or BITSLICE_6 on that same Byte. If this condition is acceptable for your 
+# design and board layout, this DRC can be bypassed by acknowledging the condition and setting the following XDC constraint:
+
+set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_1_rxc]
