@@ -4,7 +4,7 @@ ethernet-fmc-zynq-gem
 Example design for using the [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC") with the Zynq PS hard 
 Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 
-### Supported boards
+## Supported boards
 
 * Zynq-7000 [ZedBoard](http://zedboard.org "ZedBoard")
   * LPC connector (use zedboard.xdc)
@@ -14,7 +14,7 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
 
-### Description
+## Description
 
 This project demonstrates the use of the Opsero [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC").
 The design demonstrates use of the GMII-to-RGMII IP core to connect the hard GEMs of the Zynq PS to the Ethernet FMC
@@ -22,14 +22,14 @@ PHYs. All designs use the hard GEMs but some also use AXI Ethernet Subsystem IP.
 
 ![Ethernet FMC Quad Gig AXI Ethernet](http://ethernetfmc.com/wp-content/uploads/2014/10/qgige_gmii_to_rgmii.png "Zynq Quad Gig Ethernet All AXI Ethernet")
 
-### Requirements
+## Requirements
 
 * Vivado 2016.4
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the above listed Zynq boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
-### Build instructions
+## Build instructions
 
 To use the sources in this repository, please follow these steps:
 
@@ -60,23 +60,23 @@ Xilinx SDK. The application relies on the lwIP library (also built into Xilinx S
 The modified version of the lwIP library is contained in the `EmbeddedSw` directory, which is added as a
 local SDK repository to the SDK workspace. See the readme in the SDK directory for more information.
 
-### Board specific notes
+## Board specific notes
 
-#### ZCU102
+### ZCU102
 
 * This design supports the ZCU102 Rev 1.0 board. Use a commit before 2016-02-13 for the older Rev-D board design.
 Note that the FMC pinouts differ between Rev 1.0 and Rev D: https://www.xilinx.com/support/answers/68050.html
 * This design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected.
 
-#### ZedBoard and MicroZed
+### ZedBoard and MicroZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
 you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
 Zynq configurations that are not compatible with the GEM1 configuration.
 
-#### MicroZed
+### MicroZed
 
-##### Uses Zynq Fabric clocks
+#### Uses Zynq Fabric clocks
 
 To generate the 125MHz and 200MHz clocks required by the AXI Ethernet IPs, this design uses two Zynq
 fabric clocks rather than using the Ethernet FMC's on-board 125MHz clock. Generally this is due to resource
@@ -87,7 +87,7 @@ yet been able to get around.
 * Using the on-board 125MHz clock into a clock wizard to generate the 200MHz clock is not possible due to the Zynq 7Z010
 only containing two MMCMs.
 
-##### Installation of MicroZed board definition files
+#### Installation of MicroZed board definition files
 
 To use this project, you must first install the board definition files
 for the MicroZed into your Vivado installation.
@@ -102,38 +102,55 @@ https://github.com/fpgadeveloper/microzed-qgige/tree/master/Vivado/boards/board_
 Copy those folders and their contents into the `C:\Xilinx\Vivado\2016.4\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory).
 
-#### Single port limit
+### Single port limit
 
 The echo server example design currently can only target one Ethernet port at a time.
 Selection of the Ethernet port can be changed by modifying the defines contained in the
 `platform_config.h` file in the application sources. Set `PLATFORM_EMAC_BASEADDR`
 to one of the following values depending on the port you want to target, and the hardware platform:
 
-##### ZedBoard and MicroZed designs
+#### ZedBoard and MicroZed designs
 
 * Ethernet FMC Port 0: `XPAR_AXIETHERNET_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_AXIETHERNET_1_BASEADDR`
 * Ethernet FMC Port 2: `XPAR_AXIETHERNET_2_BASEADDR`
 * Ethernet FMC Port 3: `XPAR_XEMACPS_1_BASEADDR`
 
-##### ZCU102 designs (HPC0 and HPC1)
+#### ZCU102 designs (HPC0 and HPC1)
 
 * Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
 * Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
 
-##### BSP Setting
+#### BSP Setting
 
 * When using ports that use AXI Ethernet IP, the BSP setting "use_axieth_on_zynq" must be set to 1.
 * When using ports that use Zynq GEM, the BSP setting "use_axieth_on_zynq" must be set to 0.
 
 To change BSP settings: right click on the BSP and click `Board Support Package Settings` from the context menu.
 
-### License
+## Troubleshooting
+
+Check the following if the project fails to build or generate a bitstream:
+
+### 1. Are you using the correct version of Vivado for this version of the repository?
+Check the version specified in the Requirements section of this readme file. Note that this project is regularly maintained to the latest
+version of Vivado and you may have to refer to an earlier commit of this repo if you are using an older version of Vivado.
+
+### 2. Did you follow the Build instructions in this readme file?
+All the projects in the repo are built, synthesised and implemented to a bitstream before being committed, so if you follow the
+instructions, there should not be any build issues.
+
+### 3. Did you copy/clone the repo into a short directory structure?
+Vivado doesn't cope well with long directory structures, so copy/clone the repo into a short directory structure such as
+`C:\projects\`. When working in long directory structures, you can get errors relating to missing files, particularly files 
+that are normally generated by Vivado (FIFOs, etc).
+
+## License
 
 Feel free to modify the code for your specific application.
 
-### About us
+## About us
 
 This project was developed by [Opsero Inc.](http://opsero.com "Opsero Inc."),
 a tight-knit team of FPGA experts delivering FPGA products and design services to start-ups and tech companies. 
