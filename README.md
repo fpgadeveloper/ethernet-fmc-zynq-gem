@@ -24,7 +24,7 @@ PHYs. All designs use the hard GEMs but some also use AXI Ethernet Subsystem IP.
 
 ## Requirements
 
-* Vivado 2016.4
+* Vivado 2017.1
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the above listed Zynq boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -99,7 +99,7 @@ https://github.com/fpgadeveloper/microzed-qgige/tree/master/Vivado/boards/board_
 * `microzed_7010`
 * `microzed_7020`
 
-Copy those folders and their contents into the `C:\Xilinx\Vivado\2016.4\data\boards\board_files` folder (this may
+Copy those folders and their contents into the `C:\Xilinx\Vivado\2017.1\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory).
 
 ### Single port limit

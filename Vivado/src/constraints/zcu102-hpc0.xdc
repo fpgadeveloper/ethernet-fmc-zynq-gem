@@ -220,8 +220,8 @@ set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk/S1}]
 #set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_90_clk/S1}]
 
 #To Adjust GMII Tx Input Setup/Hold Timing
-set_property DELAY_VALUE 1250 [get_cells -hier -filter {name =~ *gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
-set_property DELAY_VALUE 1250 [get_cells -hier -filter {name =~ *delay_rgmii_rxd*}]
+set_property DELAY_VALUE 1100 [get_cells -hier -filter {name =~ *gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
+set_property DELAY_VALUE 1100 [get_cells -hier -filter {name =~ *delay_rgmii_rxd*}]
 #set_property IODELAY_GROUP gpr1 [get_cells *delay_rgmii_rx_ctl]
 #set_property IODELAY_GROUP gpr1 [get_cells -hier -filter {name =~ *delay_rgmii_rxd*}]
 #set_property IODELAY_GROUP gpr1 [get_cells *idelayctrl]
@@ -246,19 +246,6 @@ set_property SLEW FAST [get_ports {rgmii_port_2_td[0]}]
 set_property SLEW FAST [get_ports rgmii_port_2_txc]
 set_property SLEW FAST [get_ports rgmii_port_2_tx_ctl]
 
-# Rename the gmii_to_rgmii_0_gmii_clk_125m_out clock to gmii_clk_125m_out so that the in-built constraints will find it
-# Based on AR57197: http://www.xilinx.com/support/answers/57197.html
-create_generated_clock -name gmii_clk_125m_out [get_pins *_i/gmii_to_rgmii_2/U0/i_*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst/CLKOUT0]
-
-# From AR65947 : http://www.xilinx.com/support/answers/65947.html
-
-# BUFG on 200 MHz input clock
-#set_property CLOCK_REGION X3Y0      [get_cells {example_clocks/bufg_clkin1}]
-# BUFG on GTX Clock
-set_property CLOCK_REGION X3Y2      [get_cells *_i/clk_wiz_0/inst/clkout1_buf]
-# BUFG on RX Clock input
-set_property CLOCK_REGION X3Y3      [get_cells *_i/gmii_to_rgmii_2/U0/i_*_gmii_to_rgmii_2_0_clocking/clk10_div_buf]
-
 # Sub-optimal placement for a global clock-capable IO pin and BUFG pair.If this sub optimal condition
 # is acceptable for this design, you may use the CLOCK_DEDICATED_ROUTE constraint in the .xdc file to 
 # demote this message to a WARNING. However, the use of this override is highly discouraged.
@@ -272,3 +259,25 @@ set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets zcu102_hpc0_qgige_i/gmii_to_r
 # design and board layout, this DRC can be bypassed by acknowledging the condition and setting the following XDC constraint:
 
 set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_1_rxc]
+
+# The following constraints are needed in Vivado 2017.1 to correct the MMCM configuration made by the
+# shared logic of the GMII-to-RGMII IP. If left uncorrected, the configuration made by the IP produces an error message
+# which I have posted about on the Xilinx forums:
+# https://forums.xilinx.com/t5/UltraScale-Architecture/GMII-to-RGMII-MMCM-config-issue-in-Vivado-2017-1-for-ZCU102/m-p/768183#M4411
+
+set_property CLKFBOUT_MULT_F 25 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
+set_property CLKOUT0_DIVIDE_F 10 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
+set_property CLKOUT1_DIVIDE 50 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
+set_property CLKOUT1_PHASE 225 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
+set_property CLKOUT2_DIVIDE 125 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
+set_property DIVCLK_DIVIDE 4 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
+
+# The following constraints force placement of the BUFGs needed by the RGMII RX clock for Ethernet FMC port 1
+# Without these constraints, timing will not close because the BUFGCE selected by Vivado is too far.
+
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
+set_property LOC BUFGCE_X0Y64 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
+
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
+set_property LOC BUFGCE_X0Y63 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
+
