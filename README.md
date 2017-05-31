@@ -94,7 +94,7 @@ for the MicroZed into your Vivado installation.
 
 The following folders contain the board definition files and can be found in this project repository at this location:
 
-https://github.com/fpgadeveloper/microzed-qgige/tree/master/Vivado/boards/board_files
+https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tree/master/Vivado/boards/board_files
 
 * `microzed_7010`
 * `microzed_7020`
