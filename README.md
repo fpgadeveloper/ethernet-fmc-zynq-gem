@@ -4,12 +4,25 @@ ethernet-fmc-zynq-gem
 Example design for using the [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC") with the Zynq PS hard 
 Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 
+## Requirements
+
+This project is designed for Vivado 2017.2. If you are using an older version of Vivado, then you *MUST* use an older version
+of this repository. Refer to the [list of commits](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/commits/master "list of commits")
+to find links to the older versions of this repository.
+
+* Vivado 2017.2
+* [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
+* One of the above listed Zynq boards
+* For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
+
 ## Supported boards
 
 * Zynq-7000 [ZedBoard](http://zedboard.org "ZedBoard")
   * LPC connector (use zedboard.xdc)
 * [MicroZed FMC Carrier](http://zedboard.org/product/microzed-fmc-carrier "MicroZed FMC Carrier") with [MicroZed 7Z010 or 7Z020](http://microzed.org "MicroZed")
   * LPC connector (use mzfmc-7z010.xdc or mzfmc-7z020.xdc)
+* Zynq-7000 [PicoZed FMC Carrier Card V2](http://zedboard.org/product/picozed-fmc-carrier-card-v2 "PicoZed FMC Carrier Card V2") with [PicoZed 7010](http://picozed.org "PicoZed")
+  * LPC connector (use pzfmc-7z010.xdc)
 * Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
@@ -21,13 +34,6 @@ The design demonstrates use of the GMII-to-RGMII IP core to connect the hard GEM
 PHYs. All designs use the hard GEMs but some also use AXI Ethernet Subsystem IP.
 
 ![Ethernet FMC Quad Gig AXI Ethernet](http://ethernetfmc.com/wp-content/uploads/2014/10/qgige_gmii_to_rgmii.png "Zynq Quad Gig Ethernet All AXI Ethernet")
-
-## Requirements
-
-* Vivado 2017.1
-* [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
-* One of the above listed Zynq boards
-* For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
 ## Build instructions
 
@@ -66,13 +72,20 @@ local SDK repository to the SDK workspace. See the readme in the SDK directory f
 
 * This design supports the ZCU102 Rev 1.0 board. Use a commit before 2016-02-13 for the older Rev-D board design.
 Note that the FMC pinouts differ between Rev 1.0 and Rev D: https://www.xilinx.com/support/answers/68050.html
-* This design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected.
+* The HPC0 design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC.
+* The HPC1 design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected
+because certain pins required by the Ethernet FMC (namely LA30, LA31 and LA32) are left unconnected 
+on the HPC1 connector of the ZCU102 board.
 
-### ZedBoard and MicroZed
+### ZedBoard, PicoZed and MicroZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
 you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
 Zynq configurations that are not compatible with the GEM1 configuration.
+
+### PicoZed
+
+* 7Z010: This design uses 3x AXI Ethernet and 1xGMII-to-RGMII connected to GEM1 (GEM0 could be connected to the PicoZed's onboard PHY if desired).
 
 ### MicroZed
 
@@ -87,10 +100,10 @@ yet been able to get around.
 * Using the on-board 125MHz clock into a clock wizard to generate the 200MHz clock is not possible due to the Zynq 7Z010
 only containing two MMCMs.
 
-#### Installation of MicroZed board definition files
+#### Installation of MicroZed and PicoZed board definition files
 
-To use this project, you must first install the board definition files
-for the MicroZed into your Vivado installation.
+To use the projects for the MicroZed and PicoZed, you must first install the board definition files
+for those boards into your Vivado installation.
 
 The following folders contain the board definition files and can be found in this project repository at this location:
 
@@ -98,8 +111,12 @@ https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tree/master/Vivado/boards
 
 * `microzed_7010`
 * `microzed_7020`
+* `picozed_7010_fmc2`
+* `picozed_7015_fmc2`
+* `picozed_7020_fmc2`
+* `picozed_7030_fmc2`
 
-Copy those folders and their contents into the `C:\Xilinx\Vivado\2017.1\data\boards\board_files` folder (this may
+Copy those folders and their contents into the `C:\Xilinx\Vivado\2017.2\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory).
 
 ### Single port limit
@@ -109,7 +126,7 @@ Selection of the Ethernet port can be changed by modifying the defines contained
 `platform_config.h` file in the application sources. Set `PLATFORM_EMAC_BASEADDR`
 to one of the following values depending on the port you want to target, and the hardware platform:
 
-#### ZedBoard and MicroZed designs
+#### ZedBoard, PicoZed and MicroZed designs
 
 * Ethernet FMC Port 0: `XPAR_AXIETHERNET_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_AXIETHERNET_1_BASEADDR`
@@ -121,6 +138,7 @@ to one of the following values depending on the port you want to target, and the
 * Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
 * Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
+* Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR` (only valid on HPC0 design)
 
 #### BSP Setting
 
@@ -137,7 +155,7 @@ Check the following if the project fails to build or generate a bitstream:
 Check the version specified in the Requirements section of this readme file. Note that this project is regularly maintained to the latest
 version of Vivado and you may have to refer to an earlier commit of this repo if you are using an older version of Vivado.
 
-### 2. Did you follow the Build instructions in this readme file?
+### 2. Did you correctly follow the Build instructions in this readme file?
 All the projects in the repo are built, synthesised and implemented to a bitstream before being committed, so if you follow the
 instructions, there should not be any build issues.
 
@@ -145,6 +163,11 @@ instructions, there should not be any build issues.
 Vivado doesn't cope well with long directory structures, so copy/clone the repo into a short directory structure such as
 `C:\projects\`. When working in long directory structures, you can get errors relating to missing files, particularly files 
 that are normally generated by Vivado (FIFOs, etc).
+
+## For more information
+
+If you need more information on whether the Ethernet FMC is compatible with your carrier, please contact me [here](http://ethernetfmc.com/contact/ "Ethernet FMC Contact form").
+Just provide me with the pinout of your carrier and I'll be happy to check compatibility and generate a Vivado constraints file for you.
 
 ## License
 

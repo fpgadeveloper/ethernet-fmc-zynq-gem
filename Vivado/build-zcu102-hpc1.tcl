@@ -3,6 +3,20 @@
 #
 #*****************************************************************************************
 
+# Check the version of Vivado used
+set version_required "2017.2"
+set ver [lindex [split $::env(XILINX_VIVADO) /] 3]
+if {![string equal $ver $version_required]} {
+  puts "###############################"
+  puts "### Failed to build project ###"
+  puts "###############################"
+  puts "This project was designed for use with Vivado $version_required."
+  puts "You are using Vivado $ver. Please install Vivado $version_required,"
+  puts "or download the project sources from a commit of the Git repository"
+  puts "that was intended for your version of Vivado ($ver)."
+  return
+}
+
 set design_name zcu102_hpc1_qgige
 
 # Set the reference directory for source file relative paths (by default the value is script directory path)
@@ -52,9 +66,9 @@ set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
 set_property "file_type" "XDC" $file_obj
 
 # Add/Import constrs file and set constrs file properties
-set file "[file normalize "$origin_dir/src/constraints/zcu102-rgmii-hpc1.xdc"]"
+set file "[file normalize "$origin_dir/src/constraints/rgmii-012-.xdc"]"
 set file_added [add_files -norecurse -fileset $obj $file]
-set file "$origin_dir/src/constraints/zcu102-rgmii-hpc1.xdc"
+set file "$origin_dir/src/constraints/rgmii-012-.xdc"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
 set_property "file_type" "XDC" $file_obj
@@ -106,7 +120,7 @@ current_run -implementation [get_runs impl_1]
 puts "INFO: Project created:${design_name}"
 
 # Create block design
-source $origin_dir/src/bd/design_1-zcu102.tcl
+source $origin_dir/src/bd/design_1-zcu102-hpc1.tcl
 
 # Generate the wrapper
 make_wrapper -files [get_files *${design_name}.bd] -top

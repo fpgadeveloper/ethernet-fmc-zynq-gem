@@ -199,12 +199,6 @@ create_clock -period 8.000 -name rgmii_port_0_rxc -add [get_ports rgmii_port_0_r
 create_clock -period 8.000 -name rgmii_port_1_rxc -add [get_ports rgmii_port_1_rxc]
 create_clock -period 8.000 -name rgmii_port_2_rxc -add [get_ports rgmii_port_2_rxc]
 
-# Clock constraint if parameter C_EXTERNAL_CLOCK = 1
-#create_clock -add -name gmii_clk  -period 8.000 [get_ports gmii_clk]
-
-# Clock constraint if parameter C_EXTERNAL_CLOCK = 1 and clock skew on TXC is through MMCM
-#create_clock -add -name gmii_clk_90  -period 8.000 -waveform {2 6} [get_ports gmii_clk_90]
-
 #False path constraints to async inputs coming directly to synchronizer
 set_false_path -to [get_pins -hier -filter {name =~ *idelayctrl_reset_gen/*reset_sync*/PRE }]
 set_false_path -to [get_pins -of [get_cells -hier -filter { name =~ *i_MANAGEMENT/SYNC_*/data_sync* }] -filter { name =~ *D }]
@@ -221,18 +215,9 @@ set_case_analysis 0 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk/S0}]
 set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk/CE1}]
 set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk/S1}]
 
-# constraint valid if parameter C_EXTERNAL_CLOCK = 0 and clock skew on TXC is through MMCM
-#set_case_analysis 0 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_90_clk/CE0}]
-#set_case_analysis 0 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_90_clk/S0}]
-#set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_90_clk/CE1}]
-#set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_90_clk/S1}]
-
 #To Adjust GMII Tx Input Setup/Hold Timing
 set_property DELAY_VALUE 1100 [get_cells -hier -filter {name =~ *gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
 set_property DELAY_VALUE 1100 [get_cells -hier -filter {name =~ *delay_rgmii_rxd*}]
-#set_property IODELAY_GROUP gpr1 [get_cells *delay_rgmii_rx_ctl]
-#set_property IODELAY_GROUP gpr1 [get_cells -hier -filter {name =~ *delay_rgmii_rxd*}]
-#set_property IODELAY_GROUP gpr1 [get_cells *idelayctrl]
 
 #Use the following constraint to modify the slew in the IOB
 set_property SLEW FAST [get_ports {rgmii_port_0_td[3]}]
@@ -284,12 +269,18 @@ set_property CLKOUT1_PHASE 225 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii
 set_property CLKOUT2_DIVIDE 125 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
 set_property DIVCLK_DIVIDE 4 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
 
-# The following constraints force placement of the BUFGs needed by the RGMII RX clock for Ethernet FMC port 1
+# The following constraints force placement of the BUFGs needed by the RGMII RX clock for Ethernet FMC port 1 and 2
 # Without these constraints, timing will not close because the BUFGCE selected by Vivado is too far.
+# It is actually not recommended to use LOC constraints on BUFGCEs but instead to constrain placement to a clock 
+# region, but in Vivado 2017.2, even this does not result a good placement of BUFGCE and timing closure.
 
 set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
 set_property LOC BUFGCE_X0Y36 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-
 set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
 set_property LOC BUFGCE_X0Y35 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
+
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
+set_property LOC BUFGCE_X0Y49 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
+set_property LOC BUFGCE_X0Y48 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
 
