@@ -1,0 +1,97 @@
+/include/ "system-conf.dtsi"
+/ {
+};
+
+    &gem0 {
+        local-mac-address = [00 0a 35 00 01 22];
+        phy-handle = <&phy0>;
+        gmii2rgmii-phy-handle = <&gmii_to_rgmii_0>;
+        phy-mode = "rgmii-id";
+        status = "okay";
+        xlnx,ptp-enet-clock = <0x69f6bcb>;
+        xlnx,has-mdio = <0x1>;
+        psu_ethernet_0_mdio: mdio {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                phy0: phy@0 {
+                        /* compatible = "marvell,88e1510"; */
+                        device_type = "ethernet-phy";
+                        reg = <0>;
+                };
+                gmii_to_rgmii_0: phy@8 {
+                        device_type = "ethernet-phy";
+                        reg = <8>;
+                };
+        };
+    };  
+      
+    &gem1 {
+        local-mac-address = [00 0a 35 00 01 23];
+        phy-handle = <&phy1>;
+        gmii2rgmii-phy-handle = <&gmii_to_rgmii_1>;
+        phy-mode = "rgmii-id";
+        status = "okay";
+        xlnx,ptp-enet-clock = <0x69f6bcb>;
+        xlnx,has-mdio = <0x1>;
+        psu_ethernet_1_mdio: mdio {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                phy1: phy@0 {
+                        /* compatible = "marvell,88e1510"; */
+                        device_type = "ethernet-phy";
+                        reg = <0>;
+                };
+                gmii_to_rgmii_1: phy@8 {
+                        device_type = "ethernet-phy";
+                        reg = <8>;
+                };
+        };
+    };  
+      
+    &gem2 {
+        local-mac-address = [00 0a 35 00 01 24];
+        phy-handle = <&phy2>;
+        gmii2rgmii-phy-handle = <&gmii_to_rgmii_2>;
+        phy-mode = "rgmii-id";
+        status = "okay";
+        xlnx,ptp-enet-clock = <0x69f6bcb>;
+        xlnx,has-mdio = <0x1>;
+        psu_ethernet_2_mdio: mdio {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                phy2: phy@0 {
+                        /* compatible = "marvell,88e1510"; */
+                        device_type = "ethernet-phy";
+                        reg = <0>;
+                };
+                gmii_to_rgmii_2: phy@8 {
+                        device_type = "ethernet-phy";
+                        reg = <8>;
+                };
+        };
+    };  
+      
+    &gem3 {
+        local-mac-address = [00 0a 35 00 01 25];
+        phy-handle = <&phy3>;
+        gmii2rgmii-phy-handle = <&gmii_to_rgmii_3>;
+        phy-mode = "rgmii-id";
+        status = "okay";
+        xlnx,ptp-enet-clock = <0x69f6bcb>;
+        xlnx,has-mdio = <0x1>;
+        psu_ethernet_3_mdio: mdio {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                phy3: phy@0 {
+                        /* compatible = "marvell,88e1510"; */
+                        device_type = "ethernet-phy";
+                        reg = <0>;
+                };
+                gmii_to_rgmii_3: phy@8 {
+                        device_type = "ethernet-phy";
+                        reg = <8>;
+                };
+        };
+    };  
+      
+

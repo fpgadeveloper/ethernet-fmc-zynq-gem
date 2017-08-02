@@ -1,0 +1,139 @@
+diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/macb.c
+--- a/drivers/net/ethernet/cadence/macb.c	2017-07-31 15:15:10.000000000 -0400
++++ b/drivers/net/ethernet/cadence/macb.c	2017-08-01 12:57:31.000000000 -0400
+@@ -27,6 +27,10 @@
+ #include <linux/platform_data/macb.h>
+ #include <linux/platform_device.h>
+ #include <linux/phy.h>
++#include <linux/mii.h>
++#include <linux/of_platform.h>
++#include <linux/of_irq.h>
++#include <linux/of_address.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ #include <linux/of_gpio.h>
+@@ -64,6 +68,11 @@
+ #define GEM_TX_PTPHDR_OFFSET	42
+ #define GEM_RX_PTPHDR_OFFSET	28
+ 
++#define XEMACPS_GMII2RGMII_FULLDPLX		BMCR_FULLDPLX
++#define XEMACPS_GMII2RGMII_SPEED1000		BMCR_SPEED1000
++#define XEMACPS_GMII2RGMII_SPEED100		BMCR_SPEED100
++#define XEMACPS_GMII2RGMII_REG_NUM			0x10
++
+ /* Graceful stop timeouts in us. We should allow up to
+  * 1 frame time (10 Mbits/s, full-duplex, ignoring collisions)
+  */
+@@ -384,8 +393,10 @@
+ {
+ 	struct macb *bp = netdev_priv(dev);
+ 	struct phy_device *phydev = bp->phy_dev;
++	struct phy_device *gmii2rgmii_phydev = bp->gmii2rgmii_phy_dev;
+ 	unsigned long flags;
+ 	int status_change = 0;
++	u16 gmii2rgmii_reg = 0;
+ 
+ 	spin_lock_irqsave(&bp->lock, flags);
+ 
+@@ -399,16 +410,29 @@
+ 			if (macb_is_gem(bp))
+ 				reg &= ~GEM_BIT(GBE);
+ 
+-			if (phydev->duplex)
++			if (phydev->duplex) {
+ 				reg |= MACB_BIT(FD);
+-			if (phydev->speed == SPEED_100)
++				gmii2rgmii_reg |= XEMACPS_GMII2RGMII_FULLDPLX;
++			}
++			if (phydev->speed == SPEED_100) {
+ 				reg |= MACB_BIT(SPD);
++				gmii2rgmii_reg |= XEMACPS_GMII2RGMII_SPEED100;
++			}
+ 			if (phydev->speed == SPEED_1000 &&
+-			    bp->caps & MACB_CAPS_GIGABIT_MODE_AVAILABLE)
++			    bp->caps & MACB_CAPS_GIGABIT_MODE_AVAILABLE) {
+ 				reg |= GEM_BIT(GBE);
++				gmii2rgmii_reg |= XEMACPS_GMII2RGMII_SPEED1000;
++			}
+ 
+ 			macb_or_gem_writel(bp, NCFGR, reg);
+ 
++			if (gmii2rgmii_phydev != NULL) {
++				macb_mdio_write(bp->mii_bus,
++					8,
++					XEMACPS_GMII2RGMII_REG_NUM,
++					gmii2rgmii_reg);
++			}
++
+ 			bp->speed = phydev->speed;
+ 			bp->duplex = phydev->duplex;
+ 			status_change = 1;
+@@ -455,6 +479,19 @@
+ 	int phy_irq;
+ 	int ret;
+ 
++	if (bp->gmii2rgmii_phy_node) {
++		phydev = of_phy_attach(bp->dev,
++					bp->gmii2rgmii_phy_node,
++					0, 0);
++		if (!phydev) {
++			dev_err(&bp->pdev->dev, "%s: no gmii to rgmii converter found\n",
++			dev->name);
++			return -1;
++		}
++		bp->gmii2rgmii_phy_dev = phydev;
++	} else
++		bp->gmii2rgmii_phy_dev = NULL;
++
+ 	if (bp->phy_node) {
+ 		phydev = of_phy_connect(dev, bp->phy_node,
+ 					&macb_handle_link_change, 0,
+@@ -480,12 +517,16 @@
+ 		}
+ 
+ 		/* attach the mac to the phy */
++#if 0
+ 		ret = phy_connect_direct(dev, phydev, &macb_handle_link_change,
+ 					 bp->phy_interface);
+ 		if (ret) {
+ 			netdev_err(dev, "Could not attach to PHY\n");
++		if (bp->gmii2rgmii_phy_dev)
++			phy_disconnect(bp->gmii2rgmii_phy_dev);
+ 			return ret;
+ 		}
++#endif
+ 	}
+ 
+ 	/* mask with MAC supported features */
+@@ -3639,6 +3680,10 @@
+ 		bp->phy_interface = err;
+ 	}
+ 
++	bp->phy_node = of_parse_phandle(bp->pdev->dev.of_node,
++						"phy-handle", 0);
++	bp->gmii2rgmii_phy_node = of_parse_phandle(bp->pdev->dev.of_node,
++						"gmii2rgmii-phy-handle", 0);
+ 	macb_reset_phy(pdev);
+ 
+ 	/* IP specific init */
+@@ -3704,6 +3749,8 @@
+ 		bp = netdev_priv(dev);
+ 		if (bp->phy_dev)
+ 			phy_disconnect(bp->phy_dev);
++		if (bp->gmii2rgmii_phy_dev)
++			phy_disconnect(bp->gmii2rgmii_phy_dev);
+ 		mdiobus_unregister(bp->mii_bus);
+ 		dev->phydev = NULL;
+ 		mdiobus_free(bp->mii_bus);
+diff -Naur a/drivers/net/ethernet/cadence/macb.h b/drivers/net/ethernet/cadence/macb.h
+--- a/drivers/net/ethernet/cadence/macb.h	2017-07-31 15:15:10.000000000 -0400
++++ b/drivers/net/ethernet/cadence/macb.h	2017-07-31 21:43:46.282302880 -0400
+@@ -937,6 +937,8 @@
+ 	int			phc_index;
+ 	unsigned int		ns_incr;
+ 	unsigned int		subns_incr;
++	struct device_node *gmii2rgmii_phy_node;
++	struct phy_device *gmii2rgmii_phy_dev;
+ 
+ 	struct tasklet_struct   hresp_err_tasklet;
+ };
