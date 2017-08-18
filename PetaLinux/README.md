@@ -114,3 +114,21 @@ link speed by default.
 
 The included patch handles this modification - you do not need to manually modify any code.
 
+### Port configurations
+
+#### MicroZed, PicoZed, ZC702, ZC706, ZedBoard
+
+* eth0: Ethernet port of the dev board (GEM0)
+* eth1: Ethernet FMC Port 3 (GEM1)
+* eth2: Ethernet FMC Port 0 (AXI Ethernet)
+* eth3: Ethernet FMC Port 1 (AXI Ethernet)
+* eth4: Ethernet FMC Port 2 (AXI Ethernet)
+
+#### ZCU102
+
+* eth0: Ethernet FMC Port 0 (GEM0)
+* eth1: Ethernet FMC Port 1 (GEM1)
+* eth2: Ethernet FMC Port 2 (GEM2)
+* eth3: Ethernet FMC Port 3 (GEM3)
+
+Note: eth3 only implemented on the ZCU102-HPC0 design
