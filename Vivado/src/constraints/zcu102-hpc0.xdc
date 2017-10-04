@@ -5,7 +5,7 @@
 # more information: https://www.xilinx.com/support/answers/68050.html
 
 # These constraints are for the ZCU102-HPC0-QGIGE design which
-# uses 3x GEMs (with GMII-to-RGMII)
+# uses 4x GEMs (with GMII-to-RGMII)
 
 # Notes on ZCU102 HPC0 connector
 # ------------------------------
