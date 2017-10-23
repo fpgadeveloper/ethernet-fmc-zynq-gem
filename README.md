@@ -26,6 +26,8 @@ to find links to the older versions of this repository.
 * Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
+* Zynq UltraScale+ [UltraZed PCIe Carrier Card](http://zedboard.org/product/ultrazed-pcie-carrier-card "UltraZed PCIe Carrier Card") with [UltraZed-EG](http://zedboard.org/product/ultrazed-EG "UltraZed")
+  * LPC connector (use uzeg-pci.xdc)
 
 ## Description
 
@@ -77,6 +79,10 @@ Note that the FMC pinouts differ between Rev 1.0 and Rev D: https://www.xilinx.c
 because certain pins required by the Ethernet FMC (namely LA30, LA31 and LA32) are left unconnected 
 on the HPC1 connector of the ZCU102 board.
 
+### UltraZed
+
+* The UltraZed design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC.
+
 ### ZedBoard, PicoZed and MicroZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
@@ -100,9 +106,9 @@ yet been able to get around.
 * Using the on-board 125MHz clock into a clock wizard to generate the 200MHz clock is not possible due to the Zynq 7Z010
 only containing two MMCMs.
 
-#### Installation of MicroZed and PicoZed board definition files
+#### Installation of MicroZed, PicoZed & UltraZed board definition files
 
-To use the projects for the MicroZed and PicoZed, you must first install the board definition files
+To use the projects for the MicroZed, PicoZed and UltraZed, you must first install the board definition files
 for those boards into your Vivado installation.
 
 The following folders contain the board definition files and can be found in this project repository at this location:
@@ -112,9 +118,7 @@ https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tree/master/Vivado/boards
 * `microzed_7010`
 * `microzed_7020`
 * `picozed_7010_fmc2`
-* `picozed_7015_fmc2`
-* `picozed_7020_fmc2`
-* `picozed_7030_fmc2`
+* `ultrazed_3eg_pciecc`
 
 Copy those folders and their contents into the `C:\Xilinx\Vivado\2017.2\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory).
@@ -139,6 +143,13 @@ to one of the following values depending on the port you want to target, and the
 * Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
 * Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
 * Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR` (only valid on HPC0 design)
+
+#### UltraZed design
+
+* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
+* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
+* Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
+* Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR`
 
 #### BSP Setting
 
