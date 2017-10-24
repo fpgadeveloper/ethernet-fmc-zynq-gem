@@ -127,22 +127,22 @@ connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd
 connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_2/tx_reset]
 connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_2/rx_reset]
 
-# Create clock wizard for the Ethernet FMC 125MHz clock and the 200MHz clock
+# Create clock wizard for the 375MHz clock
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz clk_wiz_0
 set_property -dict [list CONFIG.PRIM_IN_FREQ.VALUE_SRC USER] [get_bd_cells clk_wiz_0]
 set_property -dict [list CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
 CONFIG.PRIM_IN_FREQ {125} \
-CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {200} \
+CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {375} \
 CONFIG.USE_LOCKED {false} \
 CONFIG.USE_RESET {false} \
 CONFIG.CLKIN1_JITTER_PS {80.0} \
-CONFIG.MMCM_DIVCLK_DIVIDE {5} \
-CONFIG.MMCM_CLKFBOUT_MULT_F {48.000} \
-CONFIG.MMCM_CLKIN1_PERIOD {8.000} \
-CONFIG.MMCM_CLKOUT0_DIVIDE_F {6.000} \
-CONFIG.CLKOUT1_JITTER {161.295} \
-CONFIG.CLKOUT1_PHASE_ERROR {222.305}] [get_bd_cells clk_wiz_0]
+CONFIG.MMCM_DIVCLK_DIVIDE {1} \
+CONFIG.MMCM_CLKFBOUT_MULT_F {9.750} \
+CONFIG.MMCM_CLKIN1_PERIOD {8.0} \
+CONFIG.MMCM_CLKOUT0_DIVIDE_F {3.250} \
+CONFIG.CLKOUT1_JITTER {86.562} \
+CONFIG.CLKOUT1_PHASE_ERROR {84.521}] [get_bd_cells clk_wiz_0]
 
 connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins gmii_to_rgmii_2/clkin]
 
@@ -157,7 +157,12 @@ set_property CONFIG.FREQ_HZ 125000000 [get_bd_ports ref_clk_n]
 # Create IDELAYCTRL for the GMII-to-RGMII without shared logic
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_idelay_ctrl util_idelay_ctrl_0
 connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins util_idelay_ctrl_0/ref_clk]
-connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins util_idelay_ctrl_0/rst]
+
+# Processor System Reset for the IDELAYCTRL reset
+create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset proc_sys_reset_0
+connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
+connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins util_idelay_ctrl_0/rst]
+connect_bd_net [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
 
 # Create Ethernet FMC reference clock output enable and frequency select
 

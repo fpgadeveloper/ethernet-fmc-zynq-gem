@@ -257,18 +257,6 @@ set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_1_rxc]
 set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_2_tx_ctl]
 set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_2_txc]
 
-# The following constraints are needed in Vivado 2017.1 to correct the MMCM configuration made by the
-# shared logic of the GMII-to-RGMII IP. If left uncorrected, the configuration made by the IP produces an error message
-# which I have posted about on the Xilinx forums:
-# https://forums.xilinx.com/t5/UltraScale-Architecture/GMII-to-RGMII-MMCM-config-issue-in-Vivado-2017-1-for-ZCU102/m-p/768183#M4411
-
-set_property CLKFBOUT_MULT_F 25 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
-set_property CLKOUT0_DIVIDE_F 10 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
-set_property CLKOUT1_DIVIDE 50 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
-set_property CLKOUT1_PHASE 225 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
-set_property CLKOUT2_DIVIDE 125 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
-set_property DIVCLK_DIVIDE 4 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_clocking/mmcm_adv_inst]
-
 # The following constraints force placement of the BUFGs needed by the RGMII RX clock for Ethernet FMC port 1 and 2
 # Without these constraints, timing will not close because the BUFGCE selected by Vivado is too far.
 # It is actually not recommended to use LOC constraints on BUFGCEs but instead to constrain placement to a clock 
