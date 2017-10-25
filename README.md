@@ -72,7 +72,7 @@ local SDK repository to the SDK workspace. See the readme in the SDK directory f
 
 ### ZCU102
 
-* This design supports the ZCU102 Rev 1.0 board. Use a commit before 2016-02-13 for the older Rev-D board design.
+* This design supports the ZCU102 Rev 1.0 board. Use a commit before 2017/02/13 for the older Rev-D board design.
 Note that the FMC pinouts differ between Rev 1.0 and Rev D: https://www.xilinx.com/support/answers/68050.html
 * The HPC0 design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC.
 * The HPC1 design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected
