@@ -45,7 +45,7 @@ do
 
   # Get CPU type from first letters of project name
   type=$(echo $proj | cut -c1-3)
-  if [[ $type == "zcu" ]]; then
+  if [ $type == "zcu" ] || [ $type == "uz_" ]; then
     cpu_type="zynqMP"
     fsbl_option="--fsbl ./images/linux/zynqmp_fsbl.elf"
   else
