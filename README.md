@@ -19,10 +19,8 @@ to find links to the older versions of this repository.
 
 * Zynq-7000 [ZedBoard](http://zedboard.org "ZedBoard")
   * LPC connector (use zedboard.xdc)
-* [MicroZed FMC Carrier](http://zedboard.org/product/microzed-fmc-carrier "MicroZed FMC Carrier") with [MicroZed 7Z010 or 7Z020](http://microzed.org "MicroZed")
-  * LPC connector (use mzfmc-7z010.xdc or mzfmc-7z020.xdc)
-* Zynq-7000 [PicoZed FMC Carrier Card V2](http://zedboard.org/product/picozed-fmc-carrier-card-v2 "PicoZed FMC Carrier Card V2") with [PicoZed 7010](http://picozed.org "PicoZed")
-  * LPC connector (use pzfmc-7z010.xdc)
+* [MicroZed FMC Carrier](http://zedboard.org/product/microzed-fmc-carrier "MicroZed FMC Carrier") with [MicroZed 7020](http://microzed.org "MicroZed")
+  * LPC connector (use mzfmc-7z010-7z020.xdc)
 * Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
@@ -83,41 +81,22 @@ on the HPC1 connector of the ZCU102 board.
 
 * The UltraZed design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC.
 
-### ZedBoard, PicoZed and MicroZed
+### ZedBoard and MicroZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
 you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
 Zynq configurations that are not compatible with the GEM1 configuration.
 
-### PicoZed
+### Installation of MicroZed & UltraZed board definition files
 
-* 7Z010: This design uses 3x AXI Ethernet and 1xGMII-to-RGMII connected to GEM1 (GEM0 could be connected to the PicoZed's onboard PHY if desired).
-
-### MicroZed
-
-#### Uses Zynq Fabric clocks
-
-To generate the 125MHz and 200MHz clocks required by the AXI Ethernet IPs, this design uses two Zynq
-fabric clocks rather than using the Ethernet FMC's on-board 125MHz clock. Generally this is due to resource
-limitations of the MicroZed 7Z010, but to be more specific:
-
-* Using the on-board 125MHz clock + Zynq fabric 200MHz clock leads to a timing closure problem that I have not
-yet been able to get around.
-* Using the on-board 125MHz clock into a clock wizard to generate the 200MHz clock is not possible due to the Zynq 7Z010
-only containing two MMCMs.
-
-#### Installation of MicroZed, PicoZed & UltraZed board definition files
-
-To use the projects for the MicroZed, PicoZed and UltraZed, you must first install the board definition files
+To use the projects for the MicroZed and UltraZed, you must first install the board definition files
 for those boards into your Vivado installation.
 
 The following folders contain the board definition files and can be found in this project repository at this location:
 
 https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tree/master/Vivado/boards/board_files
 
-* `microzed_7010`
 * `microzed_7020`
-* `picozed_7010_fmc2`
 * `ultrazed_3eg_pciecc`
 
 Copy those folders and their contents into the `C:\Xilinx\Vivado\2017.2\data\boards\board_files` folder (this may
@@ -130,7 +109,7 @@ Selection of the Ethernet port can be changed by modifying the defines contained
 `platform_config.h` file in the application sources. Set `PLATFORM_EMAC_BASEADDR`
 to one of the following values depending on the port you want to target, and the hardware platform:
 
-#### ZedBoard, PicoZed and MicroZed designs
+#### ZedBoard and MicroZed designs
 
 * Ethernet FMC Port 0: `XPAR_AXIETHERNET_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_AXIETHERNET_1_BASEADDR`
