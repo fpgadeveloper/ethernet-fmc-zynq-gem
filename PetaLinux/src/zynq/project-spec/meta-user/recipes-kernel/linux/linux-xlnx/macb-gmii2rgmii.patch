@@ -1,6 +1,6 @@
 diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/macb.c
---- a/drivers/net/ethernet/cadence/macb.c	2017-07-31 15:15:10.000000000 -0400
-+++ b/drivers/net/ethernet/cadence/macb.c	2017-08-01 12:57:31.000000000 -0400
+--- a/drivers/net/ethernet/cadence/macb.c	2017-11-17 23:37:10.000000000 -0500
++++ b/drivers/net/ethernet/cadence/macb.c	2017-11-18 20:06:36.000000000 -0500
 @@ -27,6 +27,10 @@
  #include <linux/platform_data/macb.h>
  #include <linux/platform_device.h>
@@ -12,7 +12,7 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/
  #include <linux/of.h>
  #include <linux/of_device.h>
  #include <linux/of_gpio.h>
-@@ -64,6 +68,11 @@
+@@ -65,6 +69,11 @@
  #define GEM_TX_PTPHDR_OFFSET	42
  #define GEM_RX_PTPHDR_OFFSET	28
  
@@ -24,7 +24,7 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/
  /* Graceful stop timeouts in us. We should allow up to
   * 1 frame time (10 Mbits/s, full-duplex, ignoring collisions)
   */
-@@ -384,8 +393,10 @@
+@@ -385,8 +394,10 @@
  {
  	struct macb *bp = netdev_priv(dev);
  	struct phy_device *phydev = bp->phy_dev;
@@ -35,7 +35,7 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/
  
  	spin_lock_irqsave(&bp->lock, flags);
  
-@@ -399,16 +410,29 @@
+@@ -400,16 +411,29 @@
  			if (macb_is_gem(bp))
  				reg &= ~GEM_BIT(GBE);
  
@@ -68,7 +68,7 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/
  			bp->speed = phydev->speed;
  			bp->duplex = phydev->duplex;
  			status_change = 1;
-@@ -455,6 +479,19 @@
+@@ -456,6 +480,19 @@
  	int phy_irq;
  	int ret;
  
@@ -88,7 +88,7 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/
  	if (bp->phy_node) {
  		phydev = of_phy_connect(dev, bp->phy_node,
  					&macb_handle_link_change, 0,
-@@ -480,12 +517,16 @@
+@@ -481,12 +518,16 @@
  		}
  
  		/* attach the mac to the phy */
@@ -105,7 +105,7 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/
  	}
  
  	/* mask with MAC supported features */
-@@ -3639,6 +3680,10 @@
+@@ -3733,6 +3774,10 @@
  		bp->phy_interface = err;
  	}
  
@@ -116,7 +116,7 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/
  	macb_reset_phy(pdev);
  
  	/* IP specific init */
-@@ -3704,6 +3749,8 @@
+@@ -3798,6 +3843,8 @@
  		bp = netdev_priv(dev);
  		if (bp->phy_dev)
  			phy_disconnect(bp->phy_dev);
@@ -126,9 +126,9 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.c b/drivers/net/ethernet/cadence/
  		dev->phydev = NULL;
  		mdiobus_free(bp->mii_bus);
 diff -Naur a/drivers/net/ethernet/cadence/macb.h b/drivers/net/ethernet/cadence/macb.h
---- a/drivers/net/ethernet/cadence/macb.h	2017-07-31 15:15:10.000000000 -0400
-+++ b/drivers/net/ethernet/cadence/macb.h	2017-07-31 21:43:46.282302880 -0400
-@@ -937,6 +937,8 @@
+--- a/drivers/net/ethernet/cadence/macb.h	2017-11-17 23:37:10.000000000 -0500
++++ b/drivers/net/ethernet/cadence/macb.h	2017-11-18 20:07:13.000000000 -0500
+@@ -945,6 +945,8 @@
  	int			phc_index;
  	unsigned int		ns_incr;
  	unsigned int		subns_incr;
@@ -136,4 +136,4 @@ diff -Naur a/drivers/net/ethernet/cadence/macb.h b/drivers/net/ethernet/cadence/
 +	struct phy_device *gmii2rgmii_phy_dev;
  
  	struct tasklet_struct   hresp_err_tasklet;
- };
+ 
