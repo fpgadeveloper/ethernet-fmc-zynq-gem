@@ -6,11 +6,11 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 
 ## Requirements
 
-This project is designed for Vivado 2017.4. If you are using an older version of Vivado, then you *MUST* use an older version
+This project is designed for Vivado 2018.2. If you are using an older version of Vivado, then you *MUST* use an older version
 of this repository. Refer to the [list of commits](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/commits/master "list of commits")
 to find links to the older versions of this repository.
 
-* Vivado 2017.4
+* Vivado 2018.2
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the above listed Zynq boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -21,6 +21,8 @@ to find links to the older versions of this repository.
   * LPC connector (use zedboard.xdc)
 * [MicroZed FMC Carrier](http://zedboard.org/product/microzed-fmc-carrier "MicroZed FMC Carrier") with [MicroZed 7020](http://microzed.org "MicroZed")
   * LPC connector (use mzfmc-7z010-7z020.xdc)
+* Zynq-7000 [PicoZed FMC Carrier Card V2](http://zedboard.org/product/picozed-fmc-carrier-card-v2 "PicoZed FMC Carrier Card V2") with [PicoZed 7030](http://picozed.org "PicoZed")
+  * LPC connector (use pzfmc-7z015-7z030-1v8.xdc)
 * Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
@@ -81,26 +83,28 @@ on the HPC1 connector of the ZCU102 board.
 
 * The UltraZed design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC.
 
-### ZedBoard and MicroZed
+### ZedBoard, MicroZed and PicoZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
 you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
 Zynq configurations that are not compatible with the GEM1 configuration.
 
-### Installation of MicroZed & UltraZed board definition files
+### Installation of MicroZed, PicoZed & UltraZed board definition files
 
-To use the projects for the MicroZed and UltraZed, you must first install the board definition files
-for those boards into your Vivado installation.
+To use the projects for the MicroZed, PicoZed and UltraZed, you must first install the board definition files
+for those boards into your Vivado and Xilinx SDK installation.
 
 The following folders contain the board definition files and can be found in this project repository at this location:
 
 https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tree/master/Vivado/boards/board_files
 
 * `microzed_7020`
+* `picozed_7030_fmc2`
 * `ultrazed_3eg_pciecc`
 
-Copy those folders and their contents into the `C:\Xilinx\Vivado\2017.4\data\boards\board_files` folder (this may
-be different on your machine, depending on your Vivado installation directory).
+Copy those folders and their contents into the `C:\Xilinx\Vivado\2018.2\data\boards\board_files` folder (this may
+be different on your machine, depending on your Vivado installation directory). You also need to make a copy into the
+Xilinx SDK installation at this location: `C:\Xilinx\SDK\2018.2\data\boards\board_files`.
 
 ### Single port limit
 

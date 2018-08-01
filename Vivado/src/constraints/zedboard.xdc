@@ -1,6 +1,6 @@
 # Enable internal termination resistor on LVDS 125MHz ref_clk
-set_property DIFF_TERM TRUE [get_ports ref_clk_p]
-set_property DIFF_TERM TRUE [get_ports ref_clk_n]
+set_property DIFF_TERM TRUE [get_ports ref_clk_clk_p]
+set_property DIFF_TERM TRUE [get_ports ref_clk_clk_n]
 
 # Define I/O standards
 set_property IOSTANDARD LVCMOS25 [get_ports mdio_io_port_3_mdc]
@@ -63,8 +63,8 @@ set_property IOSTANDARD LVCMOS25 [get_ports rgmii_port_3_rx_ctl]
 set_property IOSTANDARD LVCMOS25 [get_ports rgmii_port_3_tx_ctl]
 set_property IOSTANDARD LVCMOS25 [get_ports rgmii_port_3_rxc]
 set_property IOSTANDARD LVCMOS25 [get_ports rgmii_port_3_txc]
-set_property IOSTANDARD LVDS_25 [get_ports ref_clk_p]
-set_property IOSTANDARD LVDS_25 [get_ports ref_clk_n]
+set_property IOSTANDARD LVDS_25 [get_ports ref_clk_clk_p]
+set_property IOSTANDARD LVDS_25 [get_ports ref_clk_clk_n]
 set_property IOSTANDARD LVCMOS25 [get_ports {ref_clk_oe[0]}]
 set_property IOSTANDARD LVCMOS25 [get_ports {ref_clk_fsel[0]}]
 set_property PACKAGE_PIN L21 [get_ports {rgmii_port_1_rd[0]}]
@@ -126,7 +126,7 @@ set_property PACKAGE_PIN A17 [get_ports rgmii_port_3_txc]
 set_property PACKAGE_PIN C15 [get_ports rgmii_port_3_tx_ctl]
 set_property PACKAGE_PIN B15 [get_ports mdio_io_port_3_mdc]
 set_property PACKAGE_PIN A21 [get_ports mdio_io_port_3_mdio_io]
-set_property PACKAGE_PIN L19 [get_ports ref_clk_n]
+set_property PACKAGE_PIN L19 [get_ports ref_clk_clk_n]
 set_property PACKAGE_PIN L17 [get_ports {ref_clk_oe[0]}]
 set_property PACKAGE_PIN K19 [get_ports {ref_clk_fsel[0]}]
 set_property PACKAGE_PIN A22 [get_ports reset_port_3]
@@ -146,7 +146,7 @@ set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells *_i/axi
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells *_i/gmii_to_rgmii_0/U0/i_*_gmii_to_rgmii_0_0_idelayctrl]
 
 
-create_clock -period 8.000 -name ref_clk_p -waveform {0.000 4.000} [get_ports ref_clk_p]
+create_clock -period 8.000 -name ref_clk_clk_p -waveform {0.000 4.000} [get_ports ref_clk_clk_p]
 
 #False path constraints to async inputs coming directly to synchronizer
 set_false_path -to [get_pins -hier -filter {name =~ *idelayctrl_reset_gen/*reset_sync*/PRE }]
