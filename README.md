@@ -1,8 +1,10 @@
 ethernet-fmc-zynq-gem
 =====================
 
-Example design for using the [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC") with the Zynq PS hard 
+Example design for using the [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC") with the Zynq/ZynqUS+ PS hard 
 Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
+
+![Ethernet FMC](http://ethernetfmc.com/wp-content/uploads/2015/07/zedboard_eth_fmc_3.jpg "Ethernet FMC")
 
 ## Requirements
 
@@ -26,6 +28,8 @@ to find links to the older versions of this repository.
 * Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)
+* Zynq UltraScale+ [ZCU104 Evaluation board](https://www.xilinx.com/products/boards-and-kits/zcu104.html "ZCU104 Evaluation board")
+  * LPC connector (use zcu104.xdc)
 * Zynq UltraScale+ [UltraZed PCIe Carrier Card](http://zedboard.org/product/ultrazed-pcie-carrier-card "UltraZed PCIe Carrier Card") with [UltraZed-EG](http://zedboard.org/product/ultrazed-EG "UltraZed")
   * LPC connector (use uzeg-pci.xdc)
 
@@ -78,6 +82,15 @@ Note that the FMC pinouts differ between Rev 1.0 and Rev D: https://www.xilinx.c
 * The HPC1 design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected
 because certain pins required by the Ethernet FMC (namely LA30, LA31 and LA32) are left unconnected 
 on the HPC1 connector of the ZCU102 board.
+
+### ZCU104
+
+This board requires code in the FSBL to read the FMC's EEPROM and enable VADJ to the appropriate voltage. Without
+this code, the VADJ will not be enabled by default and the Ethernet FMC will not be powered. The code to do this
+was only released in the 2018.2 version of the tools, so if you are using an older version of the tools,
+you will have to reprogram the Infineon power management IC (IRPS5401) as described in this forum post:
+
+https://forums.xilinx.com/t5/Evaluation-Boards/Enabling-VADJ-on-ZCU104/m-p/869402
 
 ### UltraZed
 

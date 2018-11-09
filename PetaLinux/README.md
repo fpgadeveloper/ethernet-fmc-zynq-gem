@@ -128,6 +128,22 @@ link speed by default.
 
 The included patch handles this modification - you do not need to manually modify any code.
 
+#### ZCU104 ZynqMP FSBL patch for 2018.2
+
+The FSBL for Zynq Ultrascale+ needs a patch to properly enable VADJ on the ZCU104 board in the 2018.2
+version of PetaLinux. The FSBL released with this version of PetaLinux has code to read the FMC card's
+EEPROM and then enable VADJ to the correct value. The released FSBL code in fact reads from the ZCU104
+board's EEPROM and not the FMC's EEPROM, so it does not properly enable VADJ on this board.
+
+There is a patch contained in this repo that fixes this issue so that VADJ is correctly enabled on
+the ZCU104 board.
+
+Note that for previous versions of PetaLinux, the FSBL did not contain any code to enable VADJ so it
+must be enabled by programming the Infineon power management IC (IRPS5401) as described in this forum
+post:
+
+https://forums.xilinx.com/t5/Evaluation-Boards/Enabling-VADJ-on-ZCU104/m-p/869402
+
 ### Port configurations
 
 #### MicroZed, PicoZed, ZC702, ZC706, ZedBoard
@@ -138,7 +154,7 @@ The included patch handles this modification - you do not need to manually modif
 * eth3: Ethernet FMC Port 1 (AXI Ethernet)
 * eth4: Ethernet FMC Port 2 (AXI Ethernet)
 
-#### ZCU102
+#### ZCU104 and ZCU102
 
 * eth0: Ethernet FMC Port 0 (GEM0)
 * eth1: Ethernet FMC Port 1 (GEM1)
