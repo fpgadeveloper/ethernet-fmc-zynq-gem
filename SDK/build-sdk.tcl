@@ -70,6 +70,12 @@ proc fill_local_libraries {} {
     # Copy the original files to local repo, without overwriting existing code
     copy-r $orig_dir $lwip_dir
   }
+  # Copy the FSBL for ZCU104 patch
+  set fsbl_dir "../EmbeddedSw/lib/sw_apps/zynqmp_fsbl"
+  set orig_dir "$sdk_dir/data/embeddedsw/lib/sw_apps/zynqmp_fsbl"
+  puts "Copying files from $orig_dir to $fsbl_dir"
+  # Copy the original files to local repo, without overwriting existing code
+  copy-r $orig_dir $fsbl_dir
 }
 
 # Add a hardware design to the SDK workspace
