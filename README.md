@@ -30,6 +30,8 @@ to find links to the older versions of this repository.
   * HPC1 connector (use zcu102-hpc1.xdc)
 * Zynq UltraScale+ [ZCU104 Evaluation board](https://www.xilinx.com/products/boards-and-kits/zcu104.html "ZCU104 Evaluation board")
   * LPC connector (use zcu104.xdc)
+* Zynq UltraScale+ [ZCU106 Evaluation board](https://www.xilinx.com/products/boards-and-kits/zcu106.html "ZCU106 Evaluation board")
+  * HPC0 connector (use zcu106-hpc0.xdc)
 * Zynq UltraScale+ [UltraZed PCIe Carrier Card](http://zedboard.org/product/ultrazed-pcie-carrier-card "UltraZed PCIe Carrier Card") with [UltraZed-EG](http://zedboard.org/product/ultrazed-EG "UltraZed")
   * LPC connector (use uzeg-pci.xdc)
 
