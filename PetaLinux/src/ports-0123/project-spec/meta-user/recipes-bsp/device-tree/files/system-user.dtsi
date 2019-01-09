@@ -2,6 +2,11 @@
 / {
 };
 
+    /* Delete the phy0 node created by the board .dtsi file for gem3 */
+    /* Board files are: zcu106-reva.dtsi and zcu104-revc.dtsi */
+    
+    /delete-node/ &phy0;
+    
     &gem0 {
         local-mac-address = [00 0a 35 00 01 22];
         phy-handle = <&phy0>;
@@ -72,6 +77,12 @@
     };  
       
     &gem3 {
+        /* Delete the pinctrl properties created by the board .dtsi file for gem3 */
+        /* Board files are: zcu106-reva.dtsi and zcu104-revc.dtsi */
+        
+        /delete-property/ pinctrl-names;
+        /delete-property/ pinctrl-0;
+        
         local-mac-address = [00 0a 35 00 01 25];
         phy-handle = <&phy3>;
         gmii2rgmii-phy-handle = <&gmii_to_rgmii_3>;
