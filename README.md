@@ -111,7 +111,7 @@ When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has 
 you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
 Zynq configurations that are not compatible with the GEM1 configuration.
 
-### Installation of MicroZed, PicoZed & UltraZed board definition files
+### Installation of MicroZed, PicoZed, UltraZed, TE0808 board definition files
 
 To use the projects for the MicroZed, PicoZed and UltraZed, you must first install the board definition files
 for those boards into your Vivado and Xilinx SDK installation.
@@ -123,6 +123,7 @@ https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tree/master/Vivado/boards
 * `microzed_7020`
 * `picozed_7030_fmc2`
 * `ultrazed_3eg_pciecc`
+* `TE0808_9EG_1E`
 
 Copy those folders and their contents into the `C:\Xilinx\Vivado\2018.2\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory). You also need to make a copy into the
