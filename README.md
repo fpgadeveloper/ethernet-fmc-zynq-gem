@@ -34,6 +34,8 @@ to find links to the older versions of this repository.
   * HPC0 connector (use zcu106-hpc0.xdc)
 * Zynq UltraScale+ [UltraZed PCIe Carrier Card](http://zedboard.org/product/ultrazed-pcie-carrier-card "UltraZed PCIe Carrier Card") with [UltraZed-EG](http://zedboard.org/product/ultrazed-EG "UltraZed")
   * LPC connector (use uzeg-pci.xdc)
+* Zynq UltraScale+ [TE0808-04-09-1EE-S Starter Kit](https://shop.trenz-electronic.de/en/TE0808-04-09-1EE-S-TE0808-04-09-1EE-S-Starter-Kit "TE0808-04-09-1EE-S Starter Kit") with [TE0808 UltraSOM+ MPSoC Module](https://shop.trenz-electronic.de/en/TE0808-04-09EG-1EE-UltraSOM-MPSoC-Module-with-Zynq-UltraScale-XCZU9EG-1FFVC900E-4-GB-DDR4 "TE0808 SoM")
+  * HPC connector (use tebf0808.xdc)
 
 ## Description
 
@@ -98,6 +100,11 @@ https://forums.xilinx.com/t5/Evaluation-Boards/Enabling-VADJ-on-ZCU104/m-p/86940
 
 * The UltraZed design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC.
 
+### Trenz TE0808 Starter Kit
+
+The base board TEBF0808 has a DIP switch that must be set correctly to enable VADJ of 1.8V. Set S5-4 to ON in order
+to set VADJ to 1.8V.
+
 ### ZedBoard, MicroZed and PicoZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
@@ -142,7 +149,7 @@ to one of the following values depending on the port you want to target, and the
 * Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
 * Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR` (only valid on HPC0 design)
 
-#### UltraZed design
+#### UltraZed, TE0808 design
 
 * Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`

@@ -222,6 +222,12 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant ref_clk_fsel
 create_bd_port -dir O -from 0 -to 0 ref_clk_fsel
 connect_bd_net [get_bd_pins /ref_clk_fsel/dout] [get_bd_ports ref_clk_fsel]
 
+# Audio clock for TEBF0808 board
+set audio_pin [get_bd_pins zynq_ultra_ps_e_0/dp_audio_ref_clk]
+if {$audio_pin != ""} {
+  connect_bd_net $audio_pin [get_bd_pins zynq_ultra_ps_e_0/dp_s_axis_audio_clk]
+}
+
 # Restore current instance
 current_bd_instance $oldCurInst
 
