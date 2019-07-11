@@ -25,6 +25,8 @@ to find links to the older versions of this repository.
   * LPC connector (use mzfmc-7z010-7z020.xdc)
 * Zynq-7000 [PicoZed FMC Carrier Card V2](http://zedboard.org/product/picozed-fmc-carrier-card-v2 "PicoZed FMC Carrier Card V2") with [PicoZed 7030](http://picozed.org "PicoZed")
   * LPC connector (use pzfmc-7z015-7z030-1v8.xdc)
+* Zynq-7000 [ZC706 Evaluation board](http://www.xilinx.com/products/boards-and-kits/ek-z7-zc706-g.html "ZC706 Evaluation board") (LPC only)
+  * LPC connector (use zc706-lpc.xdc)
 * Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
   * HPC0 connector (use zcu102-hpc0.xdc)
   * HPC1 connector (use zcu102-hpc1.xdc)

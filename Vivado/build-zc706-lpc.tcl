@@ -1,5 +1,5 @@
 #
-# build.tcl: Tcl script for re-creating project 'zedboard_qgige'
+# build.tcl: Tcl script for re-creating project 'zc706_lpc_qgige'
 #
 #*****************************************************************************************
 
@@ -17,7 +17,7 @@ if {![string equal $ver $version_required]} {
   return
 }
 
-set design_name zedboard_qgige
+set design_name zc706_lpc_qgige
 
 # Set the reference directory for source file relative paths (by default the value is script directory path)
 set origin_dir "."
@@ -26,14 +26,14 @@ set origin_dir "."
 set orig_proj_dir "[file normalize "$origin_dir/$design_name"]"
 
 # Create project
-create_project $design_name $origin_dir/$design_name -part xc7z020clg484-1
+create_project $design_name $origin_dir/$design_name -part xc7z045ffg900-2
 
 # Set the directory path for the new project
 set proj_dir [get_property directory [current_project]]
 
 # Set project properties
 set obj [get_projects $design_name]
-set_property -name "board_part" -value "em.avnet.com:zed:part0:1.3" -objects $obj
+set_property -name "board_part" -value "xilinx.com:zc706:part0:1.4" -objects $obj
 set_property -name "default_lib" -value "xil_defaultlib" -objects $obj
 set_property -name "ip_cache_permissions" -value "read write" -objects $obj
 set_property -name "ip_output_repo" -value "$proj_dir/$design_name.cache/ip" -objects $obj
@@ -59,9 +59,9 @@ if {[string equal [get_filesets -quiet constrs_1] ""]} {
 set obj [get_filesets constrs_1]
 
 # Add/Import constrs file and set constrs file properties
-set file "[file normalize "$origin_dir/src/constraints/zedboard.xdc"]"
+set file "[file normalize "$origin_dir/src/constraints/zc706-lpc.xdc"]"
 set file_added [add_files -norecurse -fileset $obj $file]
-set file "$origin_dir/src/constraints/zedboard.xdc"
+set file "$origin_dir/src/constraints/zc706-lpc.xdc"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
 set_property "file_type" "XDC" $file_obj
@@ -77,7 +77,7 @@ set_property "processing_order" "LATE" $file_obj
 
 # Set 'constrs_1' fileset properties
 set obj [get_filesets constrs_1]
-set_property "target_constrs_file" "[file normalize "$origin_dir/src/constraints/zedboard.xdc"]" $obj
+set_property "target_constrs_file" "[file normalize "$origin_dir/src/constraints/zc706-lpc.xdc"]" $obj
 
 # Create 'sim_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sim_1] ""]} {
@@ -94,7 +94,7 @@ set_property "top" "${design_name}_wrapper" $obj
 
 # Create 'synth_1' run (if not found)
 if {[string equal [get_runs -quiet synth_1] ""]} {
-  create_run -name synth_1 -part xc7z020clg484-1 -flow {Vivado Synthesis 2018} -strategy "Vivado Synthesis Defaults" -constrset constrs_1
+  create_run -name synth_1 -part xc7z045ffg900-2 -flow {Vivado Synthesis 2018} -strategy "Vivado Synthesis Defaults" -constrset constrs_1
 } else {
   set_property strategy "Vivado Synthesis Defaults" [get_runs synth_1]
   set_property flow "Vivado Synthesis 2018" [get_runs synth_1]
@@ -106,7 +106,7 @@ current_run -synthesis [get_runs synth_1]
 
 # Create 'impl_1' run (if not found)
 if {[string equal [get_runs -quiet impl_1] ""]} {
-  create_run -name impl_1 -part xc7z020clg484-1 -flow {Vivado Implementation 2018} -strategy "Vivado Implementation Defaults" -constrset constrs_1 -parent_run synth_1
+  create_run -name impl_1 -part xc7z045ffg900-2 -flow {Vivado Implementation 2018} -strategy "Vivado Implementation Defaults" -constrset constrs_1 -parent_run synth_1
 } else {
   set_property strategy "Vivado Implementation Defaults" [get_runs impl_1]
   set_property flow "Vivado Implementation 2018" [get_runs impl_1]
