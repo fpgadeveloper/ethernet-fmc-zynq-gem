@@ -46,12 +46,14 @@ set_property -dict [list CONFIG.PSU__USE__M_AXI_GP0 {0} \
 CONFIG.PSU__USE__M_AXI_GP1 {0} \
 CONFIG.PSU__USE__M_AXI_GP2 {0}] [get_bd_cells zynq_ultra_ps_e_0]
 
-
-# Number of GEMs in this design (either 3 or 4)
-if {$num_gems eq 4} {
+# Number of GEMs in this design (2, 3 or 4)
+set gem2_enable 0
+set gem3_enable 0
+if {$num_gems >= 3} {
+  set gem2_enable 1
+}
+if {$num_gems >= 4} {
   set gem3_enable 1
-} else {
-  set gem3_enable 0
 }
 
 # Configure the PS: Enable GEM0, GEM1, GEM2 and GEM3
@@ -59,7 +61,7 @@ set_property -dict [list CONFIG.PSU__ENET0__PERIPHERAL__ENABLE {1} \
 CONFIG.PSU__ENET0__PERIPHERAL__IO {EMIO} \
 CONFIG.PSU__ENET1__PERIPHERAL__ENABLE {1} \
 CONFIG.PSU__ENET1__PERIPHERAL__IO {EMIO} \
-CONFIG.PSU__ENET2__PERIPHERAL__ENABLE {1} \
+CONFIG.PSU__ENET2__PERIPHERAL__ENABLE $gem2_enable \
 CONFIG.PSU__ENET2__PERIPHERAL__IO {EMIO} \
 CONFIG.PSU__ENET3__PERIPHERAL__ENABLE $gem3_enable \
 CONFIG.PSU__ENET3__PERIPHERAL__IO {EMIO} \
@@ -67,7 +69,7 @@ CONFIG.PSU__ENET0__GRP_MDIO__ENABLE {1} \
 CONFIG.PSU__ENET0__GRP_MDIO__IO {EMIO} \
 CONFIG.PSU__ENET1__GRP_MDIO__ENABLE {1} \
 CONFIG.PSU__ENET1__GRP_MDIO__IO {EMIO} \
-CONFIG.PSU__ENET2__GRP_MDIO__ENABLE {1} \
+CONFIG.PSU__ENET2__GRP_MDIO__ENABLE $gem2_enable \
 CONFIG.PSU__ENET2__GRP_MDIO__IO {EMIO} \
 CONFIG.PSU__ENET3__GRP_MDIO__ENABLE $gem3_enable \
 CONFIG.PSU__ENET3__GRP_MDIO__IO {EMIO} \
@@ -80,99 +82,59 @@ connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins rst_zynq_ult
 connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins rst_zynq_ultra_ps_e_0_100M/ext_reset_in]
 
 # Add the GMII-to-RGMIIs
-create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii gmii_to_rgmii_0
-create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii gmii_to_rgmii_1
-create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii gmii_to_rgmii_2
-if {$num_gems eq 4} {
-  create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii gmii_to_rgmii_3
+for {set i 0} {$i < $num_gems} {incr i} {
+  create_bd_cell -type ip -vlnv xilinx.com:ip:gmii_to_rgmii gmii_to_rgmii_$i
 }
-set_property -dict [list CONFIG.C_USE_IDELAY_CTRL {false}] [get_bd_cells gmii_to_rgmii_0]
-set_property -dict [list CONFIG.C_USE_IDELAY_CTRL {false}] [get_bd_cells gmii_to_rgmii_1]
-set_property -dict [list CONFIG.C_USE_IDELAY_CTRL {true} CONFIG.SupportLevel {Include_Shared_Logic_in_Core}] [get_bd_cells gmii_to_rgmii_2]
-if {$num_gems eq 4} {
-  set_property -dict [list CONFIG.C_USE_IDELAY_CTRL {false}] [get_bd_cells gmii_to_rgmii_3]
+
+# In 2 GEM designs, the 1st GMII-to-RGMII will have the IDELAY CTRL
+# In 3+ GEM designs, the 3rd GMII-to-RGMII will have the IDELAY CTRL
+if {$num_gems > 2} {
+  set with_idelay_ctrl 2
+} else {
+  set with_idelay_ctrl 0
+}
+
+# Configure one GMII-to-RGMII with the IDELAY CTRL and the others without
+for {set i 0} {$i < $num_gems} {incr i} {
+  if {$i eq $with_idelay_ctrl} {
+    set_property -dict [list CONFIG.C_USE_IDELAY_CTRL {true} CONFIG.SupportLevel {Include_Shared_Logic_in_Core}] [get_bd_cells gmii_to_rgmii_$i]
+  } else {
+    set_property -dict [list CONFIG.C_USE_IDELAY_CTRL {false}] [get_bd_cells gmii_to_rgmii_$i]
+  }
 }
 
 # Connect GMII-to-RGMIIs to the GEMs
-connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/GMII_ENET0] [get_bd_intf_pins gmii_to_rgmii_0/GMII]
-connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/MDIO_ENET0] [get_bd_intf_pins gmii_to_rgmii_0/MDIO_GEM]
-connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/GMII_ENET1] [get_bd_intf_pins gmii_to_rgmii_1/GMII]
-connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/MDIO_ENET1] [get_bd_intf_pins gmii_to_rgmii_1/MDIO_GEM]
-connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/GMII_ENET2] [get_bd_intf_pins gmii_to_rgmii_2/GMII]
-connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/MDIO_ENET2] [get_bd_intf_pins gmii_to_rgmii_2/MDIO_GEM]
-if {$num_gems eq 4} {
-  connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/GMII_ENET3] [get_bd_intf_pins gmii_to_rgmii_3/GMII]
-  connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/MDIO_ENET3] [get_bd_intf_pins gmii_to_rgmii_3/MDIO_GEM]
+for {set i 0} {$i < $num_gems} {incr i} {
+  connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/GMII_ENET$i] [get_bd_intf_pins gmii_to_rgmii_$i/GMII]
+  connect_bd_intf_net [get_bd_intf_pins zynq_ultra_ps_e_0/MDIO_ENET$i] [get_bd_intf_pins gmii_to_rgmii_$i/MDIO_GEM]
 }
 
 # Connect the clocks
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/mmcm_locked_out] [get_bd_pins gmii_to_rgmii_0/mmcm_locked_in]
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/ref_clk_out] [get_bd_pins gmii_to_rgmii_0/ref_clk_in]
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_125m_out] [get_bd_pins gmii_to_rgmii_0/gmii_clk_125m_in]
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_25m_out] [get_bd_pins gmii_to_rgmii_0/gmii_clk_25m_in]
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_2_5m_out] [get_bd_pins gmii_to_rgmii_0/gmii_clk_2_5m_in]
-
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/mmcm_locked_out] [get_bd_pins gmii_to_rgmii_1/mmcm_locked_in]
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/ref_clk_out] [get_bd_pins gmii_to_rgmii_1/ref_clk_in]
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_125m_out] [get_bd_pins gmii_to_rgmii_1/gmii_clk_125m_in]
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_25m_out] [get_bd_pins gmii_to_rgmii_1/gmii_clk_25m_in]
-connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_2_5m_out] [get_bd_pins gmii_to_rgmii_1/gmii_clk_2_5m_in]
-
-if {$num_gems eq 4} {
-  connect_bd_net [get_bd_pins gmii_to_rgmii_2/mmcm_locked_out] [get_bd_pins gmii_to_rgmii_3/mmcm_locked_in]
-  connect_bd_net [get_bd_pins gmii_to_rgmii_2/ref_clk_out] [get_bd_pins gmii_to_rgmii_3/ref_clk_in]
-  connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_125m_out] [get_bd_pins gmii_to_rgmii_3/gmii_clk_125m_in]
-  connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_25m_out] [get_bd_pins gmii_to_rgmii_3/gmii_clk_25m_in]
-  connect_bd_net [get_bd_pins gmii_to_rgmii_2/gmii_clk_2_5m_out] [get_bd_pins gmii_to_rgmii_3/gmii_clk_2_5m_in]
+for {set i 0} {$i < $num_gems} {incr i} {
+  if {$i eq $with_idelay_ctrl} {
+    continue
+  }
+  connect_bd_net [get_bd_pins gmii_to_rgmii_$with_idelay_ctrl/mmcm_locked_out] [get_bd_pins gmii_to_rgmii_$i/mmcm_locked_in]
+  connect_bd_net [get_bd_pins gmii_to_rgmii_$with_idelay_ctrl/ref_clk_out] [get_bd_pins gmii_to_rgmii_$i/ref_clk_in]
+  connect_bd_net [get_bd_pins gmii_to_rgmii_$with_idelay_ctrl/gmii_clk_125m_out] [get_bd_pins gmii_to_rgmii_$i/gmii_clk_125m_in]
+  connect_bd_net [get_bd_pins gmii_to_rgmii_$with_idelay_ctrl/gmii_clk_25m_out] [get_bd_pins gmii_to_rgmii_$i/gmii_clk_25m_in]
+  connect_bd_net [get_bd_pins gmii_to_rgmii_$with_idelay_ctrl/gmii_clk_2_5m_out] [get_bd_pins gmii_to_rgmii_$i/gmii_clk_2_5m_in]
 }
 
 # Make AXI Ethernet/GMII-to-RGMII ports external: MDIO, RGMII and RESET
-# MDIO
-create_bd_intf_port -mode Master -vlnv xilinx.com:interface:mdio_rtl:1.0 mdio_io_port_0
-connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_0/MDIO_PHY] [get_bd_intf_ports mdio_io_port_0]
-create_bd_intf_port -mode Master -vlnv xilinx.com:interface:mdio_rtl:1.0 mdio_io_port_1
-connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_1/MDIO_PHY] [get_bd_intf_ports mdio_io_port_1]
-create_bd_intf_port -mode Master -vlnv xilinx.com:interface:mdio_rtl:1.0 mdio_io_port_2
-connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_2/MDIO_PHY] [get_bd_intf_ports mdio_io_port_2]
-if {$num_gems eq 4} {
-  create_bd_intf_port -mode Master -vlnv xilinx.com:interface:mdio_rtl:1.0 mdio_io_port_3
-  connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_3/MDIO_PHY] [get_bd_intf_ports mdio_io_port_3]
-}
-
-# RGMII
-create_bd_intf_port -mode Master -vlnv xilinx.com:interface:rgmii_rtl:1.0 rgmii_port_0
-connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_0/RGMII] [get_bd_intf_ports rgmii_port_0]
-create_bd_intf_port -mode Master -vlnv xilinx.com:interface:rgmii_rtl:1.0 rgmii_port_1
-connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_1/RGMII] [get_bd_intf_ports rgmii_port_1]
-create_bd_intf_port -mode Master -vlnv xilinx.com:interface:rgmii_rtl:1.0 rgmii_port_2
-connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_2/RGMII] [get_bd_intf_ports rgmii_port_2]
-if {$num_gems eq 4} {
-  create_bd_intf_port -mode Master -vlnv xilinx.com:interface:rgmii_rtl:1.0 rgmii_port_3
-  connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_3/RGMII] [get_bd_intf_ports rgmii_port_3]
-}
-
-# PHY RESET for GMII-to-RGMII ports 0, 1 and 2
-create_bd_port -dir O reset_port_0
-connect_bd_net [get_bd_pins /rst_zynq_ultra_ps_e_0_100M/peripheral_aresetn] [get_bd_ports reset_port_0]
-create_bd_port -dir O reset_port_1
-connect_bd_net [get_bd_pins /rst_zynq_ultra_ps_e_0_100M/peripheral_aresetn] [get_bd_ports reset_port_1]
-create_bd_port -dir O reset_port_2
-connect_bd_net [get_bd_pins /rst_zynq_ultra_ps_e_0_100M/peripheral_aresetn] [get_bd_ports reset_port_2]
-if {$num_gems eq 4} {
-  create_bd_port -dir O reset_port_3
-  connect_bd_net [get_bd_pins /rst_zynq_ultra_ps_e_0_100M/peripheral_aresetn] [get_bd_ports reset_port_3]
-}
-
-# Connect GMII-to-RGMII resets
-connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_0/tx_reset]
-connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_0/rx_reset]
-connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_1/tx_reset]
-connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_1/rx_reset]
-connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_2/tx_reset]
-connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_2/rx_reset]
-if {$num_gems eq 4} {
-  connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_3/tx_reset]
-  connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_3/rx_reset]
+for {set i 0} {$i < $num_gems} {incr i} {
+  # MDIO
+  create_bd_intf_port -mode Master -vlnv xilinx.com:interface:mdio_rtl:1.0 mdio_io_port_$i
+  connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_$i/MDIO_PHY] [get_bd_intf_ports mdio_io_port_$i]
+  # RGMII
+  create_bd_intf_port -mode Master -vlnv xilinx.com:interface:rgmii_rtl:1.0 rgmii_port_$i
+  connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_$i/RGMII] [get_bd_intf_ports rgmii_port_$i]
+  # PHY RESET
+  create_bd_port -dir O reset_port_$i
+  connect_bd_net [get_bd_pins /rst_zynq_ultra_ps_e_0_100M/peripheral_aresetn] [get_bd_ports reset_port_$i]
+  # Connect GMII-to-RGMII resets
+  connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_$i/tx_reset]
+  connect_bd_net [get_bd_pins rst_zynq_ultra_ps_e_0_100M/peripheral_reset] [get_bd_pins gmii_to_rgmii_$i/rx_reset]
 }
 
 # Create clock wizard for the 375MHz clock
@@ -192,7 +154,7 @@ CONFIG.MMCM_CLKOUT0_DIVIDE_F {3.250} \
 CONFIG.CLKOUT1_JITTER {86.562} \
 CONFIG.CLKOUT1_PHASE_ERROR {84.521}] [get_bd_cells clk_wiz_0]
 
-connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins gmii_to_rgmii_2/clkin]
+connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins gmii_to_rgmii_$with_idelay_ctrl/clkin]
 
 # Connect ports for the Ethernet FMC 125MHz clock
 create_bd_port -dir I -from 0 -to 0 -type clk ref_clk_p
@@ -203,17 +165,17 @@ connect_bd_net [get_bd_pins /clk_wiz_0/clk_in1_n] [get_bd_ports ref_clk_n]
 set_property CONFIG.FREQ_HZ 125000000 [get_bd_ports ref_clk_n]
 
 # Create IDELAYCTRL for the GMII-to-RGMII without shared logic
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_idelay_ctrl util_idelay_ctrl_0
-connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins util_idelay_ctrl_0/ref_clk]
-
-# Processor System Reset for the IDELAYCTRL reset
-create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset proc_sys_reset_0
-connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
-connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins util_idelay_ctrl_0/rst]
-connect_bd_net [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
+if {$num_gems > 2} {
+  create_bd_cell -type ip -vlnv xilinx.com:ip:util_idelay_ctrl util_idelay_ctrl_0
+  connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins util_idelay_ctrl_0/ref_clk]
+  # Processor System Reset for the IDELAYCTRL reset
+  create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset proc_sys_reset_0
+  connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
+  connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins util_idelay_ctrl_0/rst]
+  connect_bd_net [get_bd_pins proc_sys_reset_0/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
+}
 
 # Create Ethernet FMC reference clock output enable and frequency select
-
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant ref_clk_oe
 create_bd_port -dir O -from 0 -to 0 ref_clk_oe
 connect_bd_net [get_bd_pins /ref_clk_oe/dout] [get_bd_ports ref_clk_oe]

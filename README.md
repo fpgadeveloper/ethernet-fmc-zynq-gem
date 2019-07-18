@@ -34,6 +34,7 @@ to find links to the older versions of this repository.
   * LPC connector (use zcu104.xdc)
 * Zynq UltraScale+ [ZCU106 Evaluation board](https://www.xilinx.com/products/boards-and-kits/zcu106.html "ZCU106 Evaluation board")
   * HPC0 connector (use zcu106-hpc0.xdc)
+  * HPC1 connector (2 ports only, use zcu106-hpc1.xdc)
 * Zynq UltraScale+ [UltraZed PCIe Carrier Card](http://zedboard.org/product/ultrazed-pcie-carrier-card "UltraZed PCIe Carrier Card") with [UltraZed-EG](http://zedboard.org/product/ultrazed-EG "UltraZed")
   * LPC connector (use uzeg-pci.xdc)
 * Zynq UltraScale+ [TE0808-04-09-1EE-S Starter Kit](https://shop.trenz-electronic.de/en/TE0808-04-09-1EE-S-TE0808-04-09-1EE-S-Starter-Kit "TE0808-04-09-1EE-S Starter Kit") with [TE0808 UltraSOM+ MPSoC Module](https://shop.trenz-electronic.de/en/TE0808-04-09EG-1EE-UltraSOM-MPSoC-Module-with-Zynq-UltraScale-XCZU9EG-1FFVC900E-4-GB-DDR4 "TE0808 SoM")
@@ -79,6 +80,12 @@ The modified version of the lwIP library is contained in the `EmbeddedSw` direct
 local SDK repository to the SDK workspace. See the readme in the SDK directory for more information.
 
 ## Board specific notes
+
+### ZCU106
+
+* The HPC0 connector on this board supports all 4 ports of the Ethernet FMC.
+* The HPC1 connector only has LA00-LA16 pins connected to the FPGA, therefore our example can only
+support 2 ports of the Ethernet FMC.
 
 ### ZCU102
 

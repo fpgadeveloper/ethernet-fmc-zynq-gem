@@ -1,10 +1,10 @@
-# These constraints are suitable for ZCU106 Rev 1.0
-# -------------------------------------------------
+# These constraints are suitable for ZCU106 Rev 1.0 HPC0
+# ------------------------------------------------------
 
 # These constraints are for the ZCU106-QGIGE design which
 # uses 4x GEMs (with GMII-to-RGMII)
 
-# Notes on ZCU106 HPC connector
+# Notes on ZCU106 HPC0 connector
 # ------------------------------
 #
 # Ethernet FMC Port 0:
