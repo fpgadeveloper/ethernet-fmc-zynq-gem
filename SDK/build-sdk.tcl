@@ -135,14 +135,23 @@ proc get_processor_name {hw_project_name} {
 # Creates the .bif file for a Zynq board
 proc create_zynq_bif {board_name app_name vivado_name target_dir sdk_dir} {
   set full_sdk_dir [file normalize $sdk_dir]
-  regsub -all {/} $full_sdk_dir {\\} full_sdk_dir
+  set fsbl_elf_filename "${full_sdk_dir}/${board_name}_fsbl/Debug/${board_name}_fsbl.elf"
+  set bitstream_filename "${full_sdk_dir}/${vivado_name}_wrapper_hw_platform_0/${vivado_name}_wrapper.bit"
+  set app_elf_filename "${full_sdk_dir}/${app_name}/Debug/${app_name}.elf"
+  # Swap forward slashes for back slashes on Windows systems
+  set OS [lindex $::tcl_platform(os) 0]
+  if { $OS == "Windows" } {
+    regsub -all {/} $fsbl_elf_filename {\\} fsbl_elf_filename
+    regsub -all {/} $bitstream_filename {\\} bitstream_filename
+    regsub -all {/} $app_elf_filename {\\} app_elf_filename
+  }
   set fd [open "${target_dir}/${board_name}.bif" "w"]
   puts $fd "//arch = zynq; split = false; format = BIN"
   puts $fd "the_ROM_image:"
   puts $fd "\{"
-  puts $fd "	\[bootloader\]${full_sdk_dir}\\${board_name}_fsbl\\Debug\\${board_name}_fsbl.elf"
-  puts $fd "	${full_sdk_dir}\\${vivado_name}_wrapper_hw_platform_0\\${vivado_name}_wrapper.bit"
-  puts $fd "	${full_sdk_dir}\\${app_name}\\Debug\\${app_name}.elf"
+  puts $fd "	\[bootloader\]${fsbl_elf_filename}"
+  puts $fd "	${bitstream_filename}"
+  puts $fd "	${app_elf_filename}"
   puts $fd "\}"
   close $fd
 }
@@ -150,15 +159,24 @@ proc create_zynq_bif {board_name app_name vivado_name target_dir sdk_dir} {
 # Creates the .bif file for a Zynq MP board
 proc create_zynqmp_bif {board_name app_name vivado_name target_dir sdk_dir} {
   set full_sdk_dir [file normalize $sdk_dir]
-  regsub -all {/} $full_sdk_dir {\\} full_sdk_dir
+  set fsbl_elf_filename "${full_sdk_dir}/${board_name}_fsbl/Debug/${board_name}_fsbl.elf"
+  set bitstream_filename "${full_sdk_dir}/${vivado_name}_wrapper_hw_platform_0/${vivado_name}_wrapper.bit"
+  set app_elf_filename "${full_sdk_dir}/${app_name}/Debug/${app_name}.elf"
+  # Swap forward slashes for back slashes on Windows systems
+  set OS [lindex $::tcl_platform(os) 0]
+  if { $OS == "Windows" } {
+    regsub -all {/} $fsbl_elf_filename {\\} fsbl_elf_filename
+    regsub -all {/} $bitstream_filename {\\} bitstream_filename
+    regsub -all {/} $app_elf_filename {\\} app_elf_filename
+  }
   set fd [open "${target_dir}/${board_name}.bif" "w"]
   puts $fd "//arch = zynqmp; split = false; format = BIN"
   puts $fd "the_ROM_image:"
   puts $fd "\{"
   puts $fd "	\[fsbl_config\]a53_x64"
-  puts $fd "	\[bootloader\]${full_sdk_dir}\\${board_name}_fsbl\\Debug\\${board_name}_fsbl.elf"
-  puts $fd "	\[destination_device = pl\]${full_sdk_dir}\\${vivado_name}_wrapper_hw_platform_0\\${vivado_name}_wrapper.bit"
-  puts $fd "	\[destination_cpu = a53-0\]${full_sdk_dir}\\${app_name}\\Debug\\${app_name}.elf"
+  puts $fd "	\[bootloader\]${fsbl_elf_filename}"
+  puts $fd "	\[destination_device = pl\]${bitstream_filename}"
+  puts $fd "	\[destination_cpu = a53-0\]${app_elf_filename}"
   puts $fd "\}"
   close $fd
 }
@@ -330,14 +348,20 @@ proc create_boot_files {} {
       puts "Generating BOOT.bin file for Zynq MP $board_name project."
       # Generate the .bif file
       create_zynqmp_bif $board_name $app_name $vivado_folder "./boot" "."
-      exec bootgen -image .\\boot\\${board_name}.bif -arch zynqmp -o .\\boot\\${board_name}\\BOOT.bin -w on
+      set bootgen_cmd "bootgen -image ./boot/${board_name}.bif -arch zynqmp -o ./boot/${board_name}/BOOT.bin -w on"
     # For Zynq designs
     } else {
       puts "Generating BOOT.bin file for Zynq $board_name project."
       # Generate the .bif file
       create_zynq_bif $board_name $app_name $vivado_folder "./boot" "."
-      exec bootgen -image .\\boot\\${board_name}.bif -arch zynq -o .\\boot\\${board_name}\\BOOT.bin -w on
+      set bootgen_cmd "bootgen -image ./boot/${board_name}.bif -arch zynq -o ./boot/${board_name}/BOOT.bin -w on"
     }
+    # Swap forward slashes for back slashes on Windows systems
+    set OS [lindex $::tcl_platform(os) 0]
+    if { $OS == "Windows" } {
+      regsub -all {/} $bootgen_cmd {\\\\} bootgen_cmd
+    }
+    exec {*}$bootgen_cmd
   }
 }
 
