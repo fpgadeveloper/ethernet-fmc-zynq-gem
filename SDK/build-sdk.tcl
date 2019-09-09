@@ -214,6 +214,7 @@ proc create_sdk_ws {} {
   # Now when we create an application, SDK will automatically use the lwIP library from the local repo
   puts "Adding SDK repo to the workspace."
   repo -set "../EmbeddedSw"
+  repo -set "../EmbeddedSw/lib"
 
   # Add each Vivado project to SDK workspace
   foreach {vivado_folder} $vivado_proj_list {
@@ -237,7 +238,17 @@ proc create_sdk_ws {} {
         -os standalone
       # Generate the FSBL for Zynq and Zynq MP designs
       # For Zynq MP designs
-      if {[str_contains $proc_instance "psu_cortexa53_"]} {
+      if {[str_contains $board_name "tebf0808"]} {
+        # The TEBF0808 board requires a modified FSBL
+        createapp -name ${board_name}_fsbl \
+          -app {Zynq MP FSBL for TEBF0808} \
+          -proc $proc_instance \
+          -hwproject ${hw_project_name} \
+          -os standalone
+        # TEBF0808 FSBL needs to be built without the compiler flags "-Os -flto -ffat-lto-objects"
+        # Otherwise it causes a checksum error when built into a BOOT.bin file for PetaLinux 2018.2.
+        configapp -app ${board_name}_fsbl -set compiler-misc {-c -fmessage-length=0 -MT"$@"}
+      } elseif {[str_contains $proc_instance "psu_cortexa53_"]} {
         createapp -name ${board_name}_fsbl \
           -app {Zynq MP FSBL} \
           -proc $proc_instance \

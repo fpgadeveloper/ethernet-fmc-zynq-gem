@@ -144,6 +144,18 @@ post:
 
 https://forums.xilinx.com/t5/Evaluation-Boards/Enabling-VADJ-on-ZCU104/m-p/869402
 
+#### TEBF0808 ZynqMP FSBL patch for 2018.2
+
+The FSBL for the TEBF0808 board needs some modifications to enable certain clocks before the bitstream
+is loaded and application/OS is launched. To incorporate the modifications, this repo contains a
+template FSBL called "Zynq MP FSBL for TEBF0808" in the `EmbeddedSw` directory. The SDK build script
+uses this template when generating the FSBL for this board.
+
+The SDK build script also changes the compiler options of the FSBL for this board.
+
+Note that to build PetaLinux for this board using the `build-petalinux` script, you must first run
+the SDK build script to generate the FSBL .elf file.
+
 ### Port configurations
 
 #### MicroZed, PicoZed, ZC702, ZC706, ZedBoard
@@ -154,7 +166,7 @@ https://forums.xilinx.com/t5/Evaluation-Boards/Enabling-VADJ-on-ZCU104/m-p/86940
 * eth3: Ethernet FMC Port 1 (AXI Ethernet)
 * eth4: Ethernet FMC Port 2 (AXI Ethernet)
 
-#### ZCU104 and ZCU102
+#### ZCU104, ZCU102 and TEBF0808
 
 * eth0: Ethernet FMC Port 0 (GEM0)
 * eth1: Ethernet FMC Port 1 (GEM1)

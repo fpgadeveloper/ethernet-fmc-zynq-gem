@@ -45,7 +45,7 @@ do
 
   # Get CPU type from first letters of project name
   type=$(echo $proj | cut -c1-3)
-  if [ $type == "zcu" ] || [ $type == "uz_" ]; then
+  if [ $type == "zcu" ] || [ $type == "uz_" ] || [ $type == "teb" ]; then
     cpu_type="zynqMP"
     fsbl_option="--fsbl ./images/linux/zynqmp_fsbl.elf"
   else
@@ -120,7 +120,15 @@ do
     echo "> PetaLinux project already packaged"
   else
     echo "> Packaging PetaLinux project"
-    petalinux-package --boot $fsbl_option --fpga ../$bit --u-boot
+    # For TEBF0808 project, we need to copy the prebuilt FSBL from the SDK directory (2018.2 only)
+    if [ $proj == "tebf0808_qgige" ]; then
+      cp ../../SDK/tebf0808_fsbl/Debug/tebf0808_fsbl.elf ./images/linux/zynqmp_fsbl.elf
+    fi
+    if [ $cpu_type == "zynqMP" ]; then
+      petalinux-package --boot $fsbl_option --pmufw ./images/linux/pmufw.elf --fpga ../$bit --atf ./images/linux/bl31.elf --u-boot
+    else
+      petalinux-package --boot $fsbl_option --fpga ../$bit --u-boot
+    fi
   fi
   cd ..
 done
