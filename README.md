@@ -8,11 +8,11 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 
 ## Requirements
 
-This project is designed for Vivado 2018.2. If you are using an older version of Vivado, then you *MUST* use an older version
+This project is designed for Vivado 2019.1. If you are using an older version of Vivado, then you *MUST* use an older version
 of this repository. Refer to the [list of commits](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/commits/master "list of commits")
 to find links to the older versions of this repository.
 
-* Vivado 2018.2
+* Vivado 2019.1
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the above listed Zynq boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -100,7 +100,7 @@ on the HPC1 connector of the ZCU102 board.
 
 This board requires code in the FSBL to read the FMC's EEPROM and enable VADJ to the appropriate voltage. Without
 this code, the VADJ will not be enabled by default and the Ethernet FMC will not be powered. The code to do this
-was only released in the 2018.2 version of the tools, so if you are using an older version of the tools,
+was only released in the 2019.1 version of the tools, so if you are using an older version of the tools,
 you will have to reprogram the Infineon power management IC (IRPS5401) as described in this forum post:
 
 https://forums.xilinx.com/t5/Evaluation-Boards/Enabling-VADJ-on-ZCU104/m-p/869402
@@ -134,9 +134,9 @@ https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tree/master/Vivado/boards
 * `ultrazed_3eg_pciecc`
 * `TE0808_9EG_1E`
 
-Copy those folders and their contents into the `C:\Xilinx\Vivado\2018.2\data\boards\board_files` folder (this may
+Copy those folders and their contents into the `C:\Xilinx\Vivado\2019.1\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory). You also need to make a copy into the
-Xilinx SDK installation at this location: `C:\Xilinx\SDK\2018.2\data\boards\board_files`.
+Xilinx SDK installation at this location: `C:\Xilinx\SDK\2019.1\data\boards\board_files`.
 
 ### Single port limit
 
