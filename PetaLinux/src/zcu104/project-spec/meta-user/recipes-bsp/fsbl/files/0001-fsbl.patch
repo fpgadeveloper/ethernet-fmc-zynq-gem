@@ -1,37 +1,37 @@
-From ad6173b6388b904e4d86987eae4f01b5111e0ff0 Mon Sep 17 00:00:00 2001
-From: Jeff Johnson <jeff@fpgadeveloper.com>
-Date: Fri, 9 Nov 2018 13:06:28 -0500
-Subject: [PATCH] mods for correct enabling of VADJ on ZCU104
-
-Signed-off-by: Jeff Johnson <jeff@fpgadeveloper.com>
----
- lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
 diff --git a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c
-index 5d9a2b6..bc1ef60 100644
+index c1b5c14..93e0893 100644
 --- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c
 +++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c
-@@ -100,7 +100,7 @@ static u32 XFsbl_ReadMinMaxEepromVadj(u16 *MinVadj, u16 *MaxVadj)
+@@ -95,7 +95,7 @@ static u32 XFsbl_ReadMinMaxEepromVadj(XIicPs* I2c0InstancePtr, u32 *MinVadj, u32
  	u32 UStatus;
  	s32 Status;
- 	u16 NominalVoltage;
--	u16 EepromAddr = 0x54U;
-+	u16 EepromAddr = 0x50U;
- 	u16 MinVoltage;
- 	u16 MaxVoltage;
+ 	u32 NominalVoltage;
+-	u32 EepromAddr = 0x54U;
++	u32 EepromAddr = 0x50U;
+ 	u32 MinVoltage;
+ 	u32 MaxVoltage;
  
-@@ -133,8 +133,8 @@ static u32 XFsbl_ReadMinMaxEepromVadj(u16 *MinVadj, u16 *MaxVadj)
- 		goto END;
- 	}
+@@ -104,8 +104,8 @@ static u32 XFsbl_ReadMinMaxEepromVadj(XIicPs* I2c0InstancePtr, u32 *MinVadj, u32
+ 	MaxVoltage = 0U;
+ 	XRecord.VadjRecordFound = 0U;
  
 -	/* Select the Channel-1 of MUX for I2C EEprom Access */
--	WriteBuffer[0] = 0x1;
+-	WriteBuffer[0U] = 0x1U;
 +	/* Select the Channel-6 of MUX for FMC I2C EEprom Access */
-+	WriteBuffer[0] = 0x20;
- 	Status = XIicPs_MasterSendPolled(&I2c0InstancePtr,
- 				WriteBuffer, 1, TCA9548A_ADDR);
++	WriteBuffer[0U] = 0x20;
+ 	Status = XIicPs_MasterSendPolled(I2c0InstancePtr,
+ 				WriteBuffer, 1U, TCA9548A_ADDR);
  	if (Status != XST_SUCCESS) {
--- 
-2.7.4
-
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h
+index 7589f3a..ecc4bf8 100644
+--- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h
++++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h
+@@ -76,7 +76,7 @@ extern "C" {
+ #define IRPS5401_SWC_ADDR		0x45U
+ 
+ #define BUF_LEN		10U
+-#define MAX_SIZE		32U
++#define MAX_SIZE		256U
+ 
+ #define CMD_CFG_0_REG		0x06U
+ #define CMD_OUTPUT_0_REG	0x02U

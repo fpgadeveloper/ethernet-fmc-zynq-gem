@@ -71,21 +71,17 @@
     &gem1 {
         local-mac-address = [00 0a 35 00 01 25];
         phy-handle = <&phy3>;
-        gmii2rgmii-phy-handle = <&gmii_to_rgmii_0>;
-        phy-mode = "rgmii-id";
         status = "okay";
-        xlnx,ptp-enet-clock = <0x69f6bcb>;
         xlnx,has-mdio = <0x1>;
         mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
                 phy3: phy@0 {
-                        /* compatible = "marvell,88e1510"; */
                         device_type = "ethernet-phy";
                         reg = <0>;
                 };
-                gmii_to_rgmii_0: phy@8 {
-                        device_type = "ethernet-phy";
+                gmii_to_rgmii_0: gmii_to_rgmii_0@8 {
+                        phy-handle = <&phy3>;
                         reg = <8>;
                 };
         };
