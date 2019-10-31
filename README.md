@@ -8,37 +8,37 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 
 ## Requirements
 
-This project is designed for Vivado 2019.1. If you are using an older version of Vivado, then you *MUST* use an older version
-of this repository. Refer to the [list of commits](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/commits/master "list of commits")
-to find links to the older versions of this repository.
+This project is designed for version 2019.1 of the Xilinx tools (Vivado/SDK/PetaLinux). If you are using an older version of the 
+Xilinx tools, then refer to the [release tags](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/releases "releases")
+to find the version of this repository that matches your version of the tools.
 
 * Vivado 2019.1
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
-* One of the above listed Zynq boards
+* One of the below listed Zynq or Zynq Ultrascale+ boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
 ## Supported boards
 
 * Zynq-7000 [ZedBoard](http://zedboard.org "ZedBoard")
-  * LPC connector (use zedboard.xdc)
+  * LPC connector
 * [MicroZed FMC Carrier](http://zedboard.org/product/microzed-fmc-carrier "MicroZed FMC Carrier") with [MicroZed 7020](http://microzed.org "MicroZed")
-  * LPC connector (use mzfmc-7z010-7z020.xdc)
+  * LPC connector
 * Zynq-7000 [PicoZed FMC Carrier Card V2](http://zedboard.org/product/picozed-fmc-carrier-card-v2 "PicoZed FMC Carrier Card V2") with [PicoZed 7030](http://picozed.org "PicoZed")
-  * LPC connector (use pzfmc-7z015-7z030-1v8.xdc)
+  * LPC connector
 * Zynq-7000 [ZC706 Evaluation board](http://www.xilinx.com/products/boards-and-kits/ek-z7-zc706-g.html "ZC706 Evaluation board") (LPC only)
-  * LPC connector (use zc706-lpc.xdc)
+  * LPC connector
 * Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
-  * HPC0 connector (use zcu102-hpc0.xdc)
-  * HPC1 connector (use zcu102-hpc1.xdc)
+  * HPC0 connector
+  * HPC1 connector
 * Zynq UltraScale+ [ZCU104 Evaluation board](https://www.xilinx.com/products/boards-and-kits/zcu104.html "ZCU104 Evaluation board")
-  * LPC connector (use zcu104.xdc)
+  * LPC connector
 * Zynq UltraScale+ [ZCU106 Evaluation board](https://www.xilinx.com/products/boards-and-kits/zcu106.html "ZCU106 Evaluation board")
-  * HPC0 connector (use zcu106-hpc0.xdc)
-  * HPC1 connector (2 ports only, use zcu106-hpc1.xdc)
+  * HPC0 connector
+  * HPC1 connector (2 ports only)
 * Zynq UltraScale+ [UltraZed PCIe Carrier Card](http://zedboard.org/product/ultrazed-pcie-carrier-card "UltraZed PCIe Carrier Card") with [UltraZed-EG](http://zedboard.org/product/ultrazed-EG "UltraZed")
-  * LPC connector (use uzeg-pci.xdc)
+  * LPC connector
 * Zynq UltraScale+ [TE0808-04-09-1EE-S Starter Kit](https://shop.trenz-electronic.de/en/TE0808-04-09-1EE-S-TE0808-04-09-1EE-S-Starter-Kit "TE0808-04-09-1EE-S Starter Kit") with [TE0808 UltraSOM+ MPSoC Module](https://shop.trenz-electronic.de/en/TE0808-04-09EG-1EE-UltraSOM-MPSoC-Module-with-Zynq-UltraScale-XCZU9EG-1FFVC900E-4-GB-DDR4 "TE0808 SoM")
-  * HPC connector (use tebf0808.xdc)
+  * HPC connector
 
 ## Description
 
@@ -95,15 +95,6 @@ Note that the FMC pinouts differ between Rev 1.0 and Rev D: https://www.xilinx.c
 * The HPC1 design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected
 because certain pins required by the Ethernet FMC (namely LA30, LA31 and LA32) are left unconnected 
 on the HPC1 connector of the ZCU102 board.
-
-### ZCU104
-
-This board requires code in the FSBL to read the FMC's EEPROM and enable VADJ to the appropriate voltage. Without
-this code, the VADJ will not be enabled by default and the Ethernet FMC will not be powered. The code to do this
-was only released in the 2019.1 version of the tools, so if you are using an older version of the tools,
-you will have to reprogram the Infineon power management IC (IRPS5401) as described in this forum post:
-
-https://forums.xilinx.com/t5/Evaluation-Boards/Enabling-VADJ-on-ZCU104/m-p/869402
 
 ### UltraZed
 

@@ -84,7 +84,6 @@ The configuration files contained in the `src` directory include:
 * Interface initializations (sets eth0-4 interfaces to DHCP)
 * Kernel configuration
 * AXI Ethernet driver patch
-* MACB GMII-to-RGMII patch
 
 #### AXI Ethernet driver patch
 
@@ -116,38 +115,17 @@ replace the above code with the following:
 
 The included patch handles this modification - you do not need to manually modify any code.
 
-#### MACB GMII-to-RGMII patch
+#### ZCU104 ZynqMP FSBL patch for 2019.1
 
-The Cadence MACB/GEM driver needs a modification so that it configures the GMII-to-RGMII IP with the
-link speed each time that a link is negotiated. This patch is based on answer record 67923, but has
-been adapted for the latest version of PetaLinux and the Cadence driver:
-
-https://www.xilinx.com/support/answers/67923.html
-
-Specifically, the GMII-to-RGMII core has a register at address 0x10, accessed via the MDIO bus using
-PHY address 8 (as specified in the Vivado design). This register needs to be updated with the actual
-link speed (10Mbps, 100Mbps or 1Gbps) and it is normally the MAC driver that should make this update.
-The Cadence MACB/GEM driver is not designed to update the GMII-to-RGMII core, hence the need for this
-patch. Without this patch, the ports will work at 10Mbps only because the core is configured to that
-link speed by default.
-
-The included patch handles this modification - you do not need to manually modify any code.
-
-#### ZCU104 ZynqMP FSBL patch for 2018.2
-
-The FSBL for Zynq Ultrascale+ needs a patch to properly enable VADJ on the ZCU104 board in the 2018.2
+The FSBL for Zynq Ultrascale+ needs a patch to properly enable VADJ on the ZCU104 board in the 2019.1
 version of PetaLinux. The FSBL released with this version of PetaLinux has code to read the FMC card's
 EEPROM and then enable VADJ to the correct value. The released FSBL code in fact reads from the ZCU104
-board's EEPROM and not the FMC's EEPROM, so it does not properly enable VADJ on this board.
+board's EEPROM and not the FMC's EEPROM. It also only reads 32 bytes from the EEPROM, which is not 
+sufficient to include the VADJ voltage data. For both of these reasons, the FSBL does not properly 
+enable VADJ on this board. 
 
 There is a patch contained in this repo that fixes this issue so that VADJ is correctly enabled on
 the ZCU104 board.
-
-Note that for previous versions of PetaLinux, the FSBL did not contain any code to enable VADJ so it
-must be enabled by programming the Infineon power management IC (IRPS5401) as described in this forum
-post:
-
-https://forums.xilinx.com/t5/Evaluation-Boards/Enabling-VADJ-on-ZCU104/m-p/869402
 
 #### TEBF0808 ZynqMP FSBL patch for 2018.2
 
