@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright (C) 2015 -17 Xilinx, Inc.  All rights reserved.
+* Copyright (C) 2015 -18 Xilinx, Inc.  All rights reserved.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -11,10 +11,6 @@
 *
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-*
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -139,10 +135,24 @@ u32 XFsbl_HookBeforeFallback(void)
 u32 XFsbl_HookPsuInit(void)
 {
 	u32 Status;
+#ifdef XFSBL_ENABLE_DDR_SR
+	u32 RegVal;
+#endif
 
 	/* Add the code here */
 
+#ifdef XFSBL_ENABLE_DDR_SR
+	/* Check if DDR is in self refresh mode */
+	RegVal = Xil_In32(XFSBL_DDR_STATUS_REGISTER_OFFSET) &
+		DDR_STATUS_FLAG_MASK;
+	if (RegVal) {
+		Status = (u32)psu_init_ddr_self_refresh();
+	} else {
+		Status = (u32)psu_init();
+	}
+#else
 	Status = (u32)psu_init();
+#endif
 
 	if (XFSBL_SUCCESS != Status) {
 			XFsbl_Printf(DEBUG_GENERAL,"XFSBL_PSU_INIT_FAILED\n\r");
@@ -152,12 +162,6 @@ u32 XFsbl_HookPsuInit(void)
 			 */
 			Status = XFSBL_PSU_INIT_FAILED + Status;
 	}
-
-	/*
-	 * Write 1U to PMU GLOBAL general storage register 5 to indicate
-	 * PMU Firmware that psu init is completed
-	 */
-	XFsbl_Out32(PMU_GLOBAL_GLOB_GEN_STORAGE5, XFSBL_PSU_INIT_COMPLETED);
 
 	/**
 	 * PS_SYSMON_ANALOG_BUS register determines mapping between SysMon supply

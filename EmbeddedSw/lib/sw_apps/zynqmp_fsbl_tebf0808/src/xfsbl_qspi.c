@@ -12,10 +12,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -47,6 +43,9 @@
 *                     32Bit boot mode support
 * 3.0   bv   12/02/16 Made compliance to MISRAC 2012 guidelines
 *       ds   01/03/17 Add support for Micron QSPI 2G part
+* 4.0   tjs  10/16/18 Added support for QPI mode in Macronix flash parts.
+*       sk   03/13/19 Added dual parallel support and QPI support for 24bit
+*                     boot mode for Macronix flash parts.
 *
 * </pre>
 *
@@ -76,6 +75,8 @@
 
 /************************** Function Prototypes ******************************/
 static u32 FlashReadID(XQspiPsu *QspiPsuPtr);
+static u32 MacronixEnable4B(XQspiPsu *QspiPsuPtr);
+static u32 MacronixEnableQPIMode(XQspiPsu *QspiPsuPtr, int Enable);
 
 /************************** Variable Definitions *****************************/
 static XQspiPsu QspiPsuInstance;
@@ -88,7 +89,7 @@ static u8 IssiIdFlag=0U;
 static u8 TxBfrPtr __attribute__ ((aligned(32)));
 static u8 ReadBuffer[10] __attribute__ ((aligned(32)));
 static u8 WriteBuffer[10] __attribute__ ((aligned(32)));
-
+static u32 MacronixFlash = 0U;
 /******************************************************************************
 *
 * This function reads serial FLASH ID connected to the SPI interface.
@@ -109,7 +110,6 @@ static u32 FlashReadID(XQspiPsu *QspiPsuPtr)
 {
 	s32 Status;
 	u32 UStatus;
-
 	/*
 	 * Read ID
 	 */
@@ -138,6 +138,7 @@ static u32 FlashReadID(XQspiPsu *QspiPsuPtr)
 	/*
 	 * Deduce flash make
 	 */
+	MacronixFlash = 0U;
 	if (ReadBuffer[0] == MICRON_ID) {
 		QspiFlashMake = MICRON_ID;
 		XFsbl_Printf(DEBUG_INFO, "MICRON ");
@@ -150,6 +151,7 @@ static u32 FlashReadID(XQspiPsu *QspiPsuPtr)
 	} else if(ReadBuffer[0] == MACRONIX_ID) {
 		QspiFlashMake = MACRONIX_ID;
 		XFsbl_Printf(DEBUG_INFO, "MACRONIX ");
+		MacronixFlash = 1U;
 	} else if(ReadBuffer[0] == ISSI_ID) {
 		QspiFlashMake = ISSI_ID;
 		XFsbl_Printf(DEBUG_INFO, "ISSI ");
@@ -162,17 +164,28 @@ static u32 FlashReadID(XQspiPsu *QspiPsuPtr)
 	/*
 	 * Deduce flash Size
 	 */
-	if (ReadBuffer[2] == FLASH_SIZE_ID_64M) {
+	if (ReadBuffer[2] == FLASH_SIZE_ID_8M) {
+		QspiFlashSize = FLASH_SIZE_8M;
+		XFsbl_Printf(DEBUG_INFO, "8M Bits\r\n");
+	} else if (ReadBuffer[2] == FLASH_SIZE_ID_16M) {
+		QspiFlashSize = FLASH_SIZE_16M;
+		XFsbl_Printf(DEBUG_INFO, "16M Bits\r\n");
+	} else if (ReadBuffer[2] == FLASH_SIZE_ID_32M) {
+		QspiFlashSize = FLASH_SIZE_32M;
+		XFsbl_Printf(DEBUG_INFO, "32M Bits\r\n");
+	} else if (ReadBuffer[2] == FLASH_SIZE_ID_64M) {
 		QspiFlashSize = FLASH_SIZE_64M;
 		XFsbl_Printf(DEBUG_INFO, "64M Bits\r\n");
 	} else if (ReadBuffer[2] == FLASH_SIZE_ID_128M) {
 		QspiFlashSize = FLASH_SIZE_128M;
 		XFsbl_Printf(DEBUG_INFO, "128M Bits\r\n");
-	} else if (ReadBuffer[2] == FLASH_SIZE_ID_256M) {
+	} else if ((ReadBuffer[2] == FLASH_SIZE_ID_256M)
+			|| (ReadBuffer[2] == MACRONIX_FLASH_1_8_V_MX25_ID_256)) {
 		QspiFlashSize = FLASH_SIZE_256M;
 		XFsbl_Printf(DEBUG_INFO, "256M Bits\r\n");
 	} else if ((ReadBuffer[2] == FLASH_SIZE_ID_512M)
-			|| (ReadBuffer[2] == MACRONIX_FLASH_SIZE_ID_512M)) {
+			|| (ReadBuffer[2] == MACRONIX_FLASH_SIZE_ID_512M)
+			|| (ReadBuffer[2] == MACRONIX_FLASH_1_8_V_MX66_ID_512)) {
 		QspiFlashSize = FLASH_SIZE_512M;
 		XFsbl_Printf(DEBUG_INFO, "512M Bits\r\n");
 	} else if ((ReadBuffer[2] == FLASH_SIZE_ID_1G)
@@ -196,10 +209,10 @@ static u32 FlashReadID(XQspiPsu *QspiPsuPtr)
 		IssiIdFlag=1;
 	}
 	UStatus = XFSBL_SUCCESS;
+
 END:
 	return UStatus;
 }
-
 
 /*****************************************************************************/
 /**
@@ -331,6 +344,11 @@ u32 XFsbl_Qspi24Init(u32 DeviceFlags)
 	 */
 	if(IssiIdFlag==1U) {
 		ReadCommand = DUAL_READ_CMD_24BIT;
+	}
+
+	if ((MacronixFlash == 1U) &&
+			(QspiPsuInstance.Config.BusWidth == XFSBL_QSPI_BUSWIDTH_FOUR)) {
+		ReadCommand = QUAD_READ_CMD_24BIT2;
 	}
 	/**
 	 * add code: For a Stacked connection, read second Flash ID
@@ -695,78 +713,144 @@ u32 XFsbl_Qspi24Copy(u32 SrcAddress, PTRSIZE DestAddress, u32 Length)
 		 * Setup the read command with the specified address and data for the
 		 * Flash
 		 */
+		if ((MacronixFlash == 1U) &&
+				(QspiPsuInstance.Config.BusWidth == XFSBL_QSPI_BUSWIDTH_FOUR)) {
 
-		WriteBuffer[COMMAND_OFFSET]   = (u8)ReadCommand;
-		WriteBuffer[ADDRESS_1_OFFSET] = (u8)((QspiAddr & 0xFF0000U) >> 16);
-		WriteBuffer[ADDRESS_2_OFFSET] = (u8)((QspiAddr & 0xFF00U) >> 8);
-		WriteBuffer[ADDRESS_3_OFFSET] = (u8)(QspiAddr & 0xFFU);
-		DiscardByteCnt = 4;
+			/* Enable QPI mode */
+			SStatus = MacronixEnableQPIMode(&QspiPsuInstance, ENABLE_QPI);
+			if (SStatus != XFSBL_SUCCESS) {
+				Status = XFSBL_ERROR_QSPI_READ;
+				XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+				goto END;
+			}
 
-		FlashMsg[0].TxBfrPtr = WriteBuffer;
-		FlashMsg[0].RxBfrPtr = NULL;
-		FlashMsg[0].ByteCount = DiscardByteCnt;
-		FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
-		FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+			/*Command*/
+			WriteBuffer[COMMAND_OFFSET]   = (u8)ReadCommand;
+			DiscardByteCnt = 1;
+			/*MACRONIX is in QPI MODE 4-4-4*/
+			FlashMsg[0].TxBfrPtr = WriteBuffer;
+			FlashMsg[0].RxBfrPtr = NULL;
+			FlashMsg[0].ByteCount = DiscardByteCnt;
+			FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+			FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+			/*Address*/
+			WriteBuffer[ADDRESS_1_OFFSET] = (u8)((QspiAddr & 0xFF0000U) >> 16);
+			WriteBuffer[ADDRESS_2_OFFSET] = (u8)((QspiAddr & 0xFF00U) >> 8);
+			WriteBuffer[ADDRESS_3_OFFSET] = (u8)(QspiAddr & 0xFFU);
+			DiscardByteCnt = 3;
 
-		/* It is recommended to have a separate entry for dummy */
-		if ((ReadCommand == FAST_READ_CMD_24BIT) || (ReadCommand == DUAL_READ_CMD_24BIT) ||
-		    (ReadCommand == QUAD_READ_CMD_24BIT)) {
-			/* Update Dummy cycles as per flash specs for QUAD IO */
+			FlashMsg[1].TxBfrPtr = &WriteBuffer[ADDRESS_1_OFFSET];
+			FlashMsg[1].RxBfrPtr = NULL;
+			FlashMsg[1].ByteCount = DiscardByteCnt;
+			FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+			FlashMsg[1].Flags = XQSPIPSU_MSG_FLAG_TX;
 
-			/*
-			 * It is recommended that Bus width value during dummy
-			 * phase should be same as data phase
-			 */
+			/*Dummy*/
+			/*Default Dummy is 6 when QPI READ MODE(ECH)*/
+			FlashMsg[2].TxBfrPtr = NULL;
+			FlashMsg[2].RxBfrPtr = NULL;
+			FlashMsg[2].ByteCount = DUMMY_CLOCKS_MACRONIX;
+			FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+			FlashMsg[2].Flags = 0U;
+
+			/*Data*/
+			FlashMsg[3].TxBfrPtr = NULL;
+			FlashMsg[3].RxBfrPtr = (u8 *)DestAddress;
+			FlashMsg[3].ByteCount = TransferBytes;
+			FlashMsg[3].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+			FlashMsg[3].Flags = XQSPIPSU_MSG_FLAG_RX;
+			if(QspiPsuInstance.Config.ConnectionMode ==
+					XQSPIPSU_CONNECTION_MODE_PARALLEL){
+				FlashMsg[3].Flags |= XQSPIPSU_MSG_FLAG_STRIPE;
+			}
+
+			SStatus = XQspiPsu_PolledTransfer(&QspiPsuInstance, &FlashMsg[0], 4);
+			if (SStatus != XFSBL_SUCCESS) {
+				Status = XFSBL_ERROR_QSPI_READ;
+				XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+				goto END;
+			}
+
+			/* Disable QPI mode */
+			SStatus = MacronixEnableQPIMode(&QspiPsuInstance, DISABLE_QPI);
+			if (SStatus != XFSBL_SUCCESS) {
+				Status = XFSBL_ERROR_QSPI_READ;
+				XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+				goto END;
+			}
+		} else {
+			WriteBuffer[COMMAND_OFFSET]   = (u8)ReadCommand;
+			WriteBuffer[ADDRESS_1_OFFSET] = (u8)((QspiAddr & 0xFF0000U) >> 16);
+			WriteBuffer[ADDRESS_2_OFFSET] = (u8)((QspiAddr & 0xFF00U) >> 8);
+			WriteBuffer[ADDRESS_3_OFFSET] = (u8)(QspiAddr & 0xFFU);
+			DiscardByteCnt = 4;
+
+			FlashMsg[0].TxBfrPtr = WriteBuffer;
+			FlashMsg[0].RxBfrPtr = NULL;
+			FlashMsg[0].ByteCount = DiscardByteCnt;
+			FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+			FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+
+			/* It is recommended to have a separate entry for dummy */
+			if ((ReadCommand == FAST_READ_CMD_24BIT) || (ReadCommand == DUAL_READ_CMD_24BIT) ||
+				(ReadCommand == QUAD_READ_CMD_24BIT)) {
+				/* Update Dummy cycles as per flash specs for QUAD IO */
+
+				/*
+				 * It is recommended that Bus width value during dummy
+				 * phase should be same as data phase
+				 */
+				if (ReadCommand == FAST_READ_CMD_24BIT) {
+					FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+				}
+
+				if (ReadCommand == DUAL_READ_CMD_24BIT) {
+					FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_DUALSPI;
+				}
+
+				if (ReadCommand == QUAD_READ_CMD_24BIT) {
+					FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+				}
+
+				FlashMsg[1].TxBfrPtr = NULL;
+				FlashMsg[1].RxBfrPtr = NULL;
+				FlashMsg[1].ByteCount = DUMMY_CLOCKS;
+				FlashMsg[1].Flags = 0U;
+			}
+
 			if (ReadCommand == FAST_READ_CMD_24BIT) {
-				FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+				FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
 			}
 
 			if (ReadCommand == DUAL_READ_CMD_24BIT) {
-				FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_DUALSPI;
+				FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_DUALSPI;
 			}
 
 			if (ReadCommand == QUAD_READ_CMD_24BIT) {
-				FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+				FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
 			}
 
-			FlashMsg[1].TxBfrPtr = NULL;
-			FlashMsg[1].RxBfrPtr = NULL;
-			FlashMsg[1].ByteCount = DUMMY_CLOCKS;
-			FlashMsg[1].Flags = 0U;
-		}
+			FlashMsg[2].TxBfrPtr = NULL;
+			FlashMsg[2].RxBfrPtr = (u8 *)DestAddress;
+			FlashMsg[2].ByteCount = TransferBytes;
+			FlashMsg[2].Flags = XQSPIPSU_MSG_FLAG_RX;
 
-		if (ReadCommand == FAST_READ_CMD_24BIT) {
-			FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
-		}
+			if(QspiPsuInstance.Config.ConnectionMode ==
+					XQSPIPSU_CONNECTION_MODE_PARALLEL){
+				FlashMsg[2].Flags |= XQSPIPSU_MSG_FLAG_STRIPE;
+			}
 
-		if (ReadCommand == DUAL_READ_CMD_24BIT) {
-			FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_DUALSPI;
-		}
-
-		if (ReadCommand == QUAD_READ_CMD_24BIT) {
-			FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
-		}
-
-		FlashMsg[2].TxBfrPtr = NULL;
-		FlashMsg[2].RxBfrPtr = (u8 *)DestAddress;
-		FlashMsg[2].ByteCount = TransferBytes;
-		FlashMsg[2].Flags = XQSPIPSU_MSG_FLAG_RX;
-
-		if(QspiPsuInstance.Config.ConnectionMode ==
-				XQSPIPSU_CONNECTION_MODE_PARALLEL){
-			FlashMsg[2].Flags |= XQSPIPSU_MSG_FLAG_STRIPE;
-		}
-
-		/**
-		 * Send the read command to the Flash to read the specified number
-		 * of bytes from the Flash, send the read command and address and
-		 * receive the specified number of bytes of data in the data buffer
-		 */
-		SStatus = XQspiPsu_PolledTransfer(&QspiPsuInstance, &FlashMsg[0], 3);
-		if (SStatus != XFSBL_SUCCESS) {
-			Status = XFSBL_ERROR_QSPI_READ;
-			XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
-			goto END;
+			/**
+			 * Send the read command to the Flash to read the specified number
+			 * of bytes from the Flash, send the read command and address and
+			 * receive the specified number of bytes of data in the data buffer
+			 */
+			SStatus = XQspiPsu_PolledTransfer(&QspiPsuInstance, &FlashMsg[0], 3);
+			if (SStatus != XFSBL_SUCCESS) {
+				Status = XFSBL_ERROR_QSPI_READ;
+				XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+				goto END;
+			}
 		}
 
 		/**
@@ -942,6 +1026,35 @@ u32 XFsbl_Qspi32Init(u32 DeviceFlags)
 		goto END;
 	}
 
+	if (MacronixFlash == 1U) {
+		if (QspiPsuInstance.Config.BusWidth == XFSBL_QSPI_BUSWIDTH_FOUR) {
+			ReadCommand = QUAD_READ_CMD_24BIT2;
+		}
+
+		if (QspiPsuInstance.Config.ConnectionMode ==
+				XQSPIPSU_CONNECTION_MODE_PARALLEL) {
+			XQspiPsu_SelectFlash(&QspiPsuInstance,
+						XQSPIPSU_SELECT_FLASH_CS_BOTH,
+						XQSPIPSU_SELECT_FLASH_BUS_BOTH);
+			Status = MacronixEnable4B(&QspiPsuInstance);
+		} else {
+			XQspiPsu_SelectFlash(&QspiPsuInstance,
+						XQSPIPSU_SELECT_FLASH_CS_LOWER,
+						XQSPIPSU_SELECT_FLASH_BUS_LOWER);
+			Status = MacronixEnable4B(&QspiPsuInstance);
+			if (Status != XFSBL_SUCCESS) {
+				UStatus = XFSBL_FAILURE;
+				goto END;
+			}
+			if (QspiPsuInstance.Config.ConnectionMode ==
+					XQSPIPSU_CONNECTION_MODE_STACKED) {
+				XQspiPsu_SelectFlash(&QspiPsuInstance,
+						XQSPIPSU_SELECT_FLASH_CS_UPPER,
+						XQSPIPSU_SELECT_FLASH_BUS_LOWER);
+				Status = MacronixEnable4B(&QspiPsuInstance);
+			}
+		}
+	}
 	/**
 	 * add code: For a Stacked connection, read second Flash ID
 	 */
@@ -952,6 +1065,122 @@ u32 XFsbl_Qspi32Init(u32 DeviceFlags)
 					(s32)(XQSPIPSU_CONNECTION_MODE_STACKED)) ) {
 		QspiFlashSize = 2 * QspiFlashSize;
 	}
+
+END:
+	return UStatus;
+}
+
+/******************************************************************************
+*
+* Static API used for Macronix flash to enable 4BYTE mode
+*
+* @param	QspiPsuPtr Pointer to QSPI instance.
+*
+* @return	XFSBL_SUCCESS if success, otherwise XFSBL_FAILURE.
+*
+* @note		None.
+*
+******************************************************************************/
+static u32 MacronixEnable4B(XQspiPsu *QspiPsuPtr)
+{
+	s32 Status;
+	u32 UStatus;
+
+	XFsbl_Printf(DEBUG_GENERAL,"MACRONIX_FLASH_MODE\r\n");
+
+	/*Enable register write*/
+	TxBfrPtr = WRITE_ENABLE_CMD;
+	FlashMsg[0].TxBfrPtr = &TxBfrPtr;
+	FlashMsg[0].RxBfrPtr = NULL;
+	FlashMsg[0].ByteCount = 1;
+	FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+	FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+
+	Status = XQspiPsu_PolledTransfer(QspiPsuPtr, &FlashMsg[0], 1);
+	if (Status != XFSBL_SUCCESS) {
+		UStatus = XFSBL_FAILURE;
+		goto END;
+	}
+
+	/*Enable 4 byte mode*/
+	TxBfrPtr = 0xB7;
+	FlashMsg[0].TxBfrPtr = &TxBfrPtr;
+	FlashMsg[0].RxBfrPtr = NULL;
+	FlashMsg[0].ByteCount = 1;
+	FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+	FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+
+	Status = XQspiPsu_PolledTransfer(QspiPsuPtr, &FlashMsg[0], 1);
+	if (Status != XFSBL_SUCCESS) {
+		UStatus = XFSBL_FAILURE;
+		goto END;
+	}
+	XFsbl_Printf(DEBUG_GENERAL,"MACRONIX_ENABLE_4BYTE_DONE\r\n");
+
+	UStatus = XFSBL_SUCCESS;
+
+END:
+	return UStatus;
+}
+
+/******************************************************************************
+*
+* Static API used for Macronix flash to enable or disable QPI mode
+*
+* @param	QspiPsuPtr Pointer to QSPI instance.
+* @param    Enable valid values are 0 (disable) and 1 (enable).
+*
+* @return	XFSBL_SUCCESS if success, otherwise XFSBL_ERROR_QSPI_READ.
+*
+* @note		None.
+*
+******************************************************************************/
+static u32 MacronixEnableQPIMode(XQspiPsu *QspiPsuPtr, int Enable)
+{
+	s32 Status;
+	u32 UStatus;
+
+	/*Enable register write*/
+	TxBfrPtr = WRITE_ENABLE_CMD;
+	FlashMsg[0].TxBfrPtr = &TxBfrPtr;
+	FlashMsg[0].RxBfrPtr = NULL;
+	FlashMsg[0].ByteCount = 1;
+	if (Enable == ENABLE_QPI) {
+		FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+	} else {
+		FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+	}
+	FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+
+	Status = XQspiPsu_PolledTransfer(&QspiPsuInstance, &FlashMsg[0], 1);
+	if (Status != XFSBL_SUCCESS) {
+		UStatus = XFSBL_ERROR_QSPI_READ;
+		XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+		goto END;
+	}
+
+	if (Enable == ENABLE_QPI)
+		TxBfrPtr = 0x35;
+	else
+		TxBfrPtr = 0xF5;
+	FlashMsg[0].TxBfrPtr = &TxBfrPtr;
+	FlashMsg[0].RxBfrPtr = NULL;
+	FlashMsg[0].ByteCount = 1;
+	if (Enable == ENABLE_QPI) {
+		FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+	} else {
+		FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+	}
+	FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+
+	Status = XQspiPsu_PolledTransfer(&QspiPsuInstance, &FlashMsg[0], 1);
+	if (Status != XFSBL_SUCCESS) {
+		UStatus = XFSBL_ERROR_QSPI_READ;
+		XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+		goto END;
+	}
+
+	UStatus = XFSBL_SUCCESS;
 
 END:
 	return UStatus;
@@ -1027,85 +1256,152 @@ u32 XFsbl_Qspi32Copy(u32 SrcAddress, PTRSIZE DestAddress, u32 Length)
 		 * Setup the read command with the specified address and data for the
 		 * Flash
 		 */
+		if ((MacronixFlash == 1U) &&
+				(QspiPsuInstance.Config.BusWidth == XFSBL_QSPI_BUSWIDTH_FOUR)) {
 
-		WriteBuffer[COMMAND_OFFSET]   = (u8)ReadCommand;
-		WriteBuffer[ADDRESS_1_OFFSET] = (u8)((QspiAddr & 0xFF000000U) >> 24);
-		WriteBuffer[ADDRESS_2_OFFSET] = (u8)((QspiAddr & 0xFF0000U) >> 16);
-		WriteBuffer[ADDRESS_3_OFFSET] = (u8)((QspiAddr & 0xFF00U) >> 8);
-		WriteBuffer[ADDRESS_4_OFFSET] = (u8)(QspiAddr & 0xFFU);
-		DiscardByteCnt = 5;
+			/* Enable QPI mode */
+			Status = MacronixEnableQPIMode(&QspiPsuInstance, ENABLE_QPI);
+			if (Status != XFSBL_SUCCESS) {
+				UStatus = XFSBL_ERROR_QSPI_READ;
+				XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+				goto END;
+			}
 
-		FlashMsg[0].TxBfrPtr = WriteBuffer;
-		FlashMsg[0].RxBfrPtr = NULL;
-		FlashMsg[0].ByteCount = DiscardByteCnt;
-		FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
-		FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+			/*Command*/
+			WriteBuffer[COMMAND_OFFSET]   = (u8)ReadCommand;
+			DiscardByteCnt = 1;
+			/*MACRONIX is in QPI MODE 4-4-4*/
+			FlashMsg[0].TxBfrPtr = WriteBuffer;
+			FlashMsg[0].RxBfrPtr = NULL;
+			FlashMsg[0].ByteCount = DiscardByteCnt;
+			FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+			FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
+			/*Address*/
+			WriteBuffer[ADDRESS_1_OFFSET] = (u8)((QspiAddr & 0xFF000000U) >> 24);
+			WriteBuffer[ADDRESS_2_OFFSET] = (u8)((QspiAddr & 0xFF0000U) >> 16);
+			WriteBuffer[ADDRESS_3_OFFSET] = (u8)((QspiAddr & 0xFF00U) >> 8);
+			WriteBuffer[ADDRESS_4_OFFSET] = (u8)(QspiAddr & 0xFFU);
+			DiscardByteCnt = 4;
 
-		/*
-		 * It is recommended to have a separate entry for dummy
-		 */
-		if ((ReadCommand == FAST_READ_CMD_32BIT) ||
-				(ReadCommand == DUAL_READ_CMD_32BIT) ||
-				(ReadCommand == QUAD_READ_CMD_32BIT)) {
+			FlashMsg[1].TxBfrPtr = &WriteBuffer[ADDRESS_1_OFFSET];
+			FlashMsg[1].RxBfrPtr = NULL;
+			FlashMsg[1].ByteCount = DiscardByteCnt;
+			FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+			FlashMsg[1].Flags = XQSPIPSU_MSG_FLAG_TX;
 
-			/* Update Dummy cycles as per flash specs for QUAD IO */
+			/*Dummy*/
+			/*Default Dummy is 6 when QPI READ MODE(ECH)*/
+			FlashMsg[2].TxBfrPtr = NULL;
+			FlashMsg[2].RxBfrPtr = NULL;
+			FlashMsg[2].ByteCount = DUMMY_CLOCKS_MACRONIX;
+			FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+			FlashMsg[2].Flags = 0U;
+
+			/*Data*/
+			FlashMsg[3].TxBfrPtr = NULL;
+			FlashMsg[3].RxBfrPtr = (u8 *)DestAddress;
+			FlashMsg[3].ByteCount = TransferBytes;
+			FlashMsg[3].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+			FlashMsg[3].Flags = XQSPIPSU_MSG_FLAG_RX;
+			if(QspiPsuInstance.Config.ConnectionMode ==
+					XQSPIPSU_CONNECTION_MODE_PARALLEL){
+				FlashMsg[3].Flags |= XQSPIPSU_MSG_FLAG_STRIPE;
+			}
+
+			Status = XQspiPsu_PolledTransfer(&QspiPsuInstance, &FlashMsg[0], 4);
+			if (Status != XFSBL_SUCCESS) {
+				UStatus = XFSBL_ERROR_QSPI_READ;
+				XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+				goto END;
+			}
+
+			/* Disable QPI mode */
+			Status = MacronixEnableQPIMode(&QspiPsuInstance, DISABLE_QPI);
+			if (Status != XFSBL_SUCCESS) {
+				UStatus = XFSBL_ERROR_QSPI_READ;
+				XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+				goto END;
+			}
+
+		} else {
+			WriteBuffer[COMMAND_OFFSET]   = (u8)ReadCommand;
+			WriteBuffer[ADDRESS_1_OFFSET] = (u8)((QspiAddr & 0xFF000000U) >> 24);
+			WriteBuffer[ADDRESS_2_OFFSET] = (u8)((QspiAddr & 0xFF0000U) >> 16);
+			WriteBuffer[ADDRESS_3_OFFSET] = (u8)((QspiAddr & 0xFF00U) >> 8);
+			WriteBuffer[ADDRESS_4_OFFSET] = (u8)(QspiAddr & 0xFFU);
+			DiscardByteCnt = 5;
+
+			FlashMsg[0].TxBfrPtr = WriteBuffer;
+			FlashMsg[0].RxBfrPtr = NULL;
+			FlashMsg[0].ByteCount = DiscardByteCnt;
+			FlashMsg[0].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+			FlashMsg[0].Flags = XQSPIPSU_MSG_FLAG_TX;
 
 			/*
-			 * It is recommended that Bus width value during dummy
-			 * phase should be same as data phase
+			 * It is recommended to have a separate entry for dummy
 			 */
+			if ((ReadCommand == FAST_READ_CMD_32BIT) ||
+					(ReadCommand == DUAL_READ_CMD_32BIT) ||
+					(ReadCommand == QUAD_READ_CMD_32BIT)) {
+
+				/* Update Dummy cycles as per flash specs for QUAD IO */
+
+				/*
+				 * It is recommended that Bus width value during dummy
+				 * phase should be same as data phase
+				 */
+				if (ReadCommand == FAST_READ_CMD_32BIT) {
+					FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+				}
+
+				if (ReadCommand == DUAL_READ_CMD_32BIT) {
+					FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_DUALSPI;
+				}
+
+				if (ReadCommand == QUAD_READ_CMD_32BIT) {
+					FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+				}
+
+				FlashMsg[1].TxBfrPtr = NULL;
+				FlashMsg[1].RxBfrPtr = NULL;
+				FlashMsg[1].ByteCount = DUMMY_CLOCKS;
+				FlashMsg[1].Flags = 0U;
+			}
+
 			if (ReadCommand == FAST_READ_CMD_32BIT) {
-				FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
+				FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
 			}
 
 			if (ReadCommand == DUAL_READ_CMD_32BIT) {
-				FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_DUALSPI;
+				FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_DUALSPI;
 			}
 
 			if (ReadCommand == QUAD_READ_CMD_32BIT) {
-				FlashMsg[1].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
+				FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
 			}
 
-			FlashMsg[1].TxBfrPtr = NULL;
-			FlashMsg[1].RxBfrPtr = NULL;
-			FlashMsg[1].ByteCount = DUMMY_CLOCKS;
-			FlashMsg[1].Flags = 0U;
+			FlashMsg[2].TxBfrPtr = NULL;
+			FlashMsg[2].RxBfrPtr = (u8 *)DestAddress;
+			FlashMsg[2].ByteCount = TransferBytes;
+			FlashMsg[2].Flags = XQSPIPSU_MSG_FLAG_RX;
+
+			if(QspiPsuInstance.Config.ConnectionMode ==
+					XQSPIPSU_CONNECTION_MODE_PARALLEL){
+				FlashMsg[2].Flags |= XQSPIPSU_MSG_FLAG_STRIPE;
+			}
+
+			/**
+			 * Send the read command to the Flash to read the specified number
+			 * of bytes from the Flash, send the read command and address and
+			 * receive the specified number of bytes of data in the data buffer
+			 */
+			Status = XQspiPsu_PolledTransfer(&QspiPsuInstance, &FlashMsg[0], 3);
+			if (Status != XFSBL_SUCCESS) {
+				UStatus = XFSBL_ERROR_QSPI_READ;
+				XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
+				goto END;
+			}
 		}
-
-		if (ReadCommand == FAST_READ_CMD_32BIT) {
-			FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_SPI;
-		}
-
-		if (ReadCommand == DUAL_READ_CMD_32BIT) {
-			FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_DUALSPI;
-		}
-
-		if (ReadCommand == QUAD_READ_CMD_32BIT) {
-			FlashMsg[2].BusWidth = XQSPIPSU_SELECT_MODE_QUADSPI;
-		}
-
-		FlashMsg[2].TxBfrPtr = NULL;
-		FlashMsg[2].RxBfrPtr = (u8 *)DestAddress;
-		FlashMsg[2].ByteCount = TransferBytes;
-		FlashMsg[2].Flags = XQSPIPSU_MSG_FLAG_RX;
-
-		if(QspiPsuInstance.Config.ConnectionMode ==
-				XQSPIPSU_CONNECTION_MODE_PARALLEL){
-			FlashMsg[2].Flags |= XQSPIPSU_MSG_FLAG_STRIPE;
-		}
-
-		/**
-		 * Send the read command to the Flash to read the specified number
-		 * of bytes from the Flash, send the read command and address and
-		 * receive the specified number of bytes of data in the data buffer
-		 */
-		Status = XQspiPsu_PolledTransfer(&QspiPsuInstance, &FlashMsg[0], 3);
-		if (Status != XFSBL_SUCCESS) {
-			UStatus = XFSBL_ERROR_QSPI_READ;
-			XFsbl_Printf(DEBUG_GENERAL,"XFSBL_ERROR_QSPI_READ\r\n");
-			goto END;
-		}
-
 		/**
 		 * Update the variables
 		 */

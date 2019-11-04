@@ -12,10 +12,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -71,7 +67,6 @@ extern "C" {
 #define PL_DONE_POLL_COUNT  (u32)(10000U)
 #define PL_RESET_PERIOD_IN_US  1U
 #define XFSBL_PL_PWRUP_WAIT_MICROSEC    0U
-#define XFSBL_BITSTREAM_NOT_LOADED		1U
 
 /* Dummy address to indicate that destination is PCAP */
 #define XFSBL_DESTINATION_PCAP_ADDR    (0XFFFFFFFFU)

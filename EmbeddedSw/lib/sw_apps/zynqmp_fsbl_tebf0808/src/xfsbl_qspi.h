@@ -12,10 +12,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -79,8 +75,10 @@ extern "C" {
 #define FAST_READ_CMD_32BIT		(0x0CU)
 #define DUAL_READ_CMD_32BIT		(0x3CU)
 #define QUAD_READ_CMD_32BIT		(0x6CU)
+#define QUAD_READ_CMD_24BIT2	(0xEBU)
 
 
+#define WRITE_STATUS_CMD	(0x01U)
 #define WRITE_ENABLE_CMD	(0x06U)
 #define BANK_REG_RD_CMD		(0x16U)
 #define BANK_REG_WR_CMD		(0x17U)
@@ -100,6 +98,8 @@ extern "C" {
 				     quad reads */
 #define DUMMY_CLOCKS		8 /* Number of dummy bytes for fast, dual and
 				     quad reads */
+#define DUMMY_CLOCKS_MACRONIX	6 /* For 4-4-4 mode in Macronix dummy cycles are
+					default to 6*/
 #define RD_ID_SIZE			(4U) /* Read ID command + 3 bytes ID response */
 #define BANK_SEL_SIZE		(2U) /* BRWR or EARWR command + 1 byte bank value */
 #define WRITE_ENABLE_CMD_SIZE	(1U) /* WE command */
@@ -169,6 +169,9 @@ extern "C" {
 #define MACRONIX_ID		(0xC2U)
 #define ISSI_ID			(0x9DU)
 
+#define FLASH_SIZE_ID_8M		(0x14U)
+#define FLASH_SIZE_ID_16M		(0x15U)
+#define FLASH_SIZE_ID_32M		(0x16U)
 #define FLASH_SIZE_ID_64M		(0x17U)
 #define FLASH_SIZE_ID_128M		(0x18U)
 #define FLASH_SIZE_ID_256M		(0x19U)
@@ -179,16 +182,25 @@ extern "C" {
 #define MACRONIX_FLASH_SIZE_ID_512M		(0x1AU)
 #define MACRONIX_FLASH_SIZE_ID_1G		(0x1BU)
 #define MACRONIX_FLASH_1_8_V_SIZE_ID_1G  	(0x3BU)
+#define MACRONIX_FLASH_1_8_V_MX25_ID_256	(0x39U)
+#define MACRONIX_FLASH_1_8_V_MX66_ID_512	(0x3AU)
 
 /*
  * Size in bytes
  */
+#define FLASH_SIZE_8M			(0x0100000U)
+#define FLASH_SIZE_16M			(0x0200000U)
+#define FLASH_SIZE_32M			(0x0400000U)
 #define FLASH_SIZE_64M			(0x0800000U)
 #define FLASH_SIZE_128M			(0x1000000U)
 #define FLASH_SIZE_256M			(0x2000000U)
 #define FLASH_SIZE_512M			(0x4000000U)
 #define FLASH_SIZE_1G			(0x8000000U)
 #define FLASH_SIZE_2G			(0x10000000U)
+
+/* Macronix */
+#define DISABLE_QPI		0x0U
+#define ENABLE_QPI		0x1U
 
 /**************************** Type Definitions *******************************/
 

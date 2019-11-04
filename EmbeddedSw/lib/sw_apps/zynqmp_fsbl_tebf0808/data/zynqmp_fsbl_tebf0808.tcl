@@ -12,10 +12,6 @@
 #* The above copyright notice and this permission notice shall be included in
 #* all copies or substantial portions of the Software.
 #*
-#* Use of the Software is limited solely to applications:
-#* (a) running on a Xilinx device, or
-#* (b) that interact with a Xilinx device through a bus or interconnect.
-#*
 #* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -101,7 +97,7 @@ proc get_ip_sub_type { ip_inst_object} {
 }
 
 proc get_mem_type { mem } {
-    set mem_type [get_ip_sub_type [hsi::get_cells $mem]]
+    set mem_type [get_ip_sub_type [hsi::get_cells -hier $mem]]
     if { $mem_type == "BRAM_CTRL" } {
         return "BRAM"
     }
@@ -114,7 +110,7 @@ proc get_mem_type { mem } {
 proc check_program_memory {} {
     # Obtain a list of "ID" memories
     set proc_instance [hsi::get_sw_processor]
-    set idmemlist [hsi::get_mem_ranges -of_objects [hsi::get_cells $proc_instance] -filter { IS_INSTRUCTION == true && IS_DATA == true && MEM_TYPE == "MEMORY" }]
+    set idmemlist [hsi::get_mem_ranges -of_objects [hsi::get_cells -hier $proc_instance] -filter { IS_INSTRUCTION == true && IS_DATA == true && MEM_TYPE == "MEMORY" }]
     set security [common::get_property CONFIG.security_state [::hsi::get_os]]
 
     set required_mem_size 0x2A000

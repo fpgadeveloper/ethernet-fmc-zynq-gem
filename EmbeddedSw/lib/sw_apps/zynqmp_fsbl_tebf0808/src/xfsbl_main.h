@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright (C) 2015 - 17 Xilinx, Inc.  All rights reserved.
+* Copyright (C) 2015 - 19 Xilinx, Inc.  All rights reserved.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -11,10 +11,6 @@
 *
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-*
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -116,8 +112,8 @@ typedef struct {
 /***************** Macros (Inline Functions) Definitions *********************/
 
 /* SDK release version */
-#define SDK_RELEASE_YEAR	2018
-#define SDK_RELEASE_QUARTER	2
+#define SDK_RELEASE_YEAR	2019
+#define SDK_RELEASE_QUARTER	1
 
 #define XFSBL_RUNNING			(0xFFFFU)
 #define XFSBL_COMPLETED			(0x0U)
@@ -179,6 +175,11 @@ typedef struct {
 #define XFSBL_R5_LOVEC_VALUE 	0xEAFEFFFEU
 #define XFSBL_R5_HIVEC_VALUE    0xEAFF3FFEU
 
+/* FSBL running status to update to PMU */
+#define XFSBL_RUNNING_STATUS			(0x1U << 0x1U)
+#define XFSBL_RUNNING_ON_A53			(0x1U << 0x2U)
+#define XFSBL_STATE_PROC_INFO_MASK		0x6U
+
 /************************** Function Prototypes ******************************/
 /**
  * Functions defined in xfsbl_main.c
@@ -196,6 +197,7 @@ void XFsbl_MeasurePerfTime(XTime tCur);
 u32 XFsbl_Initialize(XFsblPs * FsblInstancePtr);
 u32 XFsbl_BootDeviceInitAndValidate(XFsblPs * FsblInstancePtr);
 u32 XFsbl_TcmEccInit(XFsblPs * FsblInstancePtr, u32 CpuId);
+void XFsbl_MarkDdrAsReserved(u8 Cond);
 
 /**
  * Functions defined in xfsbl_partition_load.c

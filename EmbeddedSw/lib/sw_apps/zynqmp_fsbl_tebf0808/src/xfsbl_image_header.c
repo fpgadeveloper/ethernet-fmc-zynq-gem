@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright (C) 2015 - 18 Xilinx, Inc.  All rights reserved.
+* Copyright (C) 2015 - 19 Xilinx, Inc.  All rights reserved.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -11,10 +11,6 @@
 *
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-*
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -53,6 +49,7 @@
 *                     Updated destination CPU for PMUFW.
 * 3.0   vns  03/07/18 All the partitions should be encrypted when ENC_ONLY
 *                     eFUSE bit is set, if not encrypted FSBL throw an error.
+*       mus  02/26/19 Added support for armclang compiler
 * </pre>
 *
 * @note
@@ -141,8 +138,14 @@ static void XFsbl_SetATFHandoffParameters(
 
 /************************** Variable Definitions *****************************/
 /* Store this data structure at a fixed location for ATF to pick */
+#ifdef __clang__
+static XFsblPs_ATFHandoffParams ATFHandoffParams
+			__attribute__((section (".bss.handoff_params")));
+#else
 static XFsblPs_ATFHandoffParams ATFHandoffParams
 			__attribute__((section (".handoff_params")));
+#endif
+
 #ifdef XFSBL_SECURE
 extern u8 *ImageHdr;
 #endif
@@ -255,7 +258,7 @@ static u32 XFsbl_ValidateImageHeaderTable(
 		 */
 
 		PartitionPresentDevice = ImageHeaderTable->PartitionPresentDevice;
-		if ((PartitionPresentDevice < XIH_IHT_PPD_SAME) &&
+		if ((PartitionPresentDevice < XIH_IHT_PPD_SAME) ||
 		(PartitionPresentDevice > XIH_IHT_PPD_SATA) )
 		{
 			Status = XFSBL_ERROR_PPD;

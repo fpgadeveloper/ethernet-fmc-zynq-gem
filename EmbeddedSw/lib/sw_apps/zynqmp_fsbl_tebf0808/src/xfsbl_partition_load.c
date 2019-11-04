@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright (C) 2015 - 18 Xilinx, Inc.  All rights reserved.
+* Copyright (C) 2015 - 19 Xilinx, Inc.  All rights reserved.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -11,10 +11,6 @@
 *
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-*
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -61,6 +57,7 @@
 *                     we are using IV from authenticated header(copied to
 *                     internal memory), using same way for non authenticated
 *                     case as well.
+*       mus  02/26/19 Added support for armclang compiler.
 *
 * </pre>
 *
@@ -103,6 +100,10 @@ static u32 XFsbl_GetLoadAddress(u32 DestinationCpu, PTRSIZE * LoadAddressPtr,
 		u32 Length);
 static void XFsbl_CheckPmuFw(const XFsblPs * FsblInstancePtr, u32 PartitionNum);
 
+#ifdef XFSBL_ENABLE_DDR_SR
+static void XFsbl_PollForDDRReady(void);
+#endif
+
 #ifdef XFSBL_SECURE
 static u32 XFsbl_CalcualteCheckSum(XFsblPs* FsblInstancePtr,
 		PTRSIZE LoadAddress, u32 PartitionNum);
@@ -127,7 +128,11 @@ static void XFsbl_SetR5ExcepVectorLoVec(void);
 u32 Iv[XIH_BH_IV_LENGTH / 4U] = { 0 };
 u8 AuthBuffer[XFSBL_AUTH_BUFFER_SIZE]__attribute__ ((aligned (4))) = {0};
 #ifdef XFSBL_BS
+#ifdef __clang__
+u8 HashsOfChunks[HASH_BUFFER_SIZE] __attribute__((section (".bss.bitstream_buffer")));
+#else
 u8 HashsOfChunks[HASH_BUFFER_SIZE] __attribute__((section (".bitstream_buffer")));
+#endif
 #endif
 #endif
 
@@ -155,8 +160,14 @@ u32 XFsbl_PartitionLoad(XFsblPs * FsblInstancePtr, u32 PartitionNum)
 #endif
 
 #ifdef XFSBL_WDT_PRESENT
-	/* Restart WDT as partition copy can take more time */
-	XFsbl_RestartWdt();
+	if (FsblInstancePtr->ResetReason != XFSBL_APU_ONLY_RESET) {
+		/* Restart WDT as partition copy can take more time */
+		XFsbl_RestartWdt();
+	}
+#endif
+
+#ifdef XFSBL_ENABLE_DDR_SR
+	XFsbl_PollForDDRReady();
 #endif
 
 	/**
@@ -1205,6 +1216,7 @@ static u32 XFsbl_PartitionValidation(XFsblPs * FsblInstancePtr,
 		 */
 		if (FsblInstancePtr->ResetReason == XFSBL_PS_ONLY_RESET)
 		{
+			Status = XFSBL_SUCCESS;
 			XFsbl_Printf(DEBUG_INFO,
 			"PS Only Reset. Skipping PL configuration\r\n");
 			goto END;
@@ -1354,9 +1366,9 @@ static u32 XFsbl_PartitionValidation(XFsblPs * FsblInstancePtr,
 			if ((FsblInstancePtr->BootHdrAttributes &
 					XIH_BH_IMAGE_ATTRB_SHA2_MASK) ==
 					XIH_BH_IMAGE_ATTRB_SHA2_MASK) {
-				PlParams.PlAuth.AuthType = XFSBL_HASH_TYPE_SHA2;
-				PlParams.PlAuth.NoOfHashs =
-					HASH_BUFFER_SIZE/XFSBL_HASH_TYPE_SHA2;
+				Status = XFSBL_ERROR_SHA2_NOT_SUPPORTED;
+				XFsbl_Printf(DEBUG_INFO,"SHA2 is not supported\r\n");
+				goto END;
 			}
 			else {
 				PlParams.PlAuth.AuthType = XFSBL_HASH_TYPE_SHA3;
@@ -1411,6 +1423,10 @@ static u32 XFsbl_PartitionValidation(XFsblPs * FsblInstancePtr,
 				"XFSBL_ERROR_BITSTREAM_AUTHENTICATION\r\n");
 				/* Reset PL */
 				XFsbl_Out32(CSU_PCAP_PROG, 0x0);
+				if(IsEncryptionEnabled == TRUE) {
+					usleep(PL_RESET_PERIOD_IN_US);
+					Xil_Out32(CSU_PCAP_PROG, CSU_PCAP_PROG_PCFG_PROG_B_MASK);
+				}
 				goto END;
 			}
 #endif
@@ -1528,8 +1544,10 @@ static u32 XFsbl_PartitionValidation(XFsblPs * FsblInstancePtr,
 				Status = XFSBL_ERROR_BITSTREAM_DECRYPTION_FAIL;
 				XFsbl_Printf(DEBUG_GENERAL,
 				"XFSBL_ERROR_BITSTREAM_DECRYPTION_FAIL\r\n");
-				/* Reset PL */
+				/* Reset PL and PL zeroization */
 				XFsbl_Out32(CSU_PCAP_PROG, 0x0);
+				usleep(PL_RESET_PERIOD_IN_US);
+				Xil_Out32(CSU_PCAP_PROG, CSU_PCAP_PROG_PCFG_PROG_B_MASK);
 				goto END;
 			} else {
 				XFsbl_Printf(DEBUG_GENERAL,
@@ -1689,7 +1707,6 @@ static void XFsbl_CheckPmuFw(const XFsblPs* FsblInstancePtr, u32 PartitionNum)
 					break;
 				}
 		} while(1);
-
 	}
 
 }
@@ -1830,7 +1847,6 @@ static u32 XFsbl_CalcualteSHA(const XFsblPs * FsblInstancePtr, PTRSIZE LoadAddre
 	u8 Hash[XFSBL_HASH_TYPE_SHA3] __attribute__ ((aligned (4))) = {0};
 	u32 HashOffset;
 	u32 Index;
-	void * ShaCtx = (void * )NULL;
 	u32 Length;
 	u32 Status;
 	const XFsblPs_PartitionHeader * PartitionHeader;
@@ -1843,8 +1859,7 @@ static u32 XFsbl_CalcualteSHA(const XFsblPs * FsblInstancePtr, PTRSIZE LoadAddre
 	Length = PartitionHeader->TotalDataWordLength * 4U;
 	HashOffset = FsblInstancePtr->ImageOffsetAddress + PartitionHeader->ChecksumWordOffset * 4U;
 
-	/* Start the SHA engine */
-	XFsbl_ShaStart(ShaCtx, ShaType);
+	/* Calculate SHA hash */
 	XFsbl_ShaDigest((u8*)LoadAddress,Length, PartitionHash, ShaType);
 	Status = FsblInstancePtr->DeviceOps.DeviceCopy(HashOffset,
 			(PTRSIZE) Hash, ShaType);
@@ -1867,6 +1882,76 @@ static u32 XFsbl_CalcualteSHA(const XFsblPs * FsblInstancePtr, PTRSIZE LoadAddre
 	return Status;
 }
 #endif  /* end of XFSBL_SECURE */
+
+#ifdef XFSBL_ENABLE_DDR_SR
+/*****************************************************************************/
+/**
+ * This function waits for DDR out of self refresh.
+ *
+ * @param	None
+ *
+ * @return	None
+ *
+ *****************************************************************************/
+static void XFsbl_PollForDDRSrExit(void)
+{
+	u32 RegValue;
+	/* Timeout count for arround 1 second */
+	u32 TimeOut = XPAR_PSU_CORTEXA53_0_CPU_CLK_FREQ_HZ;
+
+	/* Wait for DDR exit from self refresh mode within 1 second */
+	while (TimeOut > 0) {
+		RegValue = Xil_In32(XFSBL_DDR_STATUS_REGISTER_OFFSET);
+		if (!(RegValue & DDR_STATUS_FLAG_MASK)) {
+			break;
+		}
+		TimeOut--;
+	}
+}
+
+/*****************************************************************************/
+/**
+ * This function removes reserved mark of DDR once it is out of self refresh.
+ *
+ * @param	None
+ *
+ * @return	None
+ *
+ *****************************************************************************/
+static void XFsbl_PollForDDRReady(void)
+{
+	volatile u32 RegValue;
+
+	RegValue = XFsbl_In32(PMU_GLOBAL_GLOBAL_CNTRL);
+	if ((RegValue & PMU_GLOBAL_GLOBAL_CNTRL_FW_IS_PRESENT_MASK)
+	    == PMU_GLOBAL_GLOBAL_CNTRL_FW_IS_PRESENT_MASK) {
+		/*
+		 * PMU firmware is ready. Set flag to indicate that DDR
+		 * controller is ready, so that the PMU may bring the DDR out
+		 * of self refresh if necessary.
+		 */
+		RegValue = Xil_In32(XFSBL_DDR_STATUS_REGISTER_OFFSET);
+		Xil_Out32(XFSBL_DDR_STATUS_REGISTER_OFFSET, RegValue |
+				DDRC_INIT_FLAG_MASK);
+
+		/*
+		 * Read PMU register bit value that indicates DDR is in self
+		 * refresh mode.
+		 */
+		RegValue = Xil_In32(XFSBL_DDR_STATUS_REGISTER_OFFSET) &
+			DDR_STATUS_FLAG_MASK;
+		if (RegValue) {
+			/* Wait untill DDR exit from self refresh */
+			XFsbl_PollForDDRSrExit();
+			/*
+			 * Mark DDR region as "Memory" as DDR initialization is
+			 * done
+			 */
+			XFsbl_MarkDdrAsReserved(FALSE);
+		}
+	}
+}
+#endif
 
 #ifdef ARMR5
 

@@ -12,10 +12,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -96,7 +92,7 @@ extern "C" {
 #define XFSBL_ERROR_STAGE_4		(u32)(0x6000U)
 
 #define XFSBL_PSU_INIT_FAILED				(0x0800U)
-#define XFSBL_PSU_INIT_COMPLETED			(0x1U)
+#define XFSBL_EXEC_COMPLETED				(0x1U)
 #define XFSBL_PSU_POSTCONFIG_FAILED			(0x1000U)
 
 #define XFSBL_SUCCESS					(u32)(0x0U)
@@ -210,6 +206,8 @@ extern "C" {
 #define XFSBL_ERROR_INVALID_EFUSE_SELECT			(0x74U)
 #define XSFBL_ERROR_FMC_ENABLE						(0x75U)
 #define XSFBL_EEPROM_PRESENT						(0x76U)
+#define XFSBL_BITSTREAM_NOT_LOADED				(0x77U)
+#define XFSBL_ERROR_SHA2_NOT_SUPPORTED				(0x78U)
 #define XFSBL_FAILURE					(0x3FFFFFFFU)
 
 /**************************** Type Definitions *******************************/

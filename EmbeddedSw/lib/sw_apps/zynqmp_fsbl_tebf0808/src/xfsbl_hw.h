@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright (C) 2015 - 18 Xilinx, Inc.  All rights reserved.
+* Copyright (C) 2015 - 19 Xilinx, Inc.  All rights reserved.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -11,10 +11,6 @@
 *
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
-*
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -49,6 +45,7 @@
 * 4.0   vns  02/02/18 Added warning message to notify SHA2 support
 *                     deprecation in future releases.
 *       vns  03/07/18 Added ENC_ONLY mask
+* 4.0   vns  03/14/19 Added AES reset offset and Mask values.
 *
 * </pre>
 *
@@ -91,6 +88,12 @@ extern "C" {
 #define CSU_CSU_SSS_CFG_PCAP_SSS_MASK    0X0000000FU
 #define CSU_CSU_SSS_CFG_PCAP_SSS_SHIFT   0U
 #define CSU_CSU_SSS_CFG_DMA_SSS_SHIFT	 1U
+
+/**
+ * Register: CSU AES RESET
+ */
+#define CSU_AES_RESET	( ( CSU_BASEADDR ) + 0X00001010U )
+#define CSU_AES_RESET_RESET_MASK	0X00000001U
 
 /**
  * Register: CSU_PCAP_STATUS
@@ -176,7 +179,7 @@ extern "C" {
  */
 #define EFUSE_SEC_CTRL    ( ( EFUSE_BASEADDR ) + 0X00001058U )
 #define EFUSE_SEC_CTRL_ENC_ONLY_MASK  0x00000004U
-#define EFUSE_SEC_CTRL_RSA_EN_MASK    0X03000000U
+#define EFUSE_SEC_CTRL_RSA_EN_MASK    0x03FFF800U
 #define EFUSE_SEC_CTRL_PPK0_RVK_MASK  0x18000000U
 #define EFUSE_SEC_CTRL_PPK1_RVK_MASK  0xC0000000U
 
@@ -283,8 +286,6 @@ extern "C" {
 #define CRL_APB_RPLL_CTRL    ( ( CRL_APB_BASEADDR ) + 0X00000030U )
 #define CRL_APB_RPLL_CTRL_BYPASS_MASK    0X00000008U
 
-/* Register: CRL_APB_BOOT_PIN_CTRL */
-#define CRL_APB_BOOT_PIN_CTRL    ( ( CRL_APB_BASEADDR ) + 0X00000250U)
 
 /* apu */
 
@@ -356,6 +357,11 @@ extern "C" {
  */
 #define PMU_GLOBAL_PERS_GLOB_GEN_STORAGE5    ( ( PMU_GLOBAL_BASEADDR ) + 0X00000064U )
 
+/*
+ * Register: PMU_GLOBAL_PERS_GLOB_GEN_STORAGE7
+ */
+#define PMU_GLOBAL_PERS_GLOB_GEN_STORAGE7    ( ( PMU_GLOBAL_BASEADDR ) + 0X0000006CU )
+
 /**
  * PMU_GLOBAL Base Address
  */
@@ -416,10 +422,12 @@ extern "C" {
 /* Register: PMU_GLOBAL_ERROR_SRST_EN_1 */
 #define PMU_GLOBAL_ERROR_SRST_EN_1    ( ( PMU_GLOBAL_BASEADDR ) + 0X0000056CU )
 #define PMU_GLOBAL_ERROR_SRST_EN_1_LPD_SWDT_MASK    0X00001000U
+#define PMU_GLOBAL_ERROR_SRST_EN_1_FPD_SWDT_MASK    0X00002000U
 
 /* Register: PMU_GLOBAL_ERROR_SRST_DIS_1 */
 #define PMU_GLOBAL_ERROR_SRST_DIS_1    ( ( PMU_GLOBAL_BASEADDR ) + 0X00000570U )
 #define PMU_GLOBAL_ERROR_SRST_DIS_1_LPD_SWDT_MASK    0X00001000U
+#define PMU_GLOBAL_ERROR_SRST_DIS_1_FPD_SWDT_MASK    0X00002000U
 
 /* Register: PMU_GLOBAL_ERROR_EN_1 */
 #define PMU_GLOBAL_ERROR_EN_1    ( ( PMU_GLOBAL_BASEADDR ) + 0X000005A0U )
@@ -784,6 +792,15 @@ extern "C" {
 #define XFSBL_R5_L				(0x2U)
 
 /**
+ * To indicate usage of RPU cores to PMU, PMU_GLOBAL_GLOB_GEN_STORAGE4 is used
+ */
+#define XFSBL_R5_USAGE_STATUS_REG		(PMU_GLOBAL_GLOB_GEN_STORAGE4)
+/* Bit 1 of rpu uasge status register is used for R50 status */
+#define XFSBL_R5_0_STATUS_MASK			(1U << 1)
+/* Bit 2 of rpu usage status register is used for R51 status */
+#define XFSBL_R5_1_STATUS_MASK			(1U << 2)
+
+/**
  * TCM address for R5
  */
 #define XFSBL_R5_TCM_START_ADDRESS		(u32)(0x0U)
@@ -803,8 +820,14 @@ extern "C" {
 /**
  * Definition for WDT to be included
  */
-#if (!defined(FSBL_WDT_EXCLUDE) && defined(XPAR_XWDTPS_0_DEVICE_ID))
+#if (!defined(FSBL_WDT_EXCLUDE) && defined(XPAR_PSU_WDT_0_DEVICE_ID))
 #define XFSBL_WDT_PRESENT
+#define XFSBL_WDT_DEVICE_ID	XPAR_PSU_WDT_0_DEVICE_ID
+#define XFSBL_WDT_MASK		PMU_GLOBAL_ERROR_SRST_EN_1_LPD_SWDT_MASK
+#elif (!defined(FSBL_WDT_EXCLUDE) && defined(XPAR_PSU_WDT_1_DEVICE_ID))
+#define XFSBL_WDT_PRESENT
+#define XFSBL_WDT_DEVICE_ID	XPAR_PSU_WDT_1_DEVICE_ID
+#define XFSBL_WDT_MASK		PMU_GLOBAL_ERROR_SRST_EN_1_FPD_SWDT_MASK
 #endif
 
 /**
@@ -859,14 +882,6 @@ extern "C" {
 #define XFSBL_EARLY_HANDOFF
 #endif
 
-/**
- * Definition for SHA2 to be included
- */
-#if !defined(FSBL_SHA2_EXCLUDE)
-#warning "SHA2 support will be deprecated soon please use SHA3"
-#define XFSBL_SHA2
-#endif
-
 #if !defined(FSBL_PERF_EXCLUDE) && (!defined(ARMR5) || (defined(ARMR5) && defined(SLEEP_TIMER_BASEADDR)))
 #define XFSBL_PERF
 #endif
@@ -918,7 +933,37 @@ extern "C" {
 #endif
 #endif
 
-#define XFSBL_PS_DDR_END_ADDRESS		(0x80000000U - 1U)  //2GB of DDR
+#ifdef XFSBL_PS_DDR
+#ifdef ARMR5
+#define XFSBL_PS_DDR_END_ADDRESS		(XPAR_PSU_R5_DDR_0_S_AXI_HIGHADDR)
+#else
+#define XFSBL_PS_DDR_END_ADDRESS		(XPAR_PSU_DDR_0_S_AXI_HIGHADDR)
+#endif
+#endif
+
+#ifdef XFSBL_ENABLE_DDR_SR
+/*
+ * For DDR status PMU_GLOBAL_PERS_GLOB_GEN_STORAGE7 is used
+ */
+#define XFSBL_DDR_STATUS_REGISTER_OFFSET	(PMU_GLOBAL_PERS_GLOB_GEN_STORAGE7)
+/*
+ * DDR controller initialization flag mask
+ *
+ * This flag signals whether DDR controller have been initialized or not. It is
+ * used by FSBL to inform PMU that DDR controller is initialized. When booting
+ * with DDR in self refresh mode, PMU must wait until DDR controller have been
+ * initialized by the FSBL before it can bring the DDR out of self refresh mode.
+ */
+#define DDRC_INIT_FLAG_MASK			(1U << 4)
+/*
+ * DDR self refresh mode indication flag mask
+ *
+ * This flag indicates whether DDR is in self refresh mode or not. It is used
+ * by PMU to signal FSBL in order to skip over DDR phy and ECC initialization
+ * at boot time.
+ */
+#define DDR_STATUS_FLAG_MASK			(1U << 3)
+#endif
 
 /* The number of bytes transferred per cycle of DMA should be
  * 64 bit aligned to avoid any ECC errors. Hence, even though the maximum
@@ -939,11 +984,7 @@ extern "C" {
 #define XFSBL_R5_1_TCM		(0x2U)
 #define XFSBL_R5_L_TCM		(0x3U)
 
-#ifdef ARMA53_64
-#define PTRSIZE		u64
-#else
-#define PTRSIZE		u32
-#endif
+#define PTRSIZE		UINTPTR
 
 /* Reset Reason */
 #define XFSBL_SYSTEM_RESET		0U

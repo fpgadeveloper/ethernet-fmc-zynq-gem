@@ -12,10 +12,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -247,6 +243,46 @@ void* XFsbl_MemCpy(void * DestPtr, const void * SrcPtr, u32 Len)
 	}
 
 	return DestPtr;
+}
+
+/*****************************************************************************/
+/**
+ * This function returns the next integer Value of the current float Value
+ *
+ * @param	Num is the float number
+ *
+ * @return	returns the next Integer Value
+ *
+ *****************************************************************************/
+s32 XFsbl_Ceil(float Num)
+{
+	s32 Inum = (s32)Num;
+
+	if (Num != (float)Inum) {
+		Inum += 1U;
+	}
+
+	return Inum;
+}
+
+/*****************************************************************************/
+/**
+ * This function returns the base integer Value of the current float Value
+ *
+ * @param	Num is the float number
+ *
+ * @return	returns the base Integer Value
+ *
+ *****************************************************************************/
+s32 XFsbl_Round(float Num)
+{
+	s32 Inum = (s32)Num;
+
+	if (Num >= ((float)Inum + 0.50)) {
+		Inum += 1U;
+	}
+
+	return Inum;
 }
 
 /*****************************************************************************/

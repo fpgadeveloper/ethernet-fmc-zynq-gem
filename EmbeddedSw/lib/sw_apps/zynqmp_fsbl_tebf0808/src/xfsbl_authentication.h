@@ -13,10 +13,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -73,12 +69,8 @@ extern "C" {
 #endif
 #include "xcsudma.h"
 #include "xparameters.h"
-#ifdef XFSBL_SHA2
-#include "xsecure_sha2.h"
-#endif
 /***************************** Type defines *********************************/
 #define XFSBL_HASH_TYPE_SHA3					(48U)
-#define XFSBL_HASH_TYPE_SHA2					(32U)
 
 #define XFSBL_SPK_SIZE						(512U+512U+64U)
 #define XFSBL_PPK_SIZE						(u32)(XFSBL_SPK_SIZE)
@@ -145,7 +137,7 @@ u32 XFsbl_BhAuthentication(const XFsblPs * FsblInstancePtr, u8 *Data,
 
 #ifndef XFSBL_PS_DDR
 #ifdef XFSBL_BS
-u32 XFsbl_ShaUpdate_DdrLess(XFsblPs *FsblInstancePtr, void *Ctx,
+u32 XFsbl_ShaUpdate_DdrLess(const XFsblPs *FsblInstancePtr, void *Ctx,
 		u64 PartitionOffset, u32 PartitionLen,
 		u32 HashLen, u8 *PartitionHash);
 #endif

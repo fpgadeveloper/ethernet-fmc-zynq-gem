@@ -12,10 +12,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -52,7 +48,6 @@
 
 #ifdef XFSBL_USB
 #include "xusbpsu.h"
-#include "xusb_wrapper.h"
 #include "xfsbl_dfu_util.h"
 #include "xfsbl_misc.h"
 #include "xfsbl_usb.h"
@@ -274,12 +269,12 @@ static void XFsbl_StdDevReq(SetupPacket *SetupData)
 	u32 ReplyLen;
 	static u8 Reply[XFSBL_REQ_REPLY_LEN]={0};
 	static u8 TmpBuffer[DFU_STATUS_SIZE]={0};
-	u8 EpNum = SetupData->wIndex & USB_ENDPOINT_NUMBER_MASK;
+	u8 EpNum = SetupData->wIndex & XFSBL_USB_ENDPOINT_NUMBER_MASK;
 	/*
 	 * Direction - 1 -- XUSBPSU_EP_DIR_IN
 	 * Direction - 0 -- XUSBPSU_EP_DIR_OUT
 	 */
-	u8 Direction = !!(SetupData->wIndex & USB_ENDPOINT_DIR_MASK);
+	u8 Direction = !!(SetupData->wIndex & XFSBL_USB_ENDPOINT_DIR_MASK);
 	u16 ShortVar;
 
 	/* Check that the requested reply length is not bigger than our reply

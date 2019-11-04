@@ -12,10 +12,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -75,6 +71,8 @@ extern "C" {
 
 /************************** Function Prototypes ******************************/
 void XFsbl_PrintArray (u32 DebugType, const u8 Buf[], u32 Len, const char *Str);
+s32 XFsbl_Ceil(float Num);
+s32 XFsbl_Round(float Num);
 void *XFsbl_MemCpy(void * DestPtr, const void * SrcPtr, u32 Len);
 char *XFsbl_Strcpy(char *DestPtr, const char *SrcPtr);
 char * XFsbl_Strcat(char* Str1Ptr, const char* Str2Ptr);

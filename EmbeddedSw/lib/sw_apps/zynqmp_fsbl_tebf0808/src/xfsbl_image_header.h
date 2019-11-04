@@ -12,10 +12,6 @@
 * The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* Use of the Software is limited solely to applications:
-* (a) running on a Xilinx device, or
-* (b) that interact with a Xilinx device through a bus or interconnect.
-*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -173,7 +169,6 @@ extern "C" {
 #define XIH_PH_ATTRB_RSA_SIGNATURE		(0x8000U)
 #define XIH_PH_ATTRB_NOCHECKSUM			(0x0000U)
 #define XIH_PH_ATTRB_CHECKSUM_MD5		(0x1000U)
-#define XIH_PH_ATTRB_HASH_SHA2			(0x2000U)
 #define XIH_PH_ATTRB_HASH_SHA3			(0x3000U)
 
 #define XIH_PH_ATTRB_DEST_CPU_NONE	(0x0000U)
