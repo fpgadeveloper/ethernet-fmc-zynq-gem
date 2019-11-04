@@ -1,5 +1,5 @@
 SRC_URI += "file://user.cfg \
-            file://edac-cortex.cfg \
+	    file://axieth.patch \
             "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"

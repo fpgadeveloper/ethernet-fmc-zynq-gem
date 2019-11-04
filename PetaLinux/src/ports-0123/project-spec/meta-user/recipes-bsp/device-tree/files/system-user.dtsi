@@ -2,25 +2,20 @@
 / {
 };
 
-    /* Delete the phy0 node created by the board .dtsi file for gem3 */
-    /* Board files are: zcu106-reva.dtsi and zcu104-revc.dtsi */
-    
-    /delete-node/ &phy0;
-    
     &gem0 {
         local-mac-address = [00 0a 35 00 01 22];
-        phy-handle = <&phy0>;
+        phy-handle = <&extphy0>;
         status = "okay";
         xlnx,has-mdio = <0x1>;
         psu_ethernet_0_mdio: mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
-                phy0: phy@0 {
+                extphy0: phy@0 {
                         device_type = "ethernet-phy";
                         reg = <0>;
                 };
                 gmii_to_rgmii_0: gmii_to_rgmii_0@8 {
-                        phy-handle = <&phy0>;
+                        phy-handle = <&extphy0>;
                         reg = <8>;
                 };
         };
@@ -28,18 +23,18 @@
       
     &gem1 {
         local-mac-address = [00 0a 35 00 01 23];
-        phy-handle = <&phy1>;
+        phy-handle = <&extphy1>;
         status = "okay";
         xlnx,has-mdio = <0x1>;
         psu_ethernet_1_mdio: mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
-                phy1: phy@0 {
+                extphy1: phy@0 {
                         device_type = "ethernet-phy";
                         reg = <0>;
                 };
                 gmii_to_rgmii_1: gmii_to_rgmii_1@8 {
-                        phy-handle = <&phy1>;
+                        phy-handle = <&extphy1>;
                         reg = <8>;
                 };
         };
@@ -47,18 +42,18 @@
       
     &gem2 {
         local-mac-address = [00 0a 35 00 01 24];
-        phy-handle = <&phy2>;
+        phy-handle = <&extphy2>;
         status = "okay";
         xlnx,has-mdio = <0x1>;
         psu_ethernet_2_mdio: mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
-                phy2: phy@0 {
+                extphy2: phy@0 {
                         device_type = "ethernet-phy";
                         reg = <0>;
                 };
                 gmii_to_rgmii_2: gmii_to_rgmii_2@8 {
-                        phy-handle = <&phy2>;
+                        phy-handle = <&extphy2>;
                         reg = <8>;
                 };
         };
@@ -72,18 +67,18 @@
         /delete-property/ pinctrl-0;
         
         local-mac-address = [00 0a 35 00 01 25];
-        phy-handle = <&phy3>;
+        phy-handle = <&extphy3>;
         status = "okay";
         xlnx,has-mdio = <0x1>;
         psu_ethernet_3_mdio: mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
-                phy3: phy@0 {
+                extphy3: phy@0 {
                         device_type = "ethernet-phy";
                         reg = <0>;
                 };
                 gmii_to_rgmii_3: gmii_to_rgmii_3@8 {
-                        phy-handle = <&phy3>;
+                        phy-handle = <&extphy3>;
                         reg = <8>;
                 };
         };

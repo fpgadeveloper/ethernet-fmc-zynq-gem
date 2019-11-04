@@ -4,18 +4,18 @@
 
     &gem0 {
         local-mac-address = [00 0a 35 00 01 22];
-        phy-handle = <&phy0>;
+        phy-handle = <&extphy0>;
         status = "okay";
         xlnx,has-mdio = <0x1>;
         psu_ethernet_0_mdio: mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
-                phy0: phy@0 {
+                extphy0: phy@0 {
                         device_type = "ethernet-phy";
                         reg = <0>;
                 };
                 gmii_to_rgmii_0: gmii_to_rgmii_0@8 {
-                        phy-handle = <&phy0>;
+                        phy-handle = <&extphy0>;
                         reg = <8>;
                 };
         };
@@ -23,18 +23,18 @@
       
     &gem1 {
         local-mac-address = [00 0a 35 00 01 23];
-        phy-handle = <&phy1>;
+        phy-handle = <&extphy1>;
         status = "okay";
         xlnx,has-mdio = <0x1>;
         psu_ethernet_1_mdio: mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
-                phy1: phy@0 {
+                extphy1: phy@0 {
                         device_type = "ethernet-phy";
                         reg = <0>;
                 };
                 gmii_to_rgmii_1: gmii_to_rgmii_1@8 {
-                        phy-handle = <&phy1>;
+                        phy-handle = <&extphy1>;
                         reg = <8>;
                 };
         };
@@ -42,26 +42,28 @@
       
     &gem2 {
         local-mac-address = [00 0a 35 00 01 24];
-        phy-handle = <&phy2>;
+        phy-handle = <&extphy2>;
         status = "okay";
         xlnx,has-mdio = <0x1>;
         psu_ethernet_2_mdio: mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
-                phy2: phy@0 {
+                extphy2: phy@0 {
                         device_type = "ethernet-phy";
                         reg = <0>;
                 };
                 gmii_to_rgmii_2: gmii_to_rgmii_2@8 {
-                        phy-handle = <&phy2>;
+                        phy-handle = <&extphy2>;
                         reg = <8>;
                 };
         };
     };  
-      
+    
+    /* GEM3 may be connected to the on-board Ethernet port via MIO */
+
     &gem3 {
         local-mac-address = [00 0a 35 00 01 25];
-        phy-handle = <&phy3>;
+        phy-handle = <&extphy3>;
         phy-mode = "rgmii-id";
         status = "okay";
         xlnx,ptp-enet-clock = <0x69f6bcb>;
@@ -69,7 +71,7 @@
         psu_ethernet_3_mdio: mdio {
                 #address-cells = <1>;
                 #size-cells = <0>;
-                phy3: phy@0x0c {
+                extphy3: phy@0x0c {
                         reg = <0x0c>;
                         ti,rx-internal-delay = <0x8>;
                         ti,tx-internal-delay = <0xa>;
