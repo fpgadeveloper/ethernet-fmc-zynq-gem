@@ -62,3 +62,11 @@ to one of the following values:
 
 To change BSP settings: right click on the BSP and click `Board Support Package Settings` from the context menu.
 
+#### TEBF0808 ZynqMP FSBL patch for 2019.1
+
+The FSBL for the TEBF0808 board needs some modifications to enable certain clocks before the bitstream
+is loaded and application/OS is launched. To incorporate the modifications, this repo contains a
+template FSBL called "Zynq MP FSBL for TEBF0808" in the `EmbeddedSw` directory. The SDK build script
+uses this template when generating the FSBL for this board.
+
+The SDK build script also changes the compiler options of the FSBL for this board.

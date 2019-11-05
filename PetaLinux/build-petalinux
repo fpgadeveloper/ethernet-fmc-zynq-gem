@@ -119,10 +119,6 @@ do
     echo "> PetaLinux project already packaged"
   else
     echo "> Packaging PetaLinux project"
-    # For TEBF0808 project, we need to copy the prebuilt FSBL from the SDK directory (2018.2 only)
-    if [ $proj == "tebf0808_qgige" ]; then
-      cp ../../SDK/tebf0808_fsbl/Debug/tebf0808_fsbl.elf ./images/linux/zynqmp_fsbl.elf
-    fi
     if [ $cpu_type == "zynqMP" ]; then
       petalinux-package --boot $fsbl_option --pmufw ./images/linux/pmufw.elf --fpga ../$bit --atf ./images/linux/bl31.elf --u-boot
     else

@@ -127,17 +127,13 @@ enable VADJ on this board.
 There is a patch contained in this repo that fixes this issue so that VADJ is correctly enabled on
 the ZCU104 board.
 
-#### TEBF0808 ZynqMP FSBL patch for 2018.2
+#### TEBF0808 ZynqMP FSBL patch
 
 The FSBL for the TEBF0808 board needs some modifications to enable certain clocks before the bitstream
-is loaded and application/OS is launched. To incorporate the modifications, this repo contains a
-template FSBL called "Zynq MP FSBL for TEBF0808" in the `EmbeddedSw` directory. The SDK build script
-uses this template when generating the FSBL for this board.
+is loaded and application/OS is launched. To incorporate the modifications into the PetaLinux build, 
+this repo contains a patch for the FSBL located here:
 
-The SDK build script also changes the compiler options of the FSBL for this board.
-
-Note that to build PetaLinux for this board using the `build-petalinux` script, you must first run
-the SDK build script to generate the FSBL .elf file.
+`<repo>/PetaLinux/src/tebf0808/project-spec/meta-user/recipes-bsp/fsbl/files/tebf0808_fsbl.patch`
 
 ### Port configurations
 
