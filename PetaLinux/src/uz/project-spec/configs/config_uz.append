@@ -1,0 +1,8 @@
+# Boot from SD card
+# Uncomment the following lines if you want this design to boot from SD card
+# UltraZed PCIe Carrier has the SD card connected to the PS SD1 interface
+
+#CONFIG_SUBSYSTEM_ROOTFS_INITRAMFS=n
+#CONFIG_SUBSYSTEM_ROOTFS_SD=y
+#CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk1p2"
+#CONFIG_SUBSYSTEM_BOOTARGS_GENERATED="earlycon console=ttyPS0,115200 clk_ignore_unused root=/dev/mmcblk1p2 rw rootwait"
