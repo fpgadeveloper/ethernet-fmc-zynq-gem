@@ -4,7 +4,7 @@
 #*****************************************************************************************
 
 # Check the version of Vivado used
-set version_required "2019.1"
+set version_required "2019.2"
 set ver [lindex [split $::env(XILINX_VIVADO) /] end]
 if {![string equal $ver $version_required]} {
   puts "###############################"
@@ -33,7 +33,7 @@ set proj_dir [get_property directory [current_project]]
 
 # Set project properties
 set obj [get_projects $design_name]
-set_property -name "board_part" -value "xilinx.com:zcu106:part0:2.4" -objects $obj
+set_property -name "board_part" -value "xilinx.com:zcu106:part0:2.5" -objects $obj
 set_property -name "default_lib" -value "xil_defaultlib" -objects $obj
 set_property -name "ip_cache_permissions" -value "read write" -objects $obj
 set_property -name "ip_output_repo" -value "$proj_dir/$design_name.cache/ip" -objects $obj
