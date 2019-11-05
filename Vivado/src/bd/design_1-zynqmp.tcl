@@ -46,7 +46,9 @@ set_property -dict [list CONFIG.PSU__USE__M_AXI_GP0 {0} \
 CONFIG.PSU__USE__M_AXI_GP1 {0} \
 CONFIG.PSU__USE__M_AXI_GP2 {0}] [get_bd_cells zynq_ultra_ps_e_0]
 
-# Number of GEMs in this design (2, 3 or 4)
+# Number of GEMs in this design (2, 3 or 4) for Ethernet FMC usage
+# Note: When $num_gems < 4 and the board definition sets up GEM3 for
+#       on-board Ethernet (via MDIO), we don't change GEM3 settings.
 set gem2_enable 0
 set gem3_enable 0
 if {$num_gems >= 3} {
@@ -56,25 +58,31 @@ if {$num_gems >= 4} {
   set gem3_enable 1
 }
 
-# Configure the PS: Enable GEM0, GEM1, GEM2 and GEM3
+# Configure the PS: Enable GEM0, GEM1 and GEM2 for EMIO
 set_property -dict [list CONFIG.PSU__ENET0__PERIPHERAL__ENABLE {1} \
 CONFIG.PSU__ENET0__PERIPHERAL__IO {EMIO} \
 CONFIG.PSU__ENET1__PERIPHERAL__ENABLE {1} \
 CONFIG.PSU__ENET1__PERIPHERAL__IO {EMIO} \
 CONFIG.PSU__ENET2__PERIPHERAL__ENABLE $gem2_enable \
 CONFIG.PSU__ENET2__PERIPHERAL__IO {EMIO} \
-CONFIG.PSU__ENET3__PERIPHERAL__ENABLE $gem3_enable \
-CONFIG.PSU__ENET3__PERIPHERAL__IO {EMIO} \
 CONFIG.PSU__ENET0__GRP_MDIO__ENABLE {1} \
 CONFIG.PSU__ENET0__GRP_MDIO__IO {EMIO} \
 CONFIG.PSU__ENET1__GRP_MDIO__ENABLE {1} \
 CONFIG.PSU__ENET1__GRP_MDIO__IO {EMIO} \
 CONFIG.PSU__ENET2__GRP_MDIO__ENABLE $gem2_enable \
 CONFIG.PSU__ENET2__GRP_MDIO__IO {EMIO} \
-CONFIG.PSU__ENET3__GRP_MDIO__ENABLE $gem3_enable \
-CONFIG.PSU__ENET3__GRP_MDIO__IO {EMIO} \
 CONFIG.PSU__TTC0__PERIPHERAL__ENABLE {1} \
 CONFIG.PSU__TTC0__PERIPHERAL__IO {EMIO}] [get_bd_cells zynq_ultra_ps_e_0]
+
+# Configure the PS: Enable GEM3 for EMIO
+# If the Ethernet FMC doesn't need GEM3, then we don't change it's settings because
+# some board definitions will use GEM3 for an on-board Ethernet port (eg. ZCU102).
+if {$gem3_enable} {
+  set_property -dict [list CONFIG.PSU__ENET3__PERIPHERAL__ENABLE {1} \
+  CONFIG.PSU__ENET3__PERIPHERAL__IO {EMIO} \
+  CONFIG.PSU__ENET3__GRP_MDIO__ENABLE {1} \
+  CONFIG.PSU__ENET3__GRP_MDIO__IO {EMIO}] [get_bd_cells zynq_ultra_ps_e_0]
+}
 
 # Add a processor system reset
 create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_zynq_ultra_ps_e_0_100M

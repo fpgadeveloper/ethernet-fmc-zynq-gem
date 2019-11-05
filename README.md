@@ -29,7 +29,7 @@ to find the version of this repository that matches your version of the tools.
   * LPC connector
 * Zynq UltraScale+ [ZCU102 Evaluation board Rev 1.0](http://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html "ZCU102 Evaluation board Rev 1.0")
   * HPC0 connector
-  * HPC1 connector
+  * HPC1 connector (3 ports only)
 * Zynq UltraScale+ [ZCU104 Evaluation board](https://www.xilinx.com/products/boards-and-kits/zcu104.html "ZCU104 Evaluation board")
   * LPC connector
 * Zynq UltraScale+ [ZCU106 Evaluation board](https://www.xilinx.com/products/boards-and-kits/zcu106.html "ZCU106 Evaluation board")
@@ -83,33 +83,41 @@ local SDK repository to the SDK workspace. See the readme in the SDK directory f
 
 ### ZCU106
 
-* The HPC0 connector on this board supports all 4 ports of the Ethernet FMC.
+* The HPC0 connector on this board supports all 4 ports of the Ethernet FMC. This design uses up all 4 GEMs,
+leaving the ZCU106's on-board Ethernet port unusable.
 * The HPC1 connector only has LA00-LA16 pins connected to the FPGA, therefore our example can only
-support 2 ports of the Ethernet FMC.
+support 2 ports of the Ethernet FMC. The ZCU106's on-board Ethernet port connects to GEM3 and is usable in this design.
 
 ### ZCU102
 
 * This design supports the ZCU102 Rev 1.0 board. Use a commit before 2017/02/13 for the older Rev-D board design.
 Note that the FMC pinouts differ between Rev 1.0 and Rev D: https://www.xilinx.com/support/answers/68050.html
-* The HPC0 design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC.
+* The HPC0 design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC. This design uses up all 4 GEMs,
+leaving the ZCU102's on-board Ethernet port unusable.
 * The HPC1 design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected
 because certain pins required by the Ethernet FMC (namely LA30, LA31 and LA32) are left unconnected 
-on the HPC1 connector of the ZCU102 board.
+on the HPC1 connector of the ZCU102 board. The ZCU102's on-board Ethernet port connects to GEM3 and is usable
+in this design.
 
 ### UltraZed
 
-* The UltraZed design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC.
+* The UltraZed design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC. This design uses up all 4 GEMs,
+leaving the UltraZed PCIe Card's on-board Ethernet port unusable.
 
 ### Trenz TE0808 Starter Kit
 
 The base board TEBF0808 has a DIP switch that must be set correctly to enable VADJ of 1.8V. Set S5-4 to ON in order
 to set VADJ to 1.8V.
 
+This design uses up all 4 GEMs, leaving the TEBF0808's on-board Ethernet port unusable.
+
 ### ZedBoard, MicroZed and PicoZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
 you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
 Zynq configurations that are not compatible with the GEM1 configuration.
+
+The on-board Ethernet port on all of these designs is connected to GEM0 and is usable.
 
 ### Installation of MicroZed, PicoZed, UltraZed, TE0808 board definition files
 
@@ -136,19 +144,43 @@ Selection of the Ethernet port can be changed by modifying the defines contained
 `platform_config.h` file in the application sources. Set `PLATFORM_EMAC_BASEADDR`
 to one of the following values depending on the port you want to target, and the hardware platform:
 
-#### ZedBoard and MicroZed designs
+#### ZedBoard, MicroZed and PicoZed designs
 
 * Ethernet FMC Port 0: `XPAR_AXIETHERNET_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_AXIETHERNET_1_BASEADDR`
 * Ethernet FMC Port 2: `XPAR_AXIETHERNET_2_BASEADDR`
 * Ethernet FMC Port 3: `XPAR_XEMACPS_1_BASEADDR`
+* On-board Ethernet port: `XPAR_XEMACPS_0_BASEADDR`
 
-#### ZCU102 designs (HPC0 and HPC1)
+#### ZCU102 design (HPC0)
 
 * Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
 * Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
-* Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR` (only valid on HPC0 design)
+* Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR`
+* ZCU102's on-board Ethernet port: Not usable
+
+#### ZCU102 design (HPC1)
+
+* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
+* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
+* Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
+* ZCU102's on-board Ethernet port: `XPAR_XEMACPS_3_BASEADDR`
+
+#### ZCU106 design (HPC0)
+
+* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
+* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
+* Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
+* Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR`
+* ZCU106's on-board Ethernet port: Not usable
+
+#### ZCU106 design (HPC1)
+
+* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
+* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
+* Ethernet FMC Port 2: Not usable
+* ZCU106's on-board Ethernet port: `XPAR_XEMACPS_3_BASEADDR`
 
 #### UltraZed, TE0808 design
 
@@ -156,6 +188,7 @@ to one of the following values depending on the port you want to target, and the
 * Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
 * Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
 * Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR`
+* On-board Ethernet port: Not usable
 
 #### BSP Setting
 

@@ -149,11 +149,25 @@ the SDK build script to generate the FSBL .elf file.
 * eth3: Ethernet FMC Port 1 (AXI Ethernet)
 * eth4: Ethernet FMC Port 2 (AXI Ethernet)
 
-#### ZCU104, ZCU102 and TEBF0808
+#### ZCU104, ZCU102 (HPC0), ZCU106 (HPC0) and TEBF0808
 
 * eth0: Ethernet FMC Port 0 (GEM0)
 * eth1: Ethernet FMC Port 1 (GEM1)
 * eth2: Ethernet FMC Port 2 (GEM2)
 * eth3: Ethernet FMC Port 3 (GEM3)
 
-Note: eth3 only implemented on the ZCU102-HPC0 design
+Note that the Ethernet port of the dev board in these designs is not connected to any GEM and is
+thus unusable.
+
+#### ZCU102 (HPC1)
+
+* eth0: Ethernet FMC Port 0 (GEM0)
+* eth1: Ethernet FMC Port 1 (GEM1)
+* eth2: Ethernet FMC Port 2 (GEM2)
+* eth3: ZCU102 on-board Ethernet port (GEM3)
+
+#### ZCU106 (HPC1)
+
+* eth0: Ethernet FMC Port 0 (GEM0)
+* eth1: Ethernet FMC Port 1 (GEM1)
+* eth2: ZCU102 on-board Ethernet port (GEM3)
