@@ -40,10 +40,10 @@ When executed, the build script searches the Vivado directory for all projects c
 This locates all projects that have been exported to SDK. Then for every exported project, the script
 does the following:
 
-1. Verifies that the `.hdf` and the `.bit` files exist.
+1. Verifies that the `.xsa` and the `.bit` files exist.
 2. Determines the CPU type: Zynq or ZynqMP. It currently does this
 by looking at the first 3 letters of the project name.
-3. Creates a PetaLinux project, referencing the exported hardware design (.hdf).
+3. Creates a PetaLinux project, referencing the exported hardware design (.xsa).
 4. Copies the relevant configuration files from the `src` directory into the created
 PetaLinux project.
 5. Builds the PetaLinux project.
@@ -115,9 +115,9 @@ replace the above code with the following:
 
 The included patch handles this modification - you do not need to manually modify any code.
 
-#### ZCU104 ZynqMP FSBL patch for 2019.1
+#### ZCU104 ZynqMP FSBL patch for 2019.2
 
-The FSBL for Zynq Ultrascale+ needs a patch to properly enable VADJ on the ZCU104 board in the 2019.1
+The FSBL for Zynq Ultrascale+ needs a patch to properly enable VADJ on the ZCU104 board in the 2019.2
 version of PetaLinux. The FSBL released with this version of PetaLinux has code to read the FMC card's
 EEPROM and then enable VADJ to the correct value. The released FSBL code in fact reads from the ZCU104
 board's EEPROM and not the FMC's EEPROM. It also only reads 32 bytes from the EEPROM, which is not 

@@ -52,6 +52,8 @@ PHYs. All designs use the hard GEMs but some also use AXI Ethernet Subsystem IP.
 
 To use the sources in this repository, please follow these steps:
 
+### Windows users
+
 1. Download the repo as a zip file and extract the files to a directory
    on your hard drive --OR-- Git users: clone the repo to your hard drive
 2. Open Windows Explorer, browse to the repo files on your hard drive.
@@ -74,10 +76,43 @@ To use the sources in this repository, please follow these steps:
 13. In the SDK, select `Xilinx Tools->Program FPGA`.
 14. Right-click on the application and select `Run As->Launch on Hardware (System Debugger)`
 
+### Linux users
+
+1. Download the repo as a zip file and extract the files to a directory
+   on your hard drive --OR-- Git users: clone the repo to your hard drive
+2. Launch the Vivado GUI.
+3. Open the Tcl console from the Vivado welcome page. In the console, `cd` to the repo files
+   on your hard drive and into the Vivado subdirectory. For example: `cd /media/projects/ethernet-fmc-zynq-gem/Vivado`.
+3. In the Vivado subdirectory, you will find multiple Tcl files. To list them, type `exec ls {*}[glob *.tcl]`.
+   Determine the Tcl script for the example project that you would like to generate (for example: `build-zcu104.tcl`), 
+   then `source` the script in the Tcl console: For example: `source build-zcu104.tcl`
+4. Vivado will run the script and generate the project. When it's finished, click Generate bitstream.
+5. When the bitstream is successfully generated, select `File->Export->Export Hardware`.
+   In the window that opens, tick "Include bitstream" and "Local to project".
+6. To build the SDK workspace, open a Linux command terminal and `cd` to the SDK directory in the repo.
+7. The SDK directory contains the `build-sdk.tcl` script that will build the SDK workspace containing the hardware design and
+   the software application. Run the build script by typing the following command: 
+   `<path-of-xilinx-sdk>/bin/xsdk -batch -source build-sdk.tcl`. Note that you must replace `<path-of-xilinx-sdk>` with the 
+   actual path to your Xilinx SDK installation.
+8. Run Xilinx SDK (DO NOT use the Launch SDK option from Vivado) and select the workspace to be the SDK subdirectory of the 
+   repo.
+10. Select `Project->Build automatically`.
+11. Connect and power up the hardware.
+12. Open a Putty terminal to view the UART output.
+13. In the SDK, select `Xilinx Tools->Program FPGA`.
+14. Right-click on the application and select `Run As->Launch on Hardware (System Debugger)`
+
+## Stand-alone software application
+
 The software application used to test these projects is the lwIP Echo Server example that is built into
 Xilinx SDK. The application relies on the lwIP library (also built into Xilinx SDK) but with a few modifications.
 The modified version of the lwIP library is contained in the `EmbeddedSw` directory, which is added as a
-local SDK repository to the SDK workspace. See the readme in the SDK directory for more information.
+local SDK repository to the SDK workspace. See the "README.md" file in the SDK directory for more information.
+
+## PetaLinux
+
+This repo contains a script and configuration files for a PetaLinux project for each one of the hardware platforms. To build
+the PetaLinux project, please refer to the "README.md" file in the PetaLinux subdirectory of this repo.
 
 ## Board specific notes
 
