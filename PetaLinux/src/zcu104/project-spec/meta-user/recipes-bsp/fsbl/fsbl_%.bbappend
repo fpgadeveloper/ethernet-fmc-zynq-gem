@@ -1,6 +1,6 @@
 # Patch for FSBL
 SRC_URI_append = " \
-        file://0001-fsbl.patch \
+        file://zcu104_vadj_fsbl.patch \
         "
   
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"

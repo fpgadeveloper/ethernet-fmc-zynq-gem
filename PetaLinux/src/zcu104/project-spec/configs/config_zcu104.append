@@ -32,7 +32,6 @@ CONFIG_SUBSYSTEM_BOOTARGS_GENERATED="earlycon console=ttyPS0,115200 clk_ignore_u
 # ZCU104 has the SD card connected to the PS SD1 interface
 
 #CONFIG_SUBSYSTEM_ROOTFS_INITRAMFS=n
-#CONFIG_SUBSYSTEM_ROOTFS_SD=y
+#CONFIG_SUBSYSTEM_ROOTFS_EXT=y
 #CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk1p2"
-#CONFIG_SUBSYSTEM_BOOTARGS_GENERATED="earlycon console=ttyPS0,115200 clk_ignore_unused root=/dev/mmcblk1p2 rw rootwait"
 

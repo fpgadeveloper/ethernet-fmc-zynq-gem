@@ -241,4 +241,5 @@
         };
     };  
       
+#include "port-config.dtsi"
 

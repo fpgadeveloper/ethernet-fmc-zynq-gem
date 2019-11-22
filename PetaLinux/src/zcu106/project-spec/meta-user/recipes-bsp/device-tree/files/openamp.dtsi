@@ -20,6 +20,7 @@
 		#size-cells = <2>;
 		ranges;
 		core_conf = "split";
+		reg = <0x0 0xFF9A0000 0x0 0x10000>;
 		r5_0: r5@0 {
 			#address-cells = <2>;
 			#size-cells = <2>;
