@@ -82,5 +82,3 @@ modified version of the ZynqMP FSBL in the `EmbeddedSw` directory. The Vitis bui
 sets the `EmbeddedSw` directory as a local software repository, thus all ZynqMP applications in the workspace
 use the modified ZynqMP FSBL. However, the TEBF0808 specific modifications are braced with `#if defined` statements
 so that they are only applied to the TEBF0808 design.
-
-The Vitis build script also changes the compiler options of the FSBL for this board.
