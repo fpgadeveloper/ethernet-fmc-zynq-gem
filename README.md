@@ -8,16 +8,21 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 
 ## Requirements
 
-This project is designed for version 2019.2 of the Xilinx tools (Vivado/SDK/PetaLinux). If you are using an older version of the 
-Xilinx tools, then refer to the [release tags](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/releases "releases")
+This project is designed for version 2019.2 of the Xilinx tools (Vivado/Vitis/PetaLinux). 
+If you are using an older version of the Xilinx tools, then refer to the 
+[release tags](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/releases "releases")
 to find the version of this repository that matches your version of the tools.
 
+In order to test this design on hardware, you will need the following:
+
 * Vivado 2019.2
+* Vitis 2019.2
+* PetaLinux SDK 2019.2
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the below listed Zynq or Zynq Ultrascale+ boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
-## Supported boards
+## Supported carrier boards
 
 * Zynq-7000 [ZedBoard](http://zedboard.org "ZedBoard")
   * LPC connector
@@ -65,16 +70,15 @@ To use the sources in this repository, please follow these steps:
 5. Click Generate bitstream.
 6. When the bitstream is successfully generated, select `File->Export->Export Hardware`.
    In the window that opens, tick "Include bitstream" and "Local to project".
-7. Return to Windows Explorer and browse to the SDK directory in the repo.
-8. Double click the `build-sdk.bat` batch file. The batch file will run the
-   `build-sdk.tcl` script and build the SDK workspace containing the hardware
+7. Return to Windows Explorer and browse to the Vitis directory in the repo.
+8. Double click the `build-vitis.bat` batch file. The batch file will run the
+   `build-vitis.tcl` script and build the Vitis workspace containing the hardware
    design and the software application.
-9. Run Xilinx SDK (DO NOT use the Launch SDK option from Vivado) and select the workspace to be the SDK directory of the repo.
-10. Select `Project->Build automatically`.
-11. Connect and power up the hardware.
-12. Open a Putty terminal to view the UART output.
-13. In the SDK, select `Xilinx Tools->Program FPGA`.
-14. Right-click on the application and select `Run As->Launch on Hardware (System Debugger)`
+9. Run Xilinx Vitis and select the workspace to be the Vitis directory of the repo.
+10. Connect and power up the hardware.
+11. Open a Putty terminal to view the UART output.
+12. In Vitis, select `Xilinx Tools->Program FPGA`.
+13. Right-click on the application and select `Run As->Launch on Hardware (Single Application Debug)`
 
 ### Linux users
 
@@ -89,25 +93,24 @@ To use the sources in this repository, please follow these steps:
 4. Vivado will run the script and generate the project. When it's finished, click Generate bitstream.
 5. When the bitstream is successfully generated, select `File->Export->Export Hardware`.
    In the window that opens, tick "Include bitstream" and "Local to project".
-6. To build the SDK workspace, open a Linux command terminal and `cd` to the SDK directory in the repo.
-7. The SDK directory contains the `build-sdk.tcl` script that will build the SDK workspace containing the hardware design and
+6. To build the Vitis workspace, open a Linux command terminal and `cd` to the Vitis directory in the repo.
+7. The Vitis directory contains the `build-vitis.tcl` script that will build the Vitis workspace containing the hardware design and
    the software application. Run the build script by typing the following command: 
-   `<path-of-xilinx-sdk>/bin/xsdk -batch -source build-sdk.tcl`. Note that you must replace `<path-of-xilinx-sdk>` with the 
-   actual path to your Xilinx SDK installation.
-8. Run Xilinx SDK (DO NOT use the Launch SDK option from Vivado) and select the workspace to be the SDK subdirectory of the 
+   `<path-of-xilinx-vitis>/bin/xsct build-vitis.tcl`. Note that you must replace `<path-of-xilinx-vitis>` with the 
+   actual path to your Xilinx Vitis installation.
+8. Run Xilinx Vitis and select the workspace to be the Vitis subdirectory of the 
    repo.
-10. Select `Project->Build automatically`.
-11. Connect and power up the hardware.
-12. Open a Putty terminal to view the UART output.
-13. In the SDK, select `Xilinx Tools->Program FPGA`.
-14. Right-click on the application and select `Run As->Launch on Hardware (System Debugger)`
+9. Connect and power up the hardware.
+10. Open a Putty terminal to view the UART output.
+11. In Vitis, select `Xilinx Tools->Program FPGA`.
+12. Right-click on the application and select `Run As->Launch on Hardware (Single Application Debug)`
 
 ## Stand-alone software application
 
 The software application used to test these projects is the lwIP Echo Server example that is built into
-Xilinx SDK. The application relies on the lwIP library (also built into Xilinx SDK) but with a few modifications.
+Xilinx Vitis. The application relies on the lwIP library (also built into Xilinx Vitis) but with a few modifications.
 The modified version of the lwIP library is contained in the `EmbeddedSw` directory, which is added as a
-local SDK repository to the SDK workspace. See the "README.md" file in the SDK directory for more information.
+local software repository to the Vitis workspace. See the "README.md" file in the Vitis directory for more information.
 
 ## PetaLinux
 

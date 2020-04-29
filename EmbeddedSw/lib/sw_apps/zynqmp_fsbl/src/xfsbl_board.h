@@ -15,14 +15,12 @@
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-* XILINX  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
-* OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
 *
-* Except as contained in this notice, the name of the Xilinx shall not be used
-* in advertising or otherwise to promote the sale, use or other dealings in
-* this Software without prior written authorization from Xilinx.
+*
 *
 ******************************************************************************/
 
@@ -59,6 +57,15 @@ extern "C" {
 
 /***************************** Include Files *********************************/
 #include "xfsbl_hw.h"
+// TE Mod :
+#if defined(XPS_BOARD_TE0808_9EG_1E_TEBF0808)
+#define GPIO_MIO31_MASK	0x00000020U
+#define GPIO_MIO30_MASK	0x00000010U
+#define ICM_CFG_VAL_PCIE	0X1U
+#define DELAY_1_US			0x1U
+#define DELAY_5_US			0x5U
+#endif
+// TE Mod finished     
 #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106)		\
 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111)
 #include "xiicps.h"
