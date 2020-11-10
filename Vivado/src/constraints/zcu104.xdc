@@ -169,18 +169,18 @@ set_property PACKAGE_PIN F8 [get_ports mdio_io_port_3_mdio_io]
 set_property PACKAGE_PIN E8 [get_ports reset_port_3]
 
 # Port 0 and 1: gmii_to_rgmii_0/1 - IODELAY_GROUP 0
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_0_0_core/*delay_rgmii_rxd*}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/*delay_rgmii_rxd*}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.rxdata_bus[*].delay_rgmii_rxd}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.rxdata_bus[*].delay_rgmii_rxd}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells *_i/util_idelay_ctrl_0/inst/dlyctrl]
 
 # Port 2 and 3: gmii_to_rgmii_2/3 - IODELAY_GROUP 1
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_core/*delay_rgmii_rxd*}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_idelayctrl}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/*delay_rgmii_rxd*}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.rxdata_bus[*].delay_rgmii_rxd}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_*_idelayctrl}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.rxdata_bus[*].delay_rgmii_rxd}]
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
 #set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells *_i/util_idelay_ctrl_1/inst/dlyctrl]
 
 # The following constraints come from the GMII to RGMII product guide
@@ -282,20 +282,20 @@ set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_3_rxc]
 # It is actually not recommended to use LOC constraints on BUFGCEs but instead to constrain placement to a clock 
 # region, but in Vivado 2017.2, even this does not result a good placement of BUFGCE and timing closure.
 
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property LOC BUFGCE_X1Y117 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
-set_property LOC BUFGCE_X1Y116 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y117 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y116 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
 
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property LOC BUFGCE_X1Y136 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
-set_property LOC BUFGCE_X1Y135 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y136 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y135 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
 
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property LOC BUFGCE_X1Y138 [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
-set_property LOC BUFGCE_X1Y137 [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y138 [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y137 [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_*_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
 
 # Since Vivado 2019.2, when we connect a GEM MDIO interface to EMIO, this sets parameter PSU__ENET0__GRP_MDIO_INTERNAL to 1
 # (see file "<vivado-path>\2019.2\data\PS\8series\data\zynqconfig\enet\enet0_preset.xml")
