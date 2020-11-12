@@ -1,9 +1,0 @@
-# DTG Settings
-CONFIG_SUBSYSTEM_DEVICETREE_FLAGS=""
-
-# Add pre-mirror url 
-CONFIG_PRE_MIRROR_URL="http://petalinux.xilinx.com/sswreleases/rel-v${PETALINUX_VER%%}/downloads"
-
-# Network sstate feeds URL
-CONFIG_YOCTO_NETWORK_SSTATE_FEEDS_URL="http://petalinux.xilinx.com/sswreleases/rel-v${PETALINUX_VER%%}/aarch64/sstate-cache"
-# CONFIG_YOCTO_BB_NO_NETWORK is not set
