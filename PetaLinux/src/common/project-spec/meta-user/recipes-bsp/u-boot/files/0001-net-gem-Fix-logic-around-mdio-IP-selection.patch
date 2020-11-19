@@ -1,0 +1,48 @@
+From 03fb8a5572c29ec78acd6ada98599df75c620b4f Mon Sep 17 00:00:00 2001
+From: Michal Simek <michal.simek@xilinx.com>
+Date: Thu, 28 May 2020 05:51:54 -0600
+Subject: [PATCH] net: gem: Fix logic around mdio IP selection
+
+Assume by default that current IP handles MDIO unless code finds
+something else. In case of failure continue to work with current IP
+for MDIO. This will avoid situations where mdio node is used and DT
+structure is not flat (flat means that phy or bridge is child of gem).
+
+Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+Tested-by: Ashok Reddy Soma <ashok.reddy.soma@xilinx.com>
+---
+ drivers/net/zynq_gem.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/net/zynq_gem.c b/drivers/net/zynq_gem.c
+index fb340fc6ba..f79238a156 100644
+--- a/drivers/net/zynq_gem.c
++++ b/drivers/net/zynq_gem.c
+@@ -749,6 +749,7 @@ static int zynq_gem_ofdata_to_platdata(struct udevice *dev)
+ 	priv->iobase = (struct zynq_gem_regs *)pdata->iobase;
+ 	/* Hardcode for now */
+ 	priv->phyaddr = -1;
++	priv->mdiobase = priv->iobase;
+ 
+ 	if (!dev_read_phandle_with_args(dev, "phy-handle", NULL, 0, 0,
+ 					&phandle_args)) {
+@@ -765,13 +766,10 @@ static int zynq_gem_ofdata_to_platdata(struct udevice *dev)
+ 
+ 		parent = ofnode_get_parent(phandle_args.node);
+ 		addr = ofnode_get_addr(parent);
+-		if (addr == FDT_ADDR_T_NONE) {
+-			printf("MDIO bus not found %s\n", dev->name);
+-			return -ENODEV;
++		if (addr != FDT_ADDR_T_NONE) {
++			debug("MDIO bus not found %s\n", dev->name);
++			priv->mdiobase = (struct zynq_gem_regs *)addr;
+ 		}
+-		priv->mdiobase = (struct zynq_gem_regs *)addr;
+-	} else {
+-		priv->mdiobase = priv->iobase;
+ 	}
+ 
+ 	phy_mode = dev_read_prop(dev, "phy-mode", NULL);
+-- 
+2.17.1
+
