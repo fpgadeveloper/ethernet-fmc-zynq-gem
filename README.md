@@ -8,16 +8,16 @@ Gigabit Ethernet MACs (GEM) and the GMII-to-RGMII IP.
 
 ## Requirements
 
-This project is designed for version 2019.2 of the Xilinx tools (Vivado/Vitis/PetaLinux). 
+This project is designed for version 2020.2 of the Xilinx tools (Vivado/Vitis/PetaLinux). 
 If you are using an older version of the Xilinx tools, then refer to the 
 [release tags](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/releases "releases")
 to find the version of this repository that matches your version of the tools.
 
 In order to test this design on hardware, you will need the following:
 
-* Vivado 2019.2
-* Vitis 2019.2
-* PetaLinux SDK 2019.2
+* Vivado 2020.2
+* Vitis 2020.2
+* PetaLinux SDK 2020.2
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the below listed Zynq or Zynq Ultrascale+ boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -173,9 +173,9 @@ https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tree/master/Vivado/boards
 * `ultrazed_3eg_pciecc`
 * `TE0808_9EG_1E`
 
-Copy those folders and their contents into the `C:\Xilinx\Vivado\2019.2\data\boards\board_files` folder (this may
+Copy those folders and their contents into the `C:\Xilinx\Vivado\2020.2\data\boards\board_files` folder (this may
 be different on your machine, depending on your Vivado installation directory). You also need to make a copy into the
-Xilinx SDK installation at this location: `C:\Xilinx\SDK\2019.2\data\boards\board_files`.
+Xilinx SDK installation at this location: `C:\Xilinx\SDK\2020.2\data\boards\board_files`.
 
 ### Single port limit
 
