@@ -17,7 +17,7 @@ In order to test this design on hardware, you will need the following:
 
 * Vivado 2020.2
 * Vitis 2020.2
-* PetaLinux SDK 2020.2
+* PetaLinux Tools 2020.2
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the below listed Zynq or Zynq Ultrascale+ boards
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -42,7 +42,7 @@ In order to test this design on hardware, you will need the following:
   * HPC1 connector (2 ports only)
 * Zynq UltraScale+ [UltraZed PCIe Carrier Card](http://zedboard.org/product/ultrazed-pcie-carrier-card "UltraZed PCIe Carrier Card") with [UltraZed-EG](http://zedboard.org/product/ultrazed-EG "UltraZed")
   * LPC connector
-* Zynq UltraScale+ [UltraZed EV Carrier Card] (http://zedboard.org/product/ultrazed-ev-carrier-card "UltraZed EV Carrier Card")
+* Zynq UltraScale+ [UltraZed EV Carrier Card](http://zedboard.org/product/ultrazed-ev-carrier-card "UltraZed EV Carrier Card")
   * HPC connector
 * Zynq UltraScale+ [TE0808-04-09-1EE-S Starter Kit](https://shop.trenz-electronic.de/en/TE0808-04-09-1EE-S-TE0808-04-09-1EE-S-Starter-Kit "TE0808-04-09-1EE-S Starter Kit") with [TE0808 UltraSOM+ MPSoC Module](https://shop.trenz-electronic.de/en/TE0808-04-09EG-1EE-UltraSOM-MPSoC-Module-with-Zynq-UltraScale-XCZU9EG-1FFVC900E-4-GB-DDR4 "TE0808 SoM")
   * HPC connector

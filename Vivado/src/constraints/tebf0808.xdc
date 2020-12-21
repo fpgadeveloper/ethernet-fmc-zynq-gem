@@ -34,8 +34,8 @@
 
 
 # Enable internal termination resistor on LVDS 125MHz ref_clk
-set_property DIFF_TERM TRUE [get_ports {ref_clk_p[0]}]
-set_property DIFF_TERM TRUE [get_ports {ref_clk_n[0]}]
+set_property DIFF_TERM TRUE [get_ports ref_clk_clk_p]
+set_property DIFF_TERM TRUE [get_ports ref_clk_clk_n]
 
 # Define I/O standards
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[0]}]
@@ -78,8 +78,8 @@ set_property IOSTANDARD LVCMOS18 [get_ports mdio_io_port_2_mdio_io]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_3_td[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_3_td[2]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_3_td[3]}]
-set_property IOSTANDARD LVDS [get_ports {ref_clk_p[0]}]
-set_property IOSTANDARD LVDS [get_ports {ref_clk_n[0]}]
+set_property IOSTANDARD LVDS [get_ports ref_clk_clk_p]
+set_property IOSTANDARD LVDS [get_ports ref_clk_clk_n]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_rd[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_rd[1]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_0_td[0]}]
@@ -143,8 +143,8 @@ set_property PACKAGE_PIN AC11 [get_ports mdio_io_port_2_mdio_io]
 set_property PACKAGE_PIN AE10 [get_ports {rgmii_port_3_td[0]}]
 set_property PACKAGE_PIN AD5 [get_ports {rgmii_port_3_td[2]}]
 set_property PACKAGE_PIN AE5 [get_ports {rgmii_port_3_td[3]}]
-set_property PACKAGE_PIN AH6 [get_ports {ref_clk_p[0]}]
-set_property PACKAGE_PIN AJ6 [get_ports {ref_clk_n[0]}]
+set_property PACKAGE_PIN AH6 [get_ports ref_clk_clk_p]
+set_property PACKAGE_PIN AJ6 [get_ports ref_clk_clk_n]
 set_property PACKAGE_PIN AF7 [get_ports {rgmii_port_0_rd[0]}]
 set_property PACKAGE_PIN AF8 [get_ports {rgmii_port_0_rd[1]}]
 set_property PACKAGE_PIN AG13 [get_ports {rgmii_port_0_td[0]}]
