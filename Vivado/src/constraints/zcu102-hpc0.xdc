@@ -37,8 +37,8 @@
 
 
 # Enable internal termination resistor on LVDS 125MHz ref_clk
-set_property DIFF_TERM TRUE [get_ports ref_clk_clk_p]
-set_property DIFF_TERM TRUE [get_ports ref_clk_clk_n]
+set_property DIFF_TERM_ADV TERM_100 [get_ports ref_clk_clk_p]
+set_property DIFF_TERM_ADV TERM_100 [get_ports ref_clk_clk_n]
 
 # Define I/O standards
 set_property IOSTANDARD LVCMOS18 [get_ports {rgmii_port_1_rd[0]}]
@@ -171,76 +171,6 @@ set_property PACKAGE_PIN U6 [get_ports mdio_io_port_3_mdc]
 set_property PACKAGE_PIN U11 [get_ports mdio_io_port_3_mdio_io]
 set_property PACKAGE_PIN T11 [get_ports reset_port_3]
 
-# Port 0 and 1: gmii_to_rgmii_0/1 - IODELAY_GROUP 0
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_0_0_core/*delay_rgmii_rxd*}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/*delay_rgmii_rxd*}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells *_i/util_idelay_ctrl_0/inst/dlyctrl]
-
-# Port 2 and 3: gmii_to_rgmii_2/3 - IODELAY_GROUP 1
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_core/*delay_rgmii_rxd*}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_idelayctrl}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/*delay_rgmii_rxd*}]
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells -hier -filter {name =~ *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
-#set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells *_i/util_idelay_ctrl_1/inst/dlyctrl]
-
-# The following constraints come from the GMII to RGMII product guide
-# http://www.xilinx.com/support/documentation/ip_documentation/gmii_to_rgmii/v4_0/pg160-gmii-to-rgmii.pdf
-
-# Clock Period Constraints
-create_clock -period 8.000 -name rgmii_port_0_rxc -add [get_ports rgmii_port_0_rxc]
-create_clock -period 8.000 -name rgmii_port_1_rxc -add [get_ports rgmii_port_1_rxc]
-create_clock -period 8.000 -name rgmii_port_2_rxc -add [get_ports rgmii_port_2_rxc]
-create_clock -period 8.000 -name rgmii_port_3_rxc -add [get_ports rgmii_port_3_rxc]
-
-#False path constraints to async inputs coming directly to synchronizer
-set_false_path -to [get_pins -hier -filter {name =~ *idelayctrl_reset_gen/*reset_sync*/PRE }]
-set_false_path -to [get_pins -of [get_cells -hier -filter { name =~ *i_MANAGEMENT/SYNC_*/data_sync* }] -filter { name =~ *D }]
-set_false_path -to [get_pins -hier -filter {name =~ *reset_sync*/PRE }]
-set_false_path -to [get_pins -hier -filter {name =~ *reset_sync*/PRE }]
-
-#False path constraints from Control Register outputs
-set_false_path -from [get_pins -hier -filter {name =~ *i_MANAGEMENT/DUPLEX_MODE_REG*/C }]
-set_false_path -from [get_pins -hier -filter {name =~ *i_MANAGEMENT/SPEED_SELECTION_REG*/C }]
-
-# constraint valid if parameter C_EXTERNAL_CLOCK = 0
-set_case_analysis 0 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk/CE0}]
-set_case_analysis 0 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk/S0}]
-set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk/CE1}]
-set_case_analysis 1 [get_pins -hier -filter {name =~ *i_bufgmux_gmii_clk/S1}]
-
-#To Adjust GMII Tx Input Setup/Hold Timing
-set_property DELAY_VALUE 1100 [get_cells -hier -filter {name =~ *gen_rgmii_rx_zqup.delay_rgmii_rx_ctl}]
-set_property DELAY_VALUE 1100 [get_cells -hier -filter {name =~ *delay_rgmii_rxd*}]
-
-#Use the following constraint to modify the slew in the IOB
-set_property SLEW FAST [get_ports {rgmii_port_0_td[3]}]
-set_property SLEW FAST [get_ports {rgmii_port_0_td[2]}]
-set_property SLEW FAST [get_ports {rgmii_port_0_td[1]}]
-set_property SLEW FAST [get_ports {rgmii_port_0_td[0]}]
-set_property SLEW FAST [get_ports rgmii_port_0_txc]
-set_property SLEW FAST [get_ports rgmii_port_0_tx_ctl]
-set_property SLEW FAST [get_ports {rgmii_port_1_td[3]}]
-set_property SLEW FAST [get_ports {rgmii_port_1_td[2]}]
-set_property SLEW FAST [get_ports {rgmii_port_1_td[1]}]
-set_property SLEW FAST [get_ports {rgmii_port_1_td[0]}]
-set_property SLEW FAST [get_ports rgmii_port_1_txc]
-set_property SLEW FAST [get_ports rgmii_port_1_tx_ctl]
-set_property SLEW FAST [get_ports {rgmii_port_2_td[3]}]
-set_property SLEW FAST [get_ports {rgmii_port_2_td[2]}]
-set_property SLEW FAST [get_ports {rgmii_port_2_td[1]}]
-set_property SLEW FAST [get_ports {rgmii_port_2_td[0]}]
-set_property SLEW FAST [get_ports rgmii_port_2_txc]
-set_property SLEW FAST [get_ports rgmii_port_2_tx_ctl]
-set_property SLEW FAST [get_ports {rgmii_port_3_td[3]}]
-set_property SLEW FAST [get_ports {rgmii_port_3_td[2]}]
-set_property SLEW FAST [get_ports {rgmii_port_3_td[1]}]
-set_property SLEW FAST [get_ports {rgmii_port_3_td[0]}]
-set_property SLEW FAST [get_ports rgmii_port_3_txc]
-set_property SLEW FAST [get_ports rgmii_port_3_tx_ctl]
-
 # Sub-optimal placement for a global clock-capable IO pin and BUFG pair.If this sub optimal condition
 # is acceptable for this design, you may use the CLOCK_DEDICATED_ROUTE constraint in the .xdc file to 
 # demote this message to a WARNING. However, the use of this override is highly discouraged.
@@ -256,35 +186,6 @@ set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets *_i/gmii_to_rgmii_3/U0/rgmii_
 
 set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_1_rxc]
 set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_3_rxc]
-
-# The below constraints place the BUFGCEs into the clock regions of their respective IO pins, which is needed 
-# for timing closure of the RGMII RX interfaces.
-
-set_property CLOCK_REGION X3Y2 [get_cells *_i/gmii_to_rgmii_0/U0/*_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-#set_property CLOCK_REGION X3Y2 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-#set_property CLOCK_REGION X3Y3 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-#set_property CLOCK_REGION X3Y3 [get_cells *_i/gmii_to_rgmii_2/U0/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-#set_property CLOCK_REGION X3Y3 [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-
-# The following constraints force placement of the BUFGs needed by the RGMII RX clock for Ethernet FMC ports 1,2 and 3
-# Without these constraints, timing will not close because the BUFGCE selected by Vivado is too far.
-# It is actually not recommended to use LOC constraints on BUFGCEs but instead to constrain placement to a clock 
-# region, but in Vivado 2017.2, even this does not result a good placement of BUFGCE and timing closure.
-
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property LOC BUFGCE_X0Y64 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
-set_property LOC BUFGCE_X0Y63 [get_cells *_i/gmii_to_rgmii_1/U0/*_gmii_to_rgmii_1_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
-
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property LOC BUFGCE_X0Y89 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
-set_property LOC BUFGCE_X0Y88 [get_cells *_i/gmii_to_rgmii_2/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_2_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
-
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property LOC BUFGCE_X0Y85 [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufg_rgmii_rx_clk]
-set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
-set_property LOC BUFGCE_X0Y84 [get_cells *_i/gmii_to_rgmii_3/U0/*_gmii_to_rgmii_3_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/bufio_rgmii_rx_clk]
 
 # Since Vivado 2019.2, when we connect a GEM MDIO interface to EMIO, this sets parameter PSU__ENET0__GRP_MDIO_INTERNAL to 1
 # (see file "<vivado-path>\2019.2\data\PS\8series\data\zynqconfig\enet\enet0_preset.xml")
