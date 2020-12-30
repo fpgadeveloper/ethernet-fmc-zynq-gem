@@ -5,9 +5,11 @@ TEBF0808 FSBL patch 2019.2
 The TEBF0808 requires some modifications to the Xilinx ZynqMP FSBL
 in order to correctly read the EEPROM via IIC.
 These modifications were provided by Trenz in the Starter kit.
-diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h b/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h
---- a/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h	1969-12-31 19:00:00.000000000 -0500
-+++ b/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h	2019-09-04 14:06:19.799540000 -0400
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h b/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h
+new file mode 100644
+index 0000000000..40c7833fdf
+--- /dev/null
++++ b/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h
 @@ -0,0 +1,959 @@
 +/*
 + * Si5345 Rev B Configuration Register Export Header File
@@ -622,10 +624,10 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h b/lib/sw_apps/zynqmp
 + * 
 + * Revision: B
 + * VDD:      1.8 V
-+ * Ta:       70 °C
++ * Ta:       70 C
 + * Airflow:  None
 + * 
-+ * Total Power: 917 mW, On Chip Power: 869 mW, Tj: 89 °C
++ * Total Power: 917 mW, On Chip Power: 869 mW, Tj: 89 C
 + * 
 + *          Frequency  Format   Voltage   Current     Power
 + *         ----------  ------  --------  --------  --------
@@ -649,7 +651,7 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h b/lib/sw_apps/zynqmp
 + * -Total power includes on- and off-chip power. This is a typical value and estimate only.
 + * -Use an EVB for a more exact power measurement
 + * -On-chip power excludes power dissipated in external terminations.
-+ * -Tj is junction temperature. When using a crystal (XTAL) reference, Tj must be less than 125 °C (on Si5345 Revision B) for device to comply with datasheet specifications.
++ * -Tj is junction temperature. When using a crystal (XTAL) reference, Tj must be less than 125 C (on Si5345 Revision B) for device to comply with datasheet specifications.
 + * 
 + * Settings
 + * ========
@@ -968,10 +970,11 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/Si5345-Registers.h b/lib/sw_apps/zynqmp
 + */
 +
 +#endif
-\ No newline at end of file
-diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/si534x.c b/lib/sw_apps/zynqmp_fsbl/src/si534x.c
---- a/lib/sw_apps/zynqmp_fsbl/src/si534x.c	1969-12-31 19:00:00.000000000 -0500
-+++ b/lib/sw_apps/zynqmp_fsbl/src/si534x.c	2019-09-04 17:23:22.777985000 -0400
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/si534x.c b/lib/sw_apps/zynqmp_fsbl/src/si534x.c
+new file mode 100644
+index 0000000000..5d514220e5
+--- /dev/null
++++ b/lib/sw_apps/zynqmp_fsbl/src/si534x.c
 @@ -0,0 +1,94 @@
 +#include "si534x.h"
 +#include "Si5345-Registers.h"
@@ -1067,9 +1070,11 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/si534x.c b/lib/sw_apps/zynqmp_fsbl/src/
 +	return I2C_SUCCESS;
 +}
 +
-diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/si534x.h b/lib/sw_apps/zynqmp_fsbl/src/si534x.h
---- a/lib/sw_apps/zynqmp_fsbl/src/si534x.h	1969-12-31 19:00:00.000000000 -0500
-+++ b/lib/sw_apps/zynqmp_fsbl/src/si534x.h	2019-09-04 18:01:36.945663000 -0400
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/si534x.h b/lib/sw_apps/zynqmp_fsbl/src/si534x.h
+new file mode 100644
+index 0000000000..34c0f985d7
+--- /dev/null
++++ b/lib/sw_apps/zynqmp_fsbl/src/si534x.h
 @@ -0,0 +1,20 @@
 +#ifndef SI534X_H
 +#define SI534X_H
@@ -1091,10 +1096,11 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/si534x.h b/lib/sw_apps/zynqmp_fsbl/src/
 +static int _last_page = -1;
 +
 +#endif
-diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c
---- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c	2019-11-07 10:42:40.000000000 -0500
-+++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c	2019-11-21 12:16:42.000000000 -0500
-@@ -50,6 +50,10 @@
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c
+index 3b52900317..31fc8d974e 100644
+--- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c
++++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c
+@@ -32,6 +32,10 @@
  ******************************************************************************/
  /***************************** Include Files *********************************/
  #include "xfsbl_board.h"
@@ -1103,9 +1109,29 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c b/lib/sw_apps/zynqmp_fsbl
 +#include "si534x.h"
 +// TE Mod finished  
  #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106)		\
- 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111)
- /************************** Constant Definitions *****************************/
-@@ -763,6 +767,67 @@
+ 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111) \
+ 		|| defined(XPS_BOARD_ZCU216) || defined(XPS_BOARD_ZCU208)
+@@ -78,7 +82,7 @@ static u32 XFsbl_ReadMinMaxEepromVadj(XIicPs* I2c0InstancePtr, u32 *MinVadj, u32
+ 	u32 UStatus;
+ 	s32 Status;
+ 	u32 NominalVoltage;
+-	u32 EepromAddr = 0x54U;
++	u32 EepromAddr = 0x50U;
+ 	u32 MinVoltage;
+ 	u32 MaxVoltage;
+ 
+@@ -87,8 +91,8 @@ static u32 XFsbl_ReadMinMaxEepromVadj(XIicPs* I2c0InstancePtr, u32 *MinVadj, u32
+ 	MaxVoltage = 0U;
+ 	XRecord.VadjRecordFound = 0U;
+ 
+-	/* Select the Channel-1 of MUX for I2C EEprom Access */
+-	WriteBuffer[0U] = 0x1U;
++	/* Select the Channel-6 of MUX for FMC I2C EEprom Access */
++	WriteBuffer[0U] = 0x20;
+ 	Status = XIicPs_MasterSendPolled(I2c0InstancePtr,
+ 				WriteBuffer, 1U, TCA9548A_ADDR);
+ 	if (Status != XST_SUCCESS) {
+@@ -790,6 +794,67 @@ static void XFsbl_PcieReset(void)
  }
  #endif
  #endif
@@ -1173,7 +1199,7 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c b/lib/sw_apps/zynqmp_fsbl
  /*****************************************************************************/
  /**
   * This function does board specific initialization.
-@@ -779,6 +844,27 @@
+@@ -806,6 +871,27 @@ static void XFsbl_PcieReset(void)
  u32 XFsbl_BoardInit(void)
  {
  	u32 Status;
@@ -1199,12 +1225,13 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.c b/lib/sw_apps/zynqmp_fsbl
 +  xil_printf("\r\n--------------------------------------------------------------------------------\r\n");
 +// TE Mod finished
  #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106)		\
- 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111)
- 	/* Program I2C to configure GT lanes */
-diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h
---- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h	2019-11-07 10:42:40.000000000 -0500
-+++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h	2019-11-21 12:17:15.000000000 -0500
-@@ -57,6 +57,13 @@
+ 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111) \
+ 		|| defined(XPS_BOARD_ZCU216) || defined(XPS_BOARD_ZCU208)
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h
+index e6f6684075..0c9d644420 100644
+--- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h
++++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h
+@@ -38,6 +38,13 @@ extern "C" {
  
  /***************************** Include Files *********************************/
  #include "xfsbl_hw.h"
@@ -1216,12 +1243,22 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_board.h b/lib/sw_apps/zynqmp_fsbl
 +#define DELAY_5_US			0x5U
 +// TE Mod finished     
  #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106)		\
- 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111)
- #include "xiicps.h"
-diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c
---- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c	2019-11-07 10:42:40.000000000 -0500
-+++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c	2019-11-21 12:24:16.000000000 -0500
-@@ -358,8 +358,10 @@
+ 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111) \
+ 		|| defined(XPS_BOARD_ZCU216) || defined(XPS_BOARD_ZCU208)
+@@ -56,7 +63,7 @@ extern "C" {
+ #define IRPS5401_SWC_ADDR		0x45U
+ 
+ #define BUF_LEN		10U
+-#define MAX_SIZE		32U
++#define MAX_SIZE		256U
+ 
+ #define CMD_CFG_0_REG		0x06U
+ #define CMD_OUTPUT_0_REG	0x02U
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c
+index 5c4a3cf2e4..a72fd0e8d3 100644
+--- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c
++++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c
+@@ -338,8 +338,10 @@ void XFsbl_PrintFsblBanner(void )
  	 */
  #if !defined(XFSBL_PERF) || defined(FSBL_DEBUG) || defined(FSBL_DEBUG_INFO) \
  			|| defined(FSBL_DEBUG_DETAILED)
@@ -1229,7 +1266,7 @@ diff -Naur a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_main.c b/lib/sw_apps/zynqmp_fsbl/
  	XFsbl_Printf(DEBUG_PRINT_ALWAYS,
 -                 "Xilinx Zynq MP First Stage Boot Loader \n\r");
 +                 "Xilinx Zynq MP First Stage Boot Loader (TE modified)\n\r");
-+// TE Mod finished             
++// TE Mod finished
  	XFsbl_Printf(DEBUG_PRINT_ALWAYS,
                   "Release %d.%d   %s  -  %s\r\n",
                   SDK_RELEASE_YEAR, SDK_RELEASE_QUARTER,__DATE__,__TIME__);
