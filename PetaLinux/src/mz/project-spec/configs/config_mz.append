@@ -1,8 +1,0 @@
-# Boot from SD card
-# Uncomment the following lines if you want this design to boot from SD card
-# MicroZed FMC Carrier has the SD card connected to the PS SD0 interface
-
-#CONFIG_SUBSYSTEM_ROOTFS_INITRAMFS=n
-#CONFIG_SUBSYSTEM_ROOTFS_EXT=y
-#CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk0p2"
-
