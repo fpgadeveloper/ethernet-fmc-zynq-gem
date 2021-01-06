@@ -70,7 +70,6 @@ do
     echo "> PetaLinux config files already transferred"
   else
     echo "> Transferring PetaLinux config files"
-    cp -R ../src/common/* .
     if [[ $portconfig != "ports-" ]]; then
       cp -R ../src/$portconfig/* .
     fi

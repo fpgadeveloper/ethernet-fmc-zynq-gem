@@ -7,3 +7,6 @@ CONFIG_gstreamer-vcu-examples
 CONFIG_packagegroup-petalinux-v4lutils
 CONFIG_packagegroup-petalinux-audio
 CONFIG_gstreamer-vcu-notebooks
+CONFIG_iperf3
+CONFIG_ethtool
+

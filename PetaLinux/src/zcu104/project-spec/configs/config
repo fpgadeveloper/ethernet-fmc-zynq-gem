@@ -317,8 +317,6 @@ CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_1_MAC="00:0a:35:00:22:02"
 CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_2_MAC="00:0a:35:00:22:03"
 CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC="00:0a:35:00:22:04"
 
-CONFIG_SUBSYSTEM_MACHINE_NAME="template"
-
 # Boot from SD card
 # Uncomment the following lines if you want this design to boot from SD card
 # ZCU104 has the SD card connected to the PS SD1 interface
