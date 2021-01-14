@@ -32,9 +32,8 @@ do
   portconfig=$(grep -Po -m 1 '(?<=src/constraints/rgmii-)[^.]+' $vivadoprj)
   portconfig="ports-$portconfig"
 
-  # Get CPU type from first letters of project name
-  type=$(echo $proj | cut -c1-3)
-  if [ $type == "zcu" ] || [ $type == "uz_" ] || [ $type == "teb" ]; then
+  # Get CPU type from Vivado project file
+  if grep -q Part=\"xczu "$vivadoprj"; then
     cpu_type="zynqMP"
     fsbl_option="--fsbl ./images/linux/zynqmp_fsbl.elf"
   else
@@ -69,7 +68,7 @@ do
   if [[ -f "configdone.txt" ]]; then
     echo "> PetaLinux config files already transferred"
   else
-    echo "> Transferring PetaLinux config files"
+    echo "> Transferring PetaLinux BSPs and config files"
     if [[ $portconfig != "ports-" ]]; then
       cp -R ../src/$portconfig/* .
     fi
