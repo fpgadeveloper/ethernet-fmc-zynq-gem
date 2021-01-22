@@ -185,6 +185,21 @@ set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_0_td[3]]
 # setting the following XDC constraint: 
 set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports rgmii_port_3_td[1]]
 
+# The following constraints force placement of the BUFGs needed by the RGMII RX clock for Ethernet FMC ports 0 and 1
+# Without these constraints, timing will not close because the BUFGCE selected by Vivado is too far.
+# It is actually not recommended to use LOC constraints on BUFGCEs but instead to constrain placement to a clock 
+# region, but in Vivado 2019.2, even this does not result a good placement of BUFGCE and timing closure.
+
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_0/U0/*_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y42 [get_cells *_i/gmii_to_rgmii_0/U0/*_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_0/U0/*_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y43 [get_cells *_i/gmii_to_rgmii_0/U0/*_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
+
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y44 [get_cells *_i/gmii_to_rgmii_1/U0/*_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufg_rgmii_rx_clk]
+set_property BEL BUFCE [get_cells *_i/gmii_to_rgmii_1/U0/*_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
+set_property LOC BUFGCE_X1Y45 [get_cells *_i/gmii_to_rgmii_1/U0/*_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/gen_rgmii_rx_clk_zq.bufio_rgmii_rx_clk]
+
 # Since Vivado 2019.2, when we connect a GEM MDIO interface to EMIO, this sets parameter PSU__ENET0__GRP_MDIO_INTERNAL to 1
 # (see file "<vivado-path>\2019.2\data\PS\8series\data\zynqconfig\enet\enet0_preset.xml")
 # which in turn enables a new create_clock constraint for the MDIO clock output
@@ -199,3 +214,8 @@ set_false_path -from [get_clocks clk_out1_uzev_qgige_clk_wiz_0_0] -to [get_clock
 set_false_path -from [get_clocks clk_out1_uzev_qgige_clk_wiz_0_0] -to [get_clocks mdio2_mdc_clock]
 set_false_path -from [get_clocks clk_out1_uzev_qgige_clk_wiz_0_0] -to [get_clocks mdio3_mdc_clock]
 
+# Create the clocks for the RGMII RX CLK inputs
+create_clock -period 8.000 -name rgmii_port_0_rx_clk -waveform {0.000 4.000} [get_ports rgmii_port_0_rxc]
+create_clock -period 8.000 -name rgmii_port_1_rx_clk -waveform {0.000 4.000} [get_ports rgmii_port_1_rxc]
+create_clock -period 8.000 -name rgmii_port_2_rx_clk -waveform {0.000 4.000} [get_ports rgmii_port_2_rxc]
+create_clock -period 8.000 -name rgmii_port_3_rx_clk -waveform {0.000 4.000} [get_ports rgmii_port_3_rxc]
