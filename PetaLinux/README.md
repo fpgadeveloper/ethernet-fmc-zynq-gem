@@ -46,7 +46,7 @@ by reading the Vivado project file.
 4. Copies the relevant configuration files from the `src` directory into the created
 PetaLinux project.
 5. Builds the PetaLinux project.
-6. Generates a BOOT.bin and image.ub file.
+6. Generates a BOOT.bin, boot.scr and image.ub file.
 
 ### Launch PetaLinux on hardware
 
@@ -71,6 +71,7 @@ To launch the PetaLinux project on hardware via SD card, copy the following file
 SD card:
 
 * `/<petalinux-project>/images/linux/BOOT.bin`
+* `/<petalinux-project>/images/linux/boot.scr`
 * `/<petalinux-project>/images/linux/image.ub`
 
 Then connect and power your hardware.
@@ -83,43 +84,14 @@ The configuration files contained in the `src` directory include:
 * Rootfs configuration (to include ethtool)
 * Interface initializations (sets eth0-4 interfaces to DHCP)
 * Kernel configuration
-* AXI Ethernet driver patch
+* Board BSPs
+* Patches (see below)
 
-#### AXI Ethernet driver patch
+#### ZCU104 ZynqMP FSBL patch
 
-The AXI Ethernet driver requires a patch for the correct configuration of the RGMII interface's 
-RX and TX clock skews.
-
-https://github.com/Xilinx/linux-xlnx/blob/master/drivers/net/ethernet/xilinx/xilinx_axienet_main.c
-
-```		} else if (lp->phy_type == XAE_PHY_TYPE_RGMII_2_0) {
-			phydev = of_phy_connect(lp->ndev, lp->phy_node,
-						axienet_adjust_link, 0,
-						PHY_INTERFACE_MODE_RGMII_ID);
-```
-
-The section of the code shown above specifies `PHY_INTERFACE_MODE_RGMII_ID` as the RGMII interface
-mode (aka "rgmii-id"). That interface mode enables both the RX and TX clock delays in the PHY but in 
-fact we need to enable only the RX delay 
-(see http://ethernetfmc.com/rgmii-interface-timing-considerations/ for more information).
-
-Our device tree specifies the correct RGMII configuration with the phy-mode setting ("rgmii-rxid"),
-and we have access to this setting via the `lp->phy_interface` variable. So to correct the issue, we
-replace the above code with the following:
-
-```		} else if (lp->phy_type == XAE_PHY_TYPE_RGMII_2_0) {
-			phydev = of_phy_connect(lp->ndev, lp->phy_node,
-						axienet_adjust_link, 0,
-						lp->phy_interface);
-```
-
-The included patch handles this modification - you do not need to manually modify any code.
-
-#### ZCU104 ZynqMP FSBL patch for 2019.2
-
-The FSBL for Zynq Ultrascale+ needs a patch to properly enable VADJ on the ZCU104 board in the 2019.2
-version of PetaLinux. The FSBL released with this version of PetaLinux has code to read the FMC card's
-EEPROM and then enable VADJ to the correct value. The released FSBL code in fact reads from the ZCU104
+The FSBL for Zynq Ultrascale+ needs a patch to properly enable VADJ on the ZCU104 board.
+The FSBL has code to read the FMC card's
+EEPROM and then enable VADJ to the correct value. The code in fact reads from the ZCU104
 board's EEPROM and not the FMC's EEPROM. It also only reads 32 bytes from the EEPROM, which is not 
 sufficient to include the VADJ voltage data. For both of these reasons, the FSBL does not properly 
 enable VADJ on this board. 
@@ -167,3 +139,20 @@ thus unusable.
 * eth0: Ethernet FMC Port 0 (GEM0)
 * eth1: Ethernet FMC Port 1 (GEM1)
 * eth2: ZCU102 on-board Ethernet port (GEM3)
+
+### AXI Ethernet issue on Zynq designs 2020.2
+
+There is an issue in the PetaLinux 2020.2 release that affects the **AXI Ethernet** connected ports on
+**Zynq** based designs. On these ports, it seems to be necessary to use the following procedure to bring 
+up a port. Note that the interface and IP address were chosen as examples, but this procedure applies to 
+all AXI Ethernet connected ports (eth2, eth3 and eth4) on the Zynq based designs (MicroZed, PicoZed, 
+ZedBoard, ZC702 and ZC706).
+```
+ifconfig eth2 up
+ifconfig eth2 down
+ifconfig eth2 192.168.1.10 up
+```
+In earlier releases, it was only necessary to run the last command to bring up a port. This issue
+does not affect the Zynq Ultrascale+ based designs. We have not yet determined the cause of this issue
+but if you have any information, please let us know.
+
