@@ -7,12 +7,13 @@
 
 # lwIP modifications
 # ------------------
-# These applications use a modified version of the lwIP library contained in the
-# ../EmbeddedSw directory. The original lwIP library can be found here:
+# These applications use a modified version of the lwIP library, the sources to which are
+# contained in the ../EmbeddedSw directory of this Git repository. The original lwIP library 
+# can be found here:
 # C:\Xilinx\Vitis\<version>\data\embeddedsw\ThirdParty\sw_services
-# This script will copy the original lwIP library sources into the ../EmbeddedSw directory,
-# except for the modified files already contained in that directory. The ../EmbeddedSw
-# directory then serves as a remote SDK repository for the software applications.
+# This script will create a local software repository called embeddedsw in the Vitis 
+# workspace (Vitis\embeddedsw\). It will copy the original lwIP library sources into 
+# embeddedsw as well as the modified sources contained in the ../EmbeddedSw directory.
 
 # Echo server applications
 # ------------------------
@@ -21,7 +22,8 @@
 # For each exported hardware design, the script will generate the echo server software application.
 
 # Set the Vivado directory containing the Vivado projects
-set vivado_dir "../Vivado"
+set vivado_dir [file join [pwd] "../Vivado"]
+set vivado_dir [file normalize $vivado_dir]
 # Set the application postfix
 set app_postfix "_echo_server"
 
@@ -57,12 +59,15 @@ proc copy-r {{dir .} target_dir} {
   }
 } ;# RS
 
-# Fill in the local libraries with original sources without overwriting existing code
-proc fill_local_libraries {} {
+# Create the local software repository (embeddedsw) for the modified drivers
+proc create_local_embeddedsw {} {
   # Xilinx Vitis install directory
   set vitis_dir $::env(XILINX_VITIS)
+  # Copy the EmbeddedSw folder into the Vitis workspace
+  file mkdir "embeddedsw"
+  copy-r "../EmbeddedSw" "embeddedsw"
   # For each of the custom lwIP versions in our local repo
-  foreach lwip_dir [glob -type d "../EmbeddedSw/ThirdParty/sw_services/*"] {
+  foreach lwip_dir [glob -type d "embeddedsw/ThirdParty/sw_services/*"] {
     # Work out the original version library directory name by removing the appended "9"
     set lib_name [string range [lindex [split $lwip_dir /] end] 0 end-1]
     set orig_dir "$vitis_dir/data/embeddedsw/ThirdParty/sw_services/$lib_name"
@@ -71,7 +76,7 @@ proc fill_local_libraries {} {
     copy-r $orig_dir $lwip_dir
   }
   # Copy the FSBL for ZCU104 patch
-  set fsbl_dir "../EmbeddedSw/lib/sw_apps/zynqmp_fsbl"
+  set fsbl_dir "embeddedsw/lib/sw_apps/zynqmp_fsbl"
   set orig_dir "$vitis_dir/data/embeddedsw/lib/sw_apps/zynqmp_fsbl"
   puts "Copying files from $orig_dir to $fsbl_dir"
   # Copy the original files to local repo, without overwriting existing code
@@ -116,6 +121,38 @@ proc get_processor_name {hw_project_name} {
     }
   }
   return ""
+}
+
+# Modifies the psu_init.c in the FSBL for the UltraZed EG
+# This removes the line that runs function serdes_illcalib() which seems to cause the
+# psu_init sequence to hang.
+proc patch_psu_init_uzeg {filename} {
+  set fd [open "${filename}" "r"]
+  set file_data [read $fd]
+  close $fd
+  set data [split $file_data "\n"]
+  
+  # Find the call to serdes_illcalib() and comment it out
+  set new_filename "${filename}.txt"
+  set fd [open "$new_filename" "w"]
+  foreach line $data {
+    if {[str_contains $line "serdes_illcalib("]} {
+			puts $fd "// Opsero mod"
+      puts $fd "//$line"
+			puts $fd "// End of Opsero mod"
+    } else {
+      puts $fd $line
+    }
+  }
+  close $fd
+
+  # Delete the old linker script
+  file delete $filename
+  
+  # Rename new linker script to the old filename
+  file rename $new_filename $filename
+  
+  return 0
 }
 
 # Returns list of Vivado projects in the given directory
@@ -174,8 +211,8 @@ proc create_vitis_ws {} {
   # Add local Vitis repo
   # Now when we create an application, SDK will automatically use the lwIP library from the local repo
   puts "Adding Vitis repo to the workspace."
-  set embsw [file normalize "${vitis_dir}/../EmbeddedSw"]
-  set embsw_lib [file normalize "${vitis_dir}/../EmbeddedSw/lib"]
+  set embsw [file normalize "${vitis_dir}/embeddedsw"]
+  set embsw_lib [file normalize "${vitis_dir}/embeddedsw/lib"]
   repo -set [list $embsw $embsw_lib]
 
   # Add each Vivado project to Vitis workspace
@@ -227,6 +264,10 @@ proc create_vitis_ws {} {
       domain active {zynqmp_fsbl}
     }
     domain active {standalone_domain}
+    # For UltraZed EG design, patch the psu_init.c file
+    if { $vivado_folder == "uz_pci_qgige" } {
+      patch_psu_init_uzeg "./uz_pci_qgige_wrapper/zynqmp_fsbl/psu_init.c"
+    }
     platform generate
     # Generate the example application
     puts "Creating application $app_name."
@@ -249,28 +290,28 @@ proc create_vitis_ws {} {
     
     # If all required files exist, then generate boot files
     # Create directory for the boot file if it doesn't already exist
-    if {[file exists "./boot/$board_name"] == 0} {
-      file mkdir "./boot/$board_name"
+    if {[file exists "./boot/$vivado_folder"] == 0} {
+      file mkdir "./boot/$vivado_folder"
     }
 	
     # For Microblaze designs
     if {[str_contains $proc_instance "microblaze"]} {
-      puts "Generating combined bitstream/elf file for $board_name project."
+      puts "Generating combined bitstream/elf file for $vivado_folder project."
       # Generate the download.bit file with .elf
       exec updatemem --bit "../Vivado/${vivado_folder}/${vivado_folder}.runs/impl_1/${vivado_folder}_wrapper.bit" \
         --meminfo "../Vivado/${vivado_folder}/${vivado_folder}.runs/impl_1/${vivado_folder}_wrapper.mmi" \
         --data "./${app_name}/Debug/${app_name}.elf" \
         --proc "${vivado_folder}_i/microblaze_0" \
-        -force --out "./boot/${board_name}/${board_name}.bit"
+        -force --out "./boot/${vivado_folder}/${vivado_folder}.bit"
     # For Zynq and Zynq MP designs
     } else {
-      puts "Copying the BOOT.BIN file to the ./boot/${board_name} directory."
+      puts "Copying the BOOT.BIN file to the ./boot/${vivado_folder} directory."
       # Copy the already generated BOOT.bin file
-      set bootbin_file "./${app_name}_system/Debug/sd_card/BOOT.bin"
+      set bootbin_file "./${app_name}_system/Debug/sd_card/BOOT.BIN"
       if {[file exists $bootbin_file] == 1} {
-        file copy -force $bootbin_file "./boot/${board_name}"
+        file copy -force $bootbin_file "./boot/${vivado_folder}"
       } else {
-        puts "No BOOT.bin file for ${app_name}."
+        puts "No BOOT.BIN file for ${app_name}."
       }
     }
   }
@@ -294,9 +335,9 @@ proc check_apps {} {
   }
 }
   
-# Copy original lwIP library sources into the local Vitis repo
-puts "Building the local Vitis repo from original sources"
-fill_local_libraries
+# Copy original lwIP library sources into the local Vitis software repo (embeddedsw)
+puts "Building the local Vitis software repo (embeddedsw) from original sources"
+create_local_embeddedsw
 
 # Create the Vitis workspace
 puts "Creating the Vitis workspace"

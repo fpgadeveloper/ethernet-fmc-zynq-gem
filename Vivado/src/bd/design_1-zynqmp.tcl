@@ -157,7 +157,6 @@ CONFIG.USE_RESET {false} \
 CONFIG.CLKIN1_JITTER_PS {80.0} \
 CONFIG.MMCM_DIVCLK_DIVIDE {1} \
 CONFIG.MMCM_CLKFBOUT_MULT_F {9.750} \
-CONFIG.MMCM_CLKIN1_PERIOD {8.0} \
 CONFIG.MMCM_CLKOUT0_DIVIDE_F {3.250} \
 CONFIG.CLKOUT1_JITTER {86.562} \
 CONFIG.CLKOUT1_PHASE_ERROR {84.521}] [get_bd_cells clk_wiz_0]
@@ -165,12 +164,9 @@ CONFIG.CLKOUT1_PHASE_ERROR {84.521}] [get_bd_cells clk_wiz_0]
 connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins gmii_to_rgmii_$with_idelay_ctrl/clkin]
 
 # Connect ports for the Ethernet FMC 125MHz clock
-create_bd_port -dir I -from 0 -to 0 -type clk ref_clk_p
-connect_bd_net [get_bd_pins /clk_wiz_0/clk_in1_p] [get_bd_ports ref_clk_p]
-set_property CONFIG.FREQ_HZ 125000000 [get_bd_ports ref_clk_p]
-create_bd_port -dir I -from 0 -to 0 -type clk ref_clk_n
-connect_bd_net [get_bd_pins /clk_wiz_0/clk_in1_n] [get_bd_ports ref_clk_n]
-set_property CONFIG.FREQ_HZ 125000000 [get_bd_ports ref_clk_n]
+create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 ref_clk
+set_property -dict [list CONFIG.FREQ_HZ {125000000}] [get_bd_intf_ports ref_clk]
+connect_bd_intf_net [get_bd_intf_ports ref_clk] [get_bd_intf_pins clk_wiz_0/CLK_IN1_D]
 
 # Create IDELAYCTRL for the GMII-to-RGMII without shared logic
 if {$num_gems > 2} {

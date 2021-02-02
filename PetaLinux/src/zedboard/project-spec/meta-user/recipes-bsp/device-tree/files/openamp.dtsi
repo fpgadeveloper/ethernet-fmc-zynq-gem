@@ -3,14 +3,25 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
-		rproc_0_reserved: rproc@3e000000 {
-			no-map;
-			reg = <0x3e000000 0x400000>;
-		};
-		rproc_0_dma: rproc@3e800000 {
+		vdev0vring0: vdev0vring0@3e800000 {
 			no-map;
 			compatible = "shared-dma-pool";
-			reg = <0x3e800000 0x100000>;
+			reg = <0x3e800000 0x4000>;
+		};
+		vdev0vring1: vdev0vring1@3e804000 {
+			no-map;
+			compatible = "shared-dma-pool";
+			reg = <0x3e804000 0x4000>;
+		};
+		vdev0buffer: vdev0buffer@3e808000 {
+			no-map;
+			compatible = "shared-dma-pool";
+			reg = <0x3e808000 0x100000>;
+		};
+		rproc_0_reserved: rproc@3e000000 {
+			no-map;
+			compatible = "shared-dma-pool";
+			reg = <0x3e000000 0x800000>;
 		};
 	};
 
@@ -19,6 +30,6 @@
 		firmware = "firmware";
 		vring0 = <15>;
 		vring1 = <14>;
-		memory-region = <&rproc_0_reserved>, <&rproc_0_dma>;
+		memory-region = <&rproc_0_reserved>, <&vdev0buffer>, <&vdev0vring0>, <&vdev0vring1>;
 	};
 };
