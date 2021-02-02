@@ -123,6 +123,38 @@ proc get_processor_name {hw_project_name} {
   return ""
 }
 
+# Modifies the psu_init.c in the FSBL for the UltraZed EG
+# This removes the line that runs function serdes_illcalib() which seems to cause the
+# psu_init sequence to hang.
+proc patch_psu_init_uzeg {filename} {
+  set fd [open "${filename}" "r"]
+  set file_data [read $fd]
+  close $fd
+  set data [split $file_data "\n"]
+  
+  # Find the call to serdes_illcalib() and comment it out
+  set new_filename "${filename}.txt"
+  set fd [open "$new_filename" "w"]
+  foreach line $data {
+    if {[str_contains $line "serdes_illcalib("]} {
+			puts $fd "// Opsero mod"
+      puts $fd "//$line"
+			puts $fd "// End of Opsero mod"
+    } else {
+      puts $fd $line
+    }
+  }
+  close $fd
+
+  # Delete the old linker script
+  file delete $filename
+  
+  # Rename new linker script to the old filename
+  file rename $new_filename $filename
+  
+  return 0
+}
+
 # Returns list of Vivado projects in the given directory
 proc get_vivado_projects {vivado_dir} {
   # Create the empty list
@@ -232,6 +264,10 @@ proc create_vitis_ws {} {
       domain active {zynqmp_fsbl}
     }
     domain active {standalone_domain}
+    # For UltraZed EG design, patch the psu_init.c file
+    if { $vivado_folder == "uz_pci_qgige" } {
+      patch_psu_init_uzeg "./uz_pci_qgige_wrapper/zynqmp_fsbl/psu_init.c"
+    }
     platform generate
     # Generate the example application
     puts "Creating application $app_name."
