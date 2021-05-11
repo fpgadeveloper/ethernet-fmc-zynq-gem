@@ -16,7 +16,7 @@ Windows users
 #. Open Windows Explorer, browse to the repo files on your hard drive.
 #. In the Vivado directory, you will find multiple batch files (.bat).
    Double click on the batch file that is appropriate to your hardware,
-   for example, double-click `build-zedboard.bat` if you are using the ZedBoard.
+   for example, double-click ``build-zedboard.bat`` if you are using the ZedBoard.
    This will generate a Vivado project for your hardware platform.
 #. Run Vivado and open the project that was just created.
 #. Click Generate bitstream.

@@ -43,7 +43,7 @@ How the script works
 The PetaLinux directory contains a ``build-petalinux`` shell script which can be run in Linux to automatically
 generate a PetaLinux project for each of the generated/exported Vivado projects in the Vivado directory.
 
-When executed, the build script searches the Vivado directory for all projects containing a `.xsa` exported
+When executed, the build script searches the Vivado directory for all projects containing a ``.xsa`` exported
 hardware design file. Then for every exported project, the script does the following:
 
 #. Verifies that the ``.bit`` file exists.
@@ -70,11 +70,6 @@ use the following commands in a Linux command terminal:
    ``petalinux-boot --jtag --fpga``
    Note that you don't have to specify the bitstream because this command will use the one that it finds
    in the ``./images/linux`` directory.
-   
-#. Download bitstream to the FPGA: 
-   ``petalinux-boot --jtag --fpga --bitstream ./images/linux/system.bit`` If you don't use the --bitstream option to 
-   specify the bitstream, then PetaLinux will download the ./images/linux/download.bit bitstream containing the FSBL. 
-   We don't want to run the FSBL when booting via JTAG.
 #. Download the PetaLinux kernel to the FPGA:
    ``petalinux-boot --jtag --kernel``
 
