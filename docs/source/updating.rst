@@ -53,15 +53,12 @@ For example, the BSP files for the ZedBoard are located in ``PetaLinux/src/zedbo
 1. Download and install the PetaLinux release that you intend to use.
 2. Download and install the BSP for the target platform for the release that you intend to use.
 
-   * MicroZed BSP
-   * PicoZed BSP
-   * UltraZed EG and EV BSP
-   * ZC706 BSP from the `PetaLinux download page <https://www.xilinx.com/petalinux>`_
-   * ZCU102 BSP from the `PetaLinux download page <https://www.xilinx.com/petalinux>`_
-   * ZCU104 BSP from the `PetaLinux download page <https://www.xilinx.com/petalinux>`_
-   * ZCU106 BSP from the `PetaLinux download page <https://www.xilinx.com/petalinux>`_
-   * ZedBoard BSP from the `PetaLinux download page <https://www.xilinx.com/petalinux>`_
-   * TEBF0808 BSP
+   * For ZC706, ZCU102, ZCU104, ZCU106 and ZedBoard, download the BSP from the 
+     `PetaLinux download page <https://www.xilinx.com/petalinux>`_
+   * For MicroZed and PicoZed, download the BSP for the **ZedBoard** from the 
+     `PetaLinux download page <https://www.xilinx.com/petalinux>`_
+   * For TEBF0808, UltraZed EG and EV, download the BSP for the **ZCU102** from the 
+     `PetaLinux download page <https://www.xilinx.com/petalinux>`_
 
 3. Update the BSP files for the target platform in the ``PetaLinux/src/<platform>`` directory. 
    These are the specific directories to update:

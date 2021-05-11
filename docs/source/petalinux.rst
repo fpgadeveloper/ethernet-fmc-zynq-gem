@@ -156,9 +156,139 @@ ZCU106 (HPC1)
 * eth1: Ethernet FMC Port 1 (GEM1)
 * eth2: ZCU102 on-board Ethernet port (GEM3)
 
+Example Usage
+=============
+
+Enable port
+-----------
+
+This example will bring up a port.
+
+.. code-block::
+
+   root@zynqgem:~# ifconfig eth1 up
+   [  378.871550] pps pps1: new PPS source ptp1
+   [  378.875583] macb ff0c0000.ethernet: gem-ptp-timer ptp clock registered.
+   [  382.943505] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
+   [  382.951774] macb ff0c0000.ethernet eth1: link up (1000/Full)
+   [  382.957441] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+
+Enable port with fixed IP address
+---------------------------------
+
+This example sets a fixed IP address to a port.
+
+.. code-block::
+
+   root@zynqgem:~# ifconfig eth1 192.168.2.31 up
+   [  424.839768] pps pps1: new PPS source ptp1
+   [  424.843798] macb ff0c0000.ethernet: gem-ptp-timer ptp clock registered.
+   [  428.927505] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
+   [  428.935778] macb ff0c0000.ethernet eth1: link up (1000/Full)
+   [  428.941450] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+
+Enable port using DHCP
+----------------------
+
+This example enables a port and obtains an IP address for the port via DHCP. Note that the
+port must be connected to a DHCP enabled router.
+
+.. code-block::
+
+   root@zynqgem:~# udhcpc -i eth1
+   udhcpc: started, v1.31.0
+   [  314.831199] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
+   [  314.839489] macb ff0c0000.ethernet eth1: link up (1000/Full)
+   [  314.845181] pps pps1: new PPS source ptp1
+   [  314.849205] macb ff0c0000.ethernet: gem-ptp-timer ptp clock registered.
+   [  314.855955] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+   udhcpc: sending discover
+   udhcpc: sending select for 192.168.2.24
+   udhcpc: lease of 192.168.2.24 obtained, lease time 259200
+   RTNETLINK answers: File exists
+   /etc/udhcpc.d/50default: Adding DNS 192.168.2.1
+
+Check port status
+-----------------
+
+In this example, we use the ``ifconfig`` command with no arguments to check the port status.
+The first interface (eth1) is connected to the Ethernet FMC port 0 and it has
+been enabled and configured with IP address 192.168.2.23.
+
+.. code-block::
+
+   root@zynqgem:~# ifconfig
+   eth0      Link encap:Ethernet  HWaddr 00:0A:35:00:01:22
+             inet addr:192.168.2.23  Bcast:192.168.2.255  Mask:255.255.255.0
+             inet6 addr: fe80::20a:35ff:fe00:122/64 Scope:Link
+             UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+             RX packets:5 errors:0 dropped:0 overruns:0 frame:0
+             TX packets:13 errors:0 dropped:0 overruns:0 carrier:0
+             collisions:0 txqueuelen:1000
+             RX bytes:794 (794.0 B)  TX bytes:2000 (1.9 KiB)
+             Interrupt:30
+   
+   lo        Link encap:Local Loopback
+             inet addr:127.0.0.1  Mask:255.0.0.0
+             inet6 addr: ::1/128 Scope:Host
+             UP LOOPBACK RUNNING  MTU:65536  Metric:1
+             RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+             TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+             collisions:0 txqueuelen:1000
+             RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+We can also use ``ethtool`` to check the port status as follows.
+
+.. code-block::
+
+   root@zynqgem:~# ethtool eth0
+   Settings for eth0:
+           Supported ports: [ TP MII FIBRE ]
+           Supported link modes:   10baseT/Half 10baseT/Full
+                                   100baseT/Half 100baseT/Full
+                                   1000baseT/Half 1000baseT/Full
+           Supported pause frame use: Symmetric Receive-only
+           Supports auto-negotiation: Yes
+           Supported FEC modes: Not reported
+           Advertised link modes:  10baseT/Half 10baseT/Full
+                                   100baseT/Half 100baseT/Full
+                                   1000baseT/Half 1000baseT/Full
+           Advertised pause frame use: No
+           Advertised auto-negotiation: Yes
+           Advertised FEC modes: Not reported
+           Link partner advertised link modes:  10baseT/Half 10baseT/Full
+                                                100baseT/Half 100baseT/Full
+                                                1000baseT/Full
+           Link partner advertised pause frame use: No
+           Link partner advertised auto-negotiation: Yes
+           Link partner advertised FEC modes: Not reported
+           Speed: 1000Mb/s
+           Duplex: Full
+           Port: MII
+           PHYAD: 0
+           Transceiver: internal
+           Auto-negotiation: on
+           Link detected: yes
+
+Ping link partner using specific port
+-------------------------------------
+
+In this example we ping the link partner at IP address 192.168.2.10 from interface eth1.
+
+.. code-block::
+
+   root@zynqgem:~# ping -I eth0 192.168.2.10
+   PING 192.168.2.10 (192.168.2.10): 56 data bytes
+   64 bytes from 192.168.2.10: seq=0 ttl=128 time=0.448 ms
+   64 bytes from 192.168.2.10: seq=1 ttl=128 time=0.416 ms
+   64 bytes from 192.168.2.10: seq=2 ttl=128 time=0.418 ms
+   64 bytes from 192.168.2.10: seq=3 ttl=128 time=0.409 ms
+
+Known Issues
+============
 
 AXI Ethernet issue on Zynq designs 2020.2
-=========================================
+-----------------------------------------
 
 There is an issue in the PetaLinux 2020.2 release that affects the **AXI Ethernet** connected ports on
 **Zynq** based designs. On these ports, it seems to be necessary to use the following procedure to bring 
@@ -173,6 +303,7 @@ ZedBoard, ZC702 and ZC706).
   ifconfig eth0 192.168.1.10 up
 
 In earlier releases, it was only necessary to run the last command to bring up a port. This issue
-does not affect the Zynq Ultrascale+ based designs. We have not yet determined the cause of this issue
+does not affect the Zynq Ultrascale+ based designs. This issue does not affect the stand-alone echo server
+operation. We have not yet determined the cause of this issue
 but if you have any information, please let us know.
 
