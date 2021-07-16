@@ -232,7 +232,6 @@ proc create_sdk_ws {} {
   # Now when we create an application, SDK will automatically use the lwIP library from the local repo
   puts "Adding SDK repo to the workspace."
   repo -set "../EmbeddedSw"
-  repo -set "../EmbeddedSw/lib"
 
   # Add each Vivado project to SDK workspace
   foreach {vivado_folder} $vivado_proj_list {
