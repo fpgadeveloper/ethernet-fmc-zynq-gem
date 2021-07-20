@@ -1,6 +1,7 @@
 Vivado/.Xil/
 Vivado/*.log
 Vivado/*.jou
+Vivado/*.str
 Vivado/*_qgige/
 Vitis/*_echo_*/
 Vitis/*_qgige_*/
