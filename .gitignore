@@ -12,4 +12,4 @@ Vitis/*.jou
 Vitis/boot/
 Vitis/embeddedsw/
 PetaLinux/*_qgige/
-
+docs/build/
