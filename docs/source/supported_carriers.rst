@@ -32,7 +32,9 @@ List of supported boards
 +-----------------------------------------------------------------------+---------------------------+ 
 | | Zynq UltraScale+ `TE0808-04-09-1EE-S Starter Kit`_                  | HPC                       |
 | | with `TE0808 UltraSOM+ MPSoC Module`_                               |                           |
-+-----------------------------------------------------------------------+---------------------------+ 
++-----------------------------------------------------------------------+---------------------------+
+| Zynq UltraScale+ `PYNQ-ZU`_      _________________                    | LPC                       |
++-----------------------------------------------------------------------+---------------------------+
  
 Unlisted boards
 ===============
@@ -123,5 +125,6 @@ Xilinx SDK installation at this location: ``C:\Xilinx\SDK\2020.2\data\boards\boa
 .. _ZCU102 Evaluation board: https://www.xilinx.com/zcu102
 .. _ZCU104 Evaluation board: https://www.xilinx.com/zcu104
 .. _ZCU106 Evaluation board: https://www.xilinx.com/zcu106
+.. _PYNQZU Evaluation board: https://www.tul.com.tw/ProductsPYNQ-ZU.html
 .. _TE0808-04-09-1EE-S Starter Kit: https://shop.trenz-electronic.de/en/TE0808-04-09-1EE-S-TE0808-04-09-1EE-S-Starter-Kit
 .. _TE0808 UltraSOM+ MPSoC Module: https://shop.trenz-electronic.de/en/TE0808-04-09EG-1EE-UltraSOM-MPSoC-Module-with-Zynq-UltraScale-XCZU9EG-1FFVC900E-4-GB-DDR4

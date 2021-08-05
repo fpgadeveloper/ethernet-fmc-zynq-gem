@@ -1,0 +1,218 @@
+/include/ "system-conf.dtsi"
+/include/ "port-config.dtsi"
+/ {
+	model = "TUL PYNQ-ZU RevB";
+
+	amba {
+		audio0:audio-codec-ctrl@800e0000 {
+			compatible = "generic-uio";
+			reg = <0x0 0x800e0000 0x0 0x10000>;
+		};
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		linux,cma {
+			linux,cma-default;
+			compatible = "shared-dma-pool";
+			alloc-ranges = <0x0 0x0 0x0 0x7ff00000>;
+			size = <0x0 0x20000000>;
+			alignment = <0x0 0x2000>;
+			reusable;
+		};
+	};
+
+	wmmcsdio_fixed:fixedregulator-mmcsdio {
+		compatible = "regulator-fixed";
+		regulator-name = "wmmcsdio_fixed";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-boot-on;
+	};
+
+	sdio_pwrseq: sdio_pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		// MIO[5] RESETN for WILC3000 active low
+		reset-gpios = <&gpio 5 1>;
+		// requires a patched pwrseq_simple.c for WILC3000
+		chip_en-gpios = <&gpio 4 1>;
+		post-power-on-delay-ms = <10>;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		ps_led0 {
+			label = "ps_led0";
+			gpios = <&gpio 0x11 0x0>;
+			linux,default-trigger = "heartbeat";
+		};
+
+		ps_led1 {
+			label = "ps_led1";
+			gpios = <&gpio 0x14 0x0>;
+			default-state = "on";
+		};
+
+		vbus_det {
+			label = "vbus_det";
+			gpios = <&gpio 0x7 0x0>;
+			default-state = "on";
+		};
+
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+		autorepeat;
+
+		ps_sw0 {
+			label = "ps_sw0";
+			gpios = <&gpio 0x17 0x0>;
+			linux,code = <0x74>;
+			gpio-key,wakeup;
+		};
+	};
+};
+
+&i2c1 {
+	status = "okay";
+	clock-frequency = <400000>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+};
+
+&i2c0 {
+	status = "okay";
+	clock-frequency = <400000>;
+
+	i2c-mux@75 {
+		compatible = "nxp,pca9548";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x75>;
+
+		i2c@0 {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			reg = <0x0>;
+
+			irps5401_43: irps5401@43 {
+				#clock-cells = <0x0>;
+				compatible = "infineon,irps5401";
+				reg = <0x43>;
+			};
+
+			irps5401_44: irps5401@44 {
+				#clock-cells = <0x0>;
+				compatible = "infineon,irps5401";
+				reg = <0x44>;
+			};
+
+			irps5401_46: irps5401@46 {
+				#clock-cells = <0x0>;
+				compatible = "infineon,irps5401";
+				reg = <0x46>;
+			};
+		};
+
+		i2c@1 {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			reg = <0x1>;
+			si5340: clock-generator@74 {
+				compatible = "silabs,si5340";
+				reg = <0x74>;
+			};
+		};
+
+		i2c@2 {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			reg = <0x2>;
+			label = "AUDIO";
+		};
+
+		i2c@3 {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			reg = <0x3>;
+			label = "CAM";
+		};
+
+		i2c@4 {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			reg = <0x4>;
+			label = "SYZYGY";
+		};
+
+		i2c@5 {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			reg = <0x5>;
+			label = "FMC";
+		};
+
+		i2c@6 {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			reg = <0x6>;
+			label = "USB";
+		};
+	};
+};
+
+&usb0 {
+	status = "okay";
+};
+
+&dwc3_0 {
+	status = "okay";
+	dr_mode = "peripheral";
+	phy-names = "usb3-phy";
+	phys = <&lane2 4 0 0 26000000>;
+	maximum-speed = "super-speed";
+};
+
+&usb1 {
+	status = "okay";
+};
+
+&dwc3_1 {
+	status = "okay";
+	dr_mode = "host";
+	phy-names = "usb3-phy";
+	phys = <&lane3 4 1 0 26000000>;
+	maximum-speed = "super-speed";
+};
+
+&sdhci0 {
+	status = "okay";
+	disable-wp;
+	no-1-8-v;
+};
+
+&sdhci1 {
+	status = "okay";
+	max-frequency = <50000000>;
+	broken-mmc-highspeed;
+	disable-wp;
+	non-removable;
+	bus-width = <0x4>;
+	mmc-pwrseq = <&sdio_pwrseq>;
+	vqmmc-supply = <&wmmcsdio_fixed>;
+	#address-cells = <0x1>;
+	#size-cells = <0x0>;
+	wilc_sdio@1 {
+			compatible = "microchip,wilc3000";
+			status = "okay";
+			bus-width = <0x4>;
+			reg = <0x0>;
+			irq-gpios = <&gpio 45 0>;
+		};
+};
