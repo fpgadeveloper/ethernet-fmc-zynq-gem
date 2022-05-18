@@ -243,7 +243,7 @@ static u32 XFsbl_FMCEnable(XIicPs* I2c0InstancePtr, XIicPs* I2c1InstancePtr)
 #if defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111) || \
 	defined(XPS_BOARD_ZCU216)|| defined(XPS_BOARD_ZCU208)
 	XVoutCommands *VoutPtr;
-	u32 VadjSetting = SET_VADJ_0V0;
+	u32 VadjSetting = SET_VADJ_1V8;
 	/**
 	 * Lookup table for Vout_Cmd, Vout Margin High,Vout_OV_Warn_Limit,
 	 * Vout_OV_Fault_Limit, Vout Margin_Low, Vout_UV_Warn_Limit
