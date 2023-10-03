@@ -1,0 +1,439 @@
+From a023eba9b585cabfdb42cf670e50750aff398531 Mon Sep 17 00:00:00 2001
+From: Giuseppe Natale <gnatale@xilinx.com>
+Date: Fri, 28 Aug 2020 17:28:03 +0100
+Subject: [PATCH] Add SYZYGY voltage handshake
+
+---
+ lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.c | 383 ++++++++++++++++++++++
+ lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.h |  10 +
+ 2 files changed, 393 insertions(+)
+
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.c b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.c
+index 80a1314203..35b374a146 100644
+--- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.c
++++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.c
+@@ -38,6 +38,387 @@
+ /************************** Function Prototypes ******************************/
+ 
+ /************************** Variable Definitions *****************************/
++
++/********************************* SYZYGY ************************************/
++int IicPsMasterConfig(u16 DeviceId, XIicPs *iic)
++{
++	int Status;
++	XIicPs_Config *Config;
++
++	// Initialize the IIC driver
++	Config = XIicPs_LookupConfig(DeviceId);
++	if (Config == NULL) {
++		return XFSBL_FAILURE;
++	}
++	Status = XIicPs_CfgInitialize(iic, Config, Config->BaseAddress);
++	if (Status != XST_SUCCESS) {
++		return XFSBL_FAILURE;
++	}
++	// Perform a self-test to ensure that the hardware was built correctly.
++	Status = XIicPs_SelfTest(iic);
++	if (Status != XST_SUCCESS) {
++		return XFSBL_FAILURE;
++	}
++	// Set the IIC serial clock rate.
++	XIicPs_SetSClk(iic, IIC_MUX_SCLK_RATE);
++	return XFSBL_SUCCESS;
++}
++int FindIicDevicesOnChannel(int chanNum, int chanDeviceID, XIicPs *iic, u8 *SendBuffer, u8 *RecvBuffer)
++{
++	int Status;
++
++	SendBuffer[0] = 1 << chanNum;   // select a channel
++	Status = XIicPs_MasterSendPolled(iic, SendBuffer, 1, IIC_MUX_SLAVE_ADDR);
++	if (Status != XST_SUCCESS) {
++		XFsbl_Printf(DEBUG_GENERAL, "No device found on channel %d\r\n", chanNum);
++		return XFSBL_FAILURE;
++	}
++	// Wait until bus is idle to start another transfer.
++	while (XIicPs_BusIsBusy(iic));
++	Status = XIicPs_MasterRecvPolled(iic, RecvBuffer, 1, chanDeviceID);
++	if (Status != XST_SUCCESS)
++		return XFSBL_FAILURE;
++	XFsbl_Printf(DEBUG_GENERAL, "Device 0x%x found on channel %d\r\n", chanDeviceID, chanNum);
++	while (XIicPs_BusIsBusy(iic));
++	return XFSBL_SUCCESS;
++}
++int ReadChannel(int chanDeviceID, int write_num, int read_num, XIicPs *iic, u8 *SendBuffer, u8 *RecvBuffer)
++{
++	int Status;
++
++	Status = XIicPs_MasterSendPolled(iic, SendBuffer, write_num, chanDeviceID);
++	if (Status != XST_SUCCESS)
++		return XFSBL_FAILURE;
++	while (XIicPs_BusIsBusy(iic));
++	XFsbl_Printf(DEBUG_GENERAL, "Reading Device with I2C address of 0x%x\r\n", chanDeviceID);
++	Status = XIicPs_MasterRecvPolled(iic, RecvBuffer, read_num, chanDeviceID);
++	if (Status != XST_SUCCESS)
++		return XFSBL_FAILURE;
++	while (XIicPs_BusIsBusy(iic));
++	return XFSBL_SUCCESS;
++}
++int WriteCmd(int chanDeviceID, u8 write_num, XIicPs *iic, u8 *SendBuffer)
++{
++	int Status;
++
++	Status = XIicPs_MasterSendPolled(iic, SendBuffer, write_num, chanDeviceID);
++	if (Status != XST_SUCCESS)
++		return XFSBL_FAILURE;
++	while (XIicPs_BusIsBusy(iic));
++	XFsbl_Printf(DEBUG_GENERAL, "Wrote command on channel %d\r\n", chanDeviceID);
++	return XFSBL_SUCCESS;
++}
++unsigned char pmbus_pmic3_1_2V[] = {
++	0x21, 0x01, 0x33, 0x22, 0x00, 0x00, 0x24, 0x02, 0x66, 0x25, 0x01, 0x52, 
++	0x26, 0x01, 0x14, 0x40, 0x01, 0x9A, 0x42, 0x01, 0x71, 0x43, 0x00, 0xf6, 
++	0x44, 0x00, 0xcd, 0x5e, 0x01, 0x1a, 0x5f, 0x01, 0x00
++};
++unsigned char pmbus_pmic3_1_8V[] = {
++	0x21, 0x01, 0xcd, 0x22, 0x00, 0x00, 0x24, 0x03, 0x9a, 0x25, 0x01, 0xfb, 
++	0x26, 0x01, 0x9f, 0x40, 0x02, 0x33, 0x42, 0x02, 0x29, 0x43, 0x01, 0x71, 
++	0x44, 0x01, 0x66, 0x5e, 0x01, 0xb3, 0x5f, 0x01, 0x9a
++};
++unsigned char pmbus_pmic3_2_5V[] = {
++	0x21, 0x02, 0x80, 0x22, 0x00, 0x00, 0x24, 0x05, 0x00, 0x25, 0x02, 0x80, 
++	0x26, 0x02, 0x40, 0x40, 0x02, 0xe6, 0x42, 0x03, 0x00, 0x43, 0x02, 0x00, 
++	0x44, 0x02, 0x1a, 0x5e, 0x02, 0x66, 0x5f, 0x02, 0x4d
++};
++unsigned char pmbus_pmic3_3_3V[] = {
++	0x21, 0x03, 0x4d, 0x22, 0x00, 0x00, 0x24, 0x06, 0x00, 0x25, 0x02, 0xa1, 
++	0x26, 0x02, 0xf8, 0x40, 0x03, 0xb3, 0x42, 0x03, 0xf6, 0x43, 0x02, 0xa4, 
++	0x44, 0x02, 0xe6, 0x5e, 0x03, 0x33, 0x5f, 0x03, 0x1a
++};
++unsigned char pmbus_pmic3_command_array[] = {
++	0x21, 0x22, 0x24, 0x25, 0x26, 0x40, 0x42, 0x43, 0x44, 0x5e, 0x5f
++};
++int ReadPMBusChannel(int chanDeviceID, int write_num, int read_num, XIicPs *iic, u8 *SendBuffer, u8 *RecvBuffer)
++{
++	int Status;
++
++	XIicPs_SetOptions(iic, XIICPS_REP_START_OPTION);
++	Status = XIicPs_MasterSendPolled(iic, SendBuffer, write_num, chanDeviceID);
++	if (Status != XST_SUCCESS)
++		return XFSBL_FAILURE;
++	Status = XIicPs_MasterRecvPolled(iic, RecvBuffer, read_num, chanDeviceID);
++	if (Status != XST_SUCCESS)
++		return XFSBL_FAILURE;
++	while (XIicPs_BusIsBusy(iic));
++	XFsbl_Printf(DEBUG_GENERAL, "Read PMBUS command on channel %d\r\n", chanDeviceID);
++	return XFSBL_SUCCESS;
++}
++int WritePMBusReg(int chanDeviceID, u8 write_num, XIicPs *iic, u8 *SendBuffer)
++{
++	int Status;
++
++	XIicPs_ClearOptions(iic, XIICPS_REP_START_OPTION);
++	Status = XIicPs_MasterSendPolled(iic, SendBuffer, write_num, chanDeviceID);
++	if (Status != XST_SUCCESS)
++		return XFSBL_FAILURE;
++	while (XIicPs_BusIsBusy(iic));
++	XFsbl_Printf(DEBUG_GENERAL, "Wrote PMBUS command on channel %d\r\n", chanDeviceID);
++	return XFSBL_SUCCESS;
++}
++int FindPMBusDevicesOnChannel(int chanNum, int chanDeviceID, XIicPs *iic, u8 *SendBuffer, u8 *RecvBuffer)
++{
++	int Status;
++
++	SendBuffer[0]= 1 << chanNum;	// select a channel
++	XIicPs_SetOptions(iic, XIICPS_REP_START_OPTION);
++	Status = XIicPs_MasterSendPolled(iic, SendBuffer, 1, IIC_MUX_SLAVE_ADDR);
++	if (Status != XST_SUCCESS) {
++		XFsbl_Printf(DEBUG_GENERAL, "No device found on channel %d\r\n", chanNum);
++		return XFSBL_FAILURE;
++	}
++
++	Status = XIicPs_MasterRecvPolled(iic, RecvBuffer, 1, chanDeviceID);
++	if (Status != XST_SUCCESS)
++		return XFSBL_FAILURE;
++	XFsbl_Printf(DEBUG_GENERAL, "Device 0x%x found on channel %d\r\n", chanDeviceID, chanNum);
++	while (XIicPs_BusIsBusy(iic));
++	XIicPs_ClearOptions(iic, XIICPS_REP_START_OPTION);
++	return XFSBL_SUCCESS;
++}
++void print_pmbus_pmic3_read_settings(int chanDeviceID, XIicPs *iic, u8 *SendBuffer, u8 *RecvBuffer) {
++	int i;
++	for (i = 0; i < 11; i++) {
++		SendBuffer[0] = pmbus_pmic3_command_array[i];
++		ReadPMBusChannel(chanDeviceID, 1, 2, iic, SendBuffer, RecvBuffer);
++		XFsbl_Printf(DEBUG_GENERAL, "Command[%0x]= %0x\r\n", pmbus_pmic3_command_array[i], (RecvBuffer[1] << 8) | RecvBuffer[0]);
++	}
++}
++int pmbus_pmic3(int chanNum, int chanDeviceID, int vio_setting, XIicPs *iic, u8 *SendBuffer, u8 *RecvBuffer)
++{
++	int i, Status;
++
++	Status = FindIicDevicesOnChannel(chanNum, chanDeviceID, iic, SendBuffer, RecvBuffer); // using I2C to read PMIC3 device
++	if (Status != XFSBL_SUCCESS)
++		return XFSBL_FAILURE;
++	Status = FindPMBusDevicesOnChannel(chanNum,chanDeviceID, iic, SendBuffer, RecvBuffer); // using PMBUS to read PMIC3 device
++	if (Status != XFSBL_SUCCESS)
++		return XFSBL_FAILURE;
++	XFsbl_Printf(DEBUG_GENERAL, "PMIC3: Setting Page to select Switcher-C\r\n");
++	SendBuffer[0] = 0x00; 			// Write Page Register- Switcher-C
++	SendBuffer[1] = 0x02;
++	WritePMBusReg(chanDeviceID, 2, iic, SendBuffer);
++	XFsbl_Printf(DEBUG_GENERAL, "PMIC3: Reading Page Register after setting\r\n");
++	SendBuffer[0] = 0x00; 			// Read Page Register
++	ReadPMBusChannel(chanDeviceID, 1, 1, iic, SendBuffer, RecvBuffer);
++	XFsbl_Printf(DEBUG_GENERAL, "PMIC3: Page Register= 0x%x\r\n", RecvBuffer[0]);
++	SendBuffer[0] = 0x21; 			// Read VOUT_COMMAND Register
++	ReadPMBusChannel(chanDeviceID, 1, 2, iic, SendBuffer, RecvBuffer);
++	XFsbl_Printf(DEBUG_GENERAL, "PMIC3: VOUT 0x%x\r\n",(RecvBuffer[1] << 8) | RecvBuffer[0]);
++	switch(vio_setting) {
++		case 1 :	// 1.2V
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "PMIC3: Setting VIO to 1.2V\r\n");
++			for (i=0; i< 11; i++) {
++				SendBuffer[0] = pmbus_pmic3_1_2V[i*3];
++				SendBuffer[1] = pmbus_pmic3_1_2V[i*3+2];
++				SendBuffer[2] = pmbus_pmic3_1_2V[i*3+1];
++				WritePMBusReg(chanDeviceID, 3, iic, SendBuffer); // write a word
++			}
++			break;
++		case 2 :	// 1.8V
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "PMIC3: Setting VIO to 1.8V\r\n");
++			for (i=0; i< 11; i++) {
++				SendBuffer[0] = pmbus_pmic3_1_8V[i*3];
++				SendBuffer[1] = pmbus_pmic3_1_8V[i*3+2];
++				SendBuffer[2] = pmbus_pmic3_1_8V[i*3+1];
++				WritePMBusReg(chanDeviceID, 3, iic, SendBuffer); // write a word
++			}
++			break;
++		case 3 :	// 2.5V
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "PMIC3: Setting VIO to 2.5V\r\n");
++			for (i=0; i< 11; i++) {
++				SendBuffer[0] = pmbus_pmic3_2_5V[i*3];
++				SendBuffer[1] = pmbus_pmic3_2_5V[i*3+2];
++				SendBuffer[2] = pmbus_pmic3_2_5V[i*3+1];
++				WritePMBusReg(chanDeviceID, 3, iic, SendBuffer); // write a word
++			}
++			break;
++		case 4 :	// 3.3V
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "PMIC3: Setting VIO to 3.3V\r\n");
++			for (i=0; i< 11; i++) {
++				SendBuffer[0] = pmbus_pmic3_3_3V[i*3];
++				SendBuffer[1] = pmbus_pmic3_3_3V[i*3+2];
++				SendBuffer[2] = pmbus_pmic3_3_3V[i*3+1];
++				WritePMBusReg(chanDeviceID, 3, iic, SendBuffer); // write a word
++			}
++			break;
++		default :
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "PMIC3: VIO setting not changed\r\n");
++	}
++	XFsbl_Printf(DEBUG_GENERAL, "PMIC3: Reading voltages after setting\r\n");
++	print_pmbus_pmic3_read_settings(chanDeviceID, iic, SendBuffer, RecvBuffer);
++	return XFSBL_SUCCESS;
++}
++int syzygy_voltage_handshake(void)
++{
++	XFsbl_Printf(DEBUG_PRINT_ALWAYS, "SYZYGY - Voltage Handshake START\r\n");
++
++	XGpioPs psGpioInstancePtr;
++	XIicPs iic;     // Instance of the IIC Device
++	u8 SendBuffer[IIC_BUF_SIZE];    // Buffer for Transmitting Data
++	u8 RecvBuffer[IIC_BUF_SIZE];    // Buffer for Receiving Data
++
++	XGpioPs_Config*GpioConfigPtr;
++	int Status;
++	float pod0_vio0_min, pod0_vio0_max, pod0_vio1_min, pod0_vio1_max;
++	float pod1_vio0_min, pod1_vio0_max, pod1_vio1_min, pod1_vio1_max;
++	int pod0_present, pod1_present, vio_setting, turn_ON_VIO;
++	float vio;
++
++	int whole1, whole2, thousandths1, thousandths2;
++
++	// PS GPIO Initialization
++	GpioConfigPtr = XGpioPs_LookupConfig(XPAR_PSU_GPIO_0_DEVICE_ID);
++	if(GpioConfigPtr == NULL)
++		return XFSBL_FAILURE;
++	Status = XGpioPs_CfgInitialize(&psGpioInstancePtr, GpioConfigPtr, GpioConfigPtr->BaseAddr);
++	if(Status != XST_SUCCESS){
++		XFsbl_Printf(DEBUG_GENERAL, "PS_GPIO_INIT_FAILED \n\r");
++		return XFSBL_FAILURE;
++	}
++	//PS GPIO pin setting to Output
++	XGpioPs_SetDirectionPin(&psGpioInstancePtr, I2C0_RESET_PIN, U_PIN_DIRECTION);
++	XGpioPs_SetOutputEnablePin(&psGpioInstancePtr, I2C0_RESET_PIN, 1);
++	XGpioPs_SetDirectionPin(&psGpioInstancePtr, SYZYGY_VIO_EN, U_PIN_DIRECTION);
++	XGpioPs_SetOutputEnablePin(&psGpioInstancePtr, SYZYGY_VIO_EN, 1);
++	XGpioPs_WritePin(&psGpioInstancePtr, SYZYGY_VIO_EN, 0);
++
++	// IIC
++	vio = 0.0;
++	turn_ON_VIO = 1; // assume that we will turn ON VIO at the end
++	pod0_present = 0;
++	pod0_vio0_min = 0;
++	pod0_vio0_max = 0;
++	pod0_vio1_min = 0;
++	pod0_vio1_max = 0;
++	Status = IicPsMasterConfig(XPAR_XIICPS_0_DEVICE_ID, &iic);
++	if(Status != XFSBL_SUCCESS){
++		XFsbl_Printf(DEBUG_GENERAL, "PS_I2C0_INIT_FAILED \n\r");
++		return XFSBL_FAILURE;
++	}
++	Status = FindIicDevicesOnChannel(4, 0x32, &iic, SendBuffer, RecvBuffer);
++	if(Status == XFSBL_SUCCESS) {
++		pod0_present = 1;
++		SendBuffer[0] = 0x80;
++		SendBuffer[1] = 0x00;
++		ReadChannel(0x32, 2, 40, &iic, SendBuffer, RecvBuffer);
++		pod0_vio0_min = (short)((RecvBuffer[17] << 8) + RecvBuffer[16])*0.01;
++		pod0_vio0_max = (short)((RecvBuffer[19] << 8) + RecvBuffer[18])*0.01;
++		whole1 = pod0_vio0_min;
++		thousandths1 = (pod0_vio0_min - whole1) * 1000;
++		whole2 = pod0_vio0_max;
++		thousandths2 = (pod0_vio0_max - whole2) * 1000;
++		XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Pod0 VIO Range0: %d.%3d to %d.%3d\r\n", whole1, thousandths1, whole2, thousandths2);
++		pod0_vio1_min = (short)((RecvBuffer[21] << 8) + RecvBuffer[20])*0.01;
++		pod0_vio1_max = (short)((RecvBuffer[22] << 8) + RecvBuffer[21])*0.01;
++		whole1 = pod0_vio1_min;
++		thousandths1 = (pod0_vio1_min - whole1) * 1000;
++		whole2 = pod0_vio1_max;
++		thousandths2 = (pod0_vio1_max - whole2) * 1000;
++		if (RecvBuffer[20]!=0)
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Pod0 VIO Range1: %d.%3d to %d.%3d\r\n", whole1, thousandths1, whole2, thousandths2);
++	}
++	pod1_present = 0;
++	pod1_vio0_min = 0;
++	pod1_vio0_max = 0;
++	pod1_vio1_min = 0;
++	pod1_vio1_max = 0;
++	Status = FindIicDevicesOnChannel(4, 0x3D, &iic, SendBuffer, RecvBuffer);
++	if(Status == XFSBL_SUCCESS) {
++		pod1_present = 1;
++		SendBuffer[0] = 0x80;
++		SendBuffer[1] = 0x00;
++		ReadChannel(0x3D, 2, 40, &iic, SendBuffer, RecvBuffer);
++		pod1_vio0_min = (short)((RecvBuffer[17] << 8) + RecvBuffer[16])*0.01;
++		pod1_vio0_max = (short)((RecvBuffer[19] << 8) + RecvBuffer[18])*0.01;
++		whole1 = pod1_vio0_min;
++		thousandths1 = (pod1_vio0_min - whole1) * 1000;
++		whole2 = pod1_vio0_max;
++		thousandths2 = (pod1_vio0_max - whole2) * 1000;
++		XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Pod1 VIO Range0: %d.%3d to %d.%3d\r\n", whole1, thousandths1, whole2, thousandths2);
++		pod1_vio1_min = (short)((RecvBuffer[21] << 8) + RecvBuffer[20])*0.01;
++		pod1_vio1_max = (short)((RecvBuffer[22] << 8) + RecvBuffer[21])*0.01;
++		whole1 = pod1_vio1_min;
++		thousandths1 = (pod1_vio1_min - whole1) * 1000;
++		whole2 = pod1_vio1_max;
++		thousandths2 = (pod1_vio1_max - whole2) * 1000;
++		if (RecvBuffer[20] != 0)
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Pod1 VIO Range1: %d.%3d to %d.%3d\r\n", whole1, thousandths1, whole2, thousandths2);
++	}
++
++	// SYZYGY
++	if (pod0_present && pod1_present) {
++		XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Both pods are present\r\n");
++		if(pod0_vio0_min == pod1_vio0_min) {
++			vio = pod0_vio0_min;
++			whole1 = vio;
++			thousandths1 = (vio - whole1) * 1000;
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Setting vio = %d.%3d\r\n", whole1, thousandths1);
++		}
++		else if((pod0_vio0_min < pod1_vio0_min) && (pod0_vio0_max <= pod1_vio0_max)) {
++			vio = pod1_vio0_min;
++			whole1 = vio;
++			thousandths1 = (vio - whole1) * 1000;
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Setting vio = %d.%3d\r\n", whole1, thousandths1);
++		}
++		else if((pod0_vio0_min < pod1_vio0_min) && (pod0_vio0_max > pod1_vio0_max)) {
++			vio = pod1_vio0_min;
++			whole1 = vio;
++			thousandths1 = (vio - whole1) * 1000;
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Setting vio = %d.%3d\r\n", whole1, thousandths1);
++		}
++		else if((pod0_vio0_min > pod1_vio0_min) && (pod0_vio0_min <= pod1_vio0_max)) {
++			vio = pod0_vio0_min;
++			whole1 = vio;
++			thousandths1 = (vio - whole1) * 1000;
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Setting vio = %d.%3d\r\n", whole1, thousandths1);
++		}
++		else{
++			turn_ON_VIO = 0;
++			XFsbl_Printf(DEBUG_PRINT_ALWAYS, "No common voltage found\r\n");
++		}
++	}
++	else if (pod0_present) {
++		if (pod0_vio0_min != 0.0)
++			vio=pod0_vio0_min;
++		whole1 = pod0_vio0_min;
++		thousandths1 = (pod0_vio0_min - whole1) * 1000;
++		XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Only Pod0 is present, setting vio = %d.%3d\r\n", whole1, thousandths1);
++	}
++	else if (pod1_present) {
++		if (pod1_vio0_min != 0.0)
++			vio=pod1_vio0_min;
++		whole1 = pod0_vio0_min;
++		thousandths1 = (pod0_vio0_min - whole1) * 1000;
++		XFsbl_Printf(DEBUG_PRINT_ALWAYS, "Only Pod1 is present, setting vio = %d.%3d\r\n", whole1, thousandths1);
++	}
++	else
++		XFsbl_Printf(DEBUG_PRINT_ALWAYS, "No pods are present\r\n");
++
++	if(vio == 1.2f)
++		vio_setting = 1;
++	else if(vio == 1.8f)
++		vio_setting = 2;
++	else if(vio == 2.5f)
++		vio_setting = 3;
++	else if(vio == 3.3f)
++		vio_setting = 4;
++	else
++		vio_setting = 0;
++	Status = pmbus_pmic3(0, PMBUS_PMIC_ADDR, vio_setting, &iic, SendBuffer, RecvBuffer);  // PMIC3 PMBUS address - 0x46
++	if(Status != XFSBL_SUCCESS){
++		XFsbl_Printf(DEBUG_PRINT_ALWAYS, "PMIC3_SETUP_FAILED\r\n");
++		return XFSBL_FAILURE;
++	}
++	if(turn_ON_VIO)
++		XGpioPs_WritePin(&psGpioInstancePtr, SYZYGY_VIO_EN, 1);
++	XFsbl_Printf(DEBUG_PRINT_ALWAYS, "SYZYGY - Voltage Handshake END\r\n");
++	return XFSBL_SUCCESS;
++}
++/*****************************************************************************/
++
+ #ifdef XFSBL_BS
+ u32 XFsbl_HookBeforeBSDownload(void )
+ {
+@@ -72,6 +453,8 @@ u32 XFsbl_HookBeforeHandoff(u32 EarlyHandoff)
+ 	 * Add the code here
+ 	 */
+ 
++	Status = syzygy_voltage_handshake();
++
+ 	return Status;
+ }
+ 
+diff --git a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.h b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.h
+index 604cb08f17..b218b0249e 100644
+--- a/lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.h
++++ b/lib/sw_apps/zynqmp_fsbl/src/xfsbl_hooks.h
+@@ -32,8 +32,18 @@ extern "C" {
+ 
+ /***************************** Include Files *********************************/
+ #include "xil_types.h"
++#include "xiicps.h"
++#include "xgpiops.h"
+ 
+ /************************** Constant Definitions *****************************/
++#define IIC_MUX_SLAVE_ADDR 0x75
++#define IIC_MUX_SCLK_RATE 100000
++#define I2C_PMIC_ADDR   0x16
++#define PMBUS_PMIC_ADDR 0x46
++#define I2C0_RESET_PIN 12
++#define SYZYGY_VIO_EN 36
++#define U_PIN_DIRECTION 0x1 // to make it output set to 0x1
++#define IIC_BUF_SIZE    132
+ 
+ /**************************** Type Definitions *******************************/
+ 
+-- 
+2.17.1
+
+Copyright (C) 2021 Xilinx, Inc
+SPDX-License-Identifier: BSD-3-Clause
