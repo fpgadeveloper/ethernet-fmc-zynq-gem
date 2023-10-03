@@ -1,5 +1,4 @@
-Zynq GEM Reference Designs for Ethernet FMC
-===========================================
+# Zynq GEM Reference Designs for Ethernet FMC
 
 ## Description
 
@@ -24,24 +23,52 @@ Important links:
 
 ## Requirements
 
-This project is designed for version 2020.2 of the Xilinx tools (Vivado/Vitis/PetaLinux). 
+This project is designed for version 2022.1 of the Xilinx tools (Vivado/Vitis/PetaLinux). 
 If you are using an older version of the Xilinx tools, then refer to the 
-[release tags](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/releases "releases")
+[release tags](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tags "releases")
 to find the version of this repository that matches your version of the tools.
 
 In order to test this design on hardware, you will need the following:
 
-* Vivado 2020.2
-* Vitis 2020.2
-* PetaLinux Tools 2020.2
+* Vivado 2022.1
+* Vitis 2022.1
+* PetaLinux Tools 2022.1
 * [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
 * One of the [supported evaluation boards](https://zynqgem.ethernetfmc.com/en/latest/supported_carriers.html)
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
+### Target boards
+
+#### Zynq boards
+
+* [MicroZed 7020 FMC Carrier](https://www.avnet.com/opasdata/d120001/medias/docus/187/PB-AES-MBCC-FMC-G-V2-Product-Brief.pdf)
+* [PicoZed 7030 FMC Carrier v2](https://www.avnet.com/wps/portal/silica/products/product-highlights/2016/xilinx-picozed-fmc-carrier-card-v2/)
+* [ZC706](https://www.xilinx.com/zc706)
+* [ZedBoard](https://digilent.com/reference/programmable-logic/zedboard/start)
+
+#### Zynq UltraScale+ MPSoC boards
+
+* [Trenz TEBF0808](https://shop.trenz-electronic.de/en/TEBF0808-04A-UltraITX-Baseboard-for-Trenz-Electronic-TE080X-UltraSOM)
+* [ZCU104](https://www.xilinx.com/zcu104)
+* [ZCU102](https://www.xilinx.com/zcu102)
+* [ZCU106](https://www.xilinx.com/zcu106)
+* [PYNQ-ZU](https://www.tulembedded.com/FPGA/ProductsPYNQ-ZU.html)
+* [UltraZed EG PCIe Carrier](https://www.xilinx.com/products/boards-and-kits/1-mb9rqb.html)
+* [UltraZed EV carrier](https://www.xilinx.com/products/boards-and-kits/1-y3n9v1.html)
+
+#### Zynq UltraScale+ RFSoC boards
+
+* [ZCU111](https://www.xilinx.com/zcu111)
+* [ZCU208](https://www.xilinx.com/zcu208)
+
 ## Contribute
 
-We encourage contribution to these projects. If you spot issues or you want to add designs for other platforms, please
-make a pull request.
+We strongly encourage community contribution to these projects. Please make a pull request if you
+would like to share your work:
+* if you've spotted and fixed any issues
+* if you've added designs for other target platforms
+
+Thank you to everyone who supports us!
 
 ## About us
 
@@ -49,3 +76,4 @@ This project was developed by [Opsero Inc.](https://opsero.com "Opsero Inc."),
 a tight-knit team of FPGA experts delivering FPGA products and design services to start-ups and tech companies. 
 Follow our blog, [FPGA Developer](https://www.fpgadeveloper.com "FPGA Developer"), for news, tutorials and
 updates on the awesome projects we work on.
+

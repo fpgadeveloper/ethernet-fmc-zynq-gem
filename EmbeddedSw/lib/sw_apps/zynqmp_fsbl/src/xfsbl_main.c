@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015 - 2020 Xilinx, Inc.  All rights reserved.
+* Copyright (c) 2015 - 2021 Xilinx, Inc.  All rights reserved.
 * SPDX-License-Identifier: MIT
 ******************************************************************************/
 
@@ -20,6 +20,9 @@
 * 1.00  ba   02/22/16 Added performance measurement feature.
 * 2.0   bv   12/02/16 Made compliance to MISRAC 2012 guidelines
 *                     Added warm restart support
+* 3.0   bv   03/03/21 Print multiboot offset in FSBL banner
+*       bsv  04/28/21 Added support to ensure authenticated images boot as
+*                     non-secure when RSA_EN is not programmed
 *
 * </pre>
 *
@@ -44,7 +47,8 @@ static void XFsbl_FallBack(void);
 static void XFsbl_MarkUsedRPUCores(XFsblPs *FsblInstPtr, u32 PartitionNum);
 
 /************************** Variable Definitions *****************************/
-XFsblPs FsblInstance={0x3U, XFSBL_SUCCESS, 0U, 0U, 0U};
+XFsblPs FsblInstance = {0x3U, XFSBL_SUCCESS, 0U, 0U, 0U, 0U};
+
 /*****************************************************************************/
 /** This is the FSBL main function and is implemented stage wise.
  *
@@ -345,6 +349,9 @@ void XFsbl_PrintFsblBanner(void )
 	XFsbl_Printf(DEBUG_PRINT_ALWAYS,
                  "Release %d.%d   %s  -  %s\r\n",
                  SDK_RELEASE_YEAR, SDK_RELEASE_QUARTER,__DATE__,__TIME__);
+
+	XFsbl_Printf(DEBUG_GENERAL, "MultiBootOffset: 0x%0x\r\n",
+		XFsbl_In32(CSU_CSU_MULTI_BOOT));
 
 	if(FsblInstance.ResetReason == XFSBL_PS_ONLY_RESET) {
 		XFsbl_Printf(DEBUG_GENERAL,"Reset Mode	:	PS Only Reset\r\n");
