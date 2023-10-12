@@ -12,7 +12,6 @@ TARGET ?= none
 JOBS ?= 8
 
 # valid targets (template name, both (plnx+baremetal) or baremetal_only)
-mz_7020_target := zynq both
 pynqzu_target := zynqMP both
 pz_7030_target :zynq both
 uzeg_pci_target := zynqMP both

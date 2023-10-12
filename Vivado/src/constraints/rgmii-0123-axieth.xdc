@@ -3,24 +3,24 @@
 # contraints in the GMII-to-RGMII and AXI Ethernet Subsystem IP's in-built XDC files.
 
 # Use these constraints to modify input delay on RGMII signals
-set_input_delay -clock [get_clocks *axi_ethernet_0/inst/mac/inst_rgmii_rx_clk] -max -1.4 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_0/rgmii_rd[*] */axi_ethernet_0/rgmii_rx_ctl"]]]
+set_input_delay -clock [get_clocks *axi_ethernet_0/inst/mac/inst_rgmii_rx_clk] -max -1.2 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_0/rgmii_rd[*] */axi_ethernet_0/rgmii_rx_ctl"]]]
 set_input_delay -clock [get_clocks *axi_ethernet_0/inst/mac/inst_rgmii_rx_clk] -min -2.8 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_0/rgmii_rd[*] */axi_ethernet_0/rgmii_rx_ctl"]]]
-set_input_delay -clock [get_clocks *axi_ethernet_0/inst/mac/inst_rgmii_rx_clk] -clock_fall -max -1.4 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_0/rgmii_rd[*] */axi_ethernet_0/rgmii_rx_ctl"]]]
+set_input_delay -clock [get_clocks *axi_ethernet_0/inst/mac/inst_rgmii_rx_clk] -clock_fall -max -1.2 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_0/rgmii_rd[*] */axi_ethernet_0/rgmii_rx_ctl"]]]
 set_input_delay -clock [get_clocks *axi_ethernet_0/inst/mac/inst_rgmii_rx_clk] -clock_fall -min -2.8 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_0/rgmii_rd[*] */axi_ethernet_0/rgmii_rx_ctl"]]]
 
-set_input_delay -clock [get_clocks *axi_ethernet_1/inst/mac/inst_rgmii_rx_clk] -max -1.4 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_1/rgmii_rd[*] */axi_ethernet_1/rgmii_rx_ctl"]]]
+set_input_delay -clock [get_clocks *axi_ethernet_1/inst/mac/inst_rgmii_rx_clk] -max -1.2 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_1/rgmii_rd[*] */axi_ethernet_1/rgmii_rx_ctl"]]]
 set_input_delay -clock [get_clocks *axi_ethernet_1/inst/mac/inst_rgmii_rx_clk] -min -2.8 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_1/rgmii_rd[*] */axi_ethernet_1/rgmii_rx_ctl"]]]
-set_input_delay -clock [get_clocks *axi_ethernet_1/inst/mac/inst_rgmii_rx_clk] -clock_fall -max -1.4 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_1/rgmii_rd[*] */axi_ethernet_1/rgmii_rx_ctl"]]]
+set_input_delay -clock [get_clocks *axi_ethernet_1/inst/mac/inst_rgmii_rx_clk] -clock_fall -max -1.2 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_1/rgmii_rd[*] */axi_ethernet_1/rgmii_rx_ctl"]]]
 set_input_delay -clock [get_clocks *axi_ethernet_1/inst/mac/inst_rgmii_rx_clk] -clock_fall -min -2.8 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_1/rgmii_rd[*] */axi_ethernet_1/rgmii_rx_ctl"]]]
 
-set_input_delay -clock [get_clocks *axi_ethernet_2/inst/mac/inst_rgmii_rx_clk] -max -1.4 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_2/rgmii_rd[*] */axi_ethernet_2/rgmii_rx_ctl"]]]
+set_input_delay -clock [get_clocks *axi_ethernet_2/inst/mac/inst_rgmii_rx_clk] -max -1.2 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_2/rgmii_rd[*] */axi_ethernet_2/rgmii_rx_ctl"]]]
 set_input_delay -clock [get_clocks *axi_ethernet_2/inst/mac/inst_rgmii_rx_clk] -min -2.8 [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_2/rgmii_rd[*] */axi_ethernet_2/rgmii_rx_ctl"]]]
-set_input_delay -clock [get_clocks *axi_ethernet_2/inst/mac/inst_rgmii_rx_clk] -clock_fall -max -1.4 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_2/rgmii_rd[*] */axi_ethernet_2/rgmii_rx_ctl"]]]
+set_input_delay -clock [get_clocks *axi_ethernet_2/inst/mac/inst_rgmii_rx_clk] -clock_fall -max -1.2 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_2/rgmii_rd[*] */axi_ethernet_2/rgmii_rx_ctl"]]]
 set_input_delay -clock [get_clocks *axi_ethernet_2/inst/mac/inst_rgmii_rx_clk] -clock_fall -min -2.8 -add_delay [get_ports -of [get_nets -of [get_pins "*/axi_ethernet_2/rgmii_rd[*] */axi_ethernet_2/rgmii_rx_ctl"]]]
 
-set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -max -1.4 [get_ports -of [get_nets -of [get_pins "*/gmii_to_rgmii_0/rgmii_rxd[*] */gmii_to_rgmii_0/rgmii_rx_ctl"]]]
+set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -max -1.2 [get_ports -of [get_nets -of [get_pins "*/gmii_to_rgmii_0/rgmii_rxd[*] */gmii_to_rgmii_0/rgmii_rx_ctl"]]]
 set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -min -2.8 [get_ports -of [get_nets -of [get_pins "*/gmii_to_rgmii_0/rgmii_rxd[*] */gmii_to_rgmii_0/rgmii_rx_ctl"]]]
-set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -clock_fall -max -1.4 -add_delay [get_ports -of [get_nets -of [get_pins "*/gmii_to_rgmii_0/rgmii_rxd[*] */gmii_to_rgmii_0/rgmii_rx_ctl"]]]
+set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -clock_fall -max -1.2 -add_delay [get_ports -of [get_nets -of [get_pins "*/gmii_to_rgmii_0/rgmii_rxd[*] */gmii_to_rgmii_0/rgmii_rx_ctl"]]]
 set_input_delay -clock [get_clocks *_gmii_to_rgmii_0_0_rgmii_rx_clk] -clock_fall -min -2.8 -add_delay [get_ports -of [get_nets -of [get_pins "*/gmii_to_rgmii_0/rgmii_rxd[*] */gmii_to_rgmii_0/rgmii_rx_ctl"]]]
 
 # Use these constraints to modify output delay on RGMII signals if 2ns delay is added by external PHY

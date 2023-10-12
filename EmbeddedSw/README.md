@@ -10,8 +10,7 @@ The lwIP sources need a few small modifications to make it work with the Etherne
 
 ### ZynqMP FSBL modifications
 
-This project uses a modified ZynqMP FSBL to fix two issues:
+This project uses a modified ZynqMP FSBL to fix these issues:
 
-1. The code used to read the FMC card's EEPROM on ZCU104 has a bug that you can read about here:
+* The code used to read the FMC card's EEPROM on ZCU104 has a bug that you can read about here:
 https://forums.xilinx.com/t5/Xilinx-Evaluation-Boards/Enabling-VADJ-on-ZCU104/td-p/861259
-2. The Trenz TEBF0808 board requires some modifications to configure the board clocks

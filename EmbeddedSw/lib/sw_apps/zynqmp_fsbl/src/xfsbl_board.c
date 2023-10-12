@@ -35,12 +35,6 @@
 ******************************************************************************/
 /***************************** Include Files *********************************/
 #include "xfsbl_board.h"
-// TE Mod: 
-#if defined(XPS_BOARD_TE0808_9EG_1E_TEBF0808)
-#include "xparameters.h"
-#include "si534x.h"
-#endif
-// TE Mod finished  
 #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106)		\
 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111) \
 		|| defined(XPS_BOARD_ZCU216) || defined(XPS_BOARD_ZCU208) \
@@ -805,68 +799,6 @@ static void XFsbl_PcieReset(void)
 }
 #endif
 #endif
-// TE Mod :
-#if defined(XPS_BOARD_TE0808_9EG_1E_TEBF0808)
-void XFsbl_TeReset(void)
-{
-  
-	u32 RegVal = 0;
-	u32 ICMCfg0L0;
-
-	ICMCfg0L0 = XFsbl_In32(SERDES_ICM_CFG0) & SERDES_ICM_CFG0_L0_ICM_CFG_MASK;
-
-	/* Give reset only if we have PCIe in design */
-	if (ICMCfg0L0 == ICM_CFG_VAL_PCIE)
-	{
-
-		/* Set MIO30 direction as output */
-		XFsbl_Out32(GPIO_DIRM_1, GPIO_MIO30_MASK);
-
-		/* Set MIO30 output enable */
-		XFsbl_Out32(GPIO_OEN_1, GPIO_MIO30_MASK);
-    
-		/* Set MIO30 to LOW */
-		RegVal = XFsbl_In32(GPIO_DATA_1) & ~(GPIO_MIO30_MASK);
-		XFsbl_Out32(GPIO_DATA_1, RegVal);
-
-    (void)usleep(DELAY_1_US);
-
-		/* Set MIO30 to HIGH --> this force cpld to reboot PS after CLK Initialisation on first power up */ 
-		RegVal = XFsbl_In32(GPIO_DATA_1) | GPIO_MIO30_MASK;
-    XFsbl_Out32(GPIO_DATA_1, RegVal);
-
-    // pci reset from xilinx 
-		/* Set MIO31 direction as output */
-		XFsbl_Out32(GPIO_DIRM_1, GPIO_MIO31_MASK);
-
-		/* Set MIO31 output enable */
-		XFsbl_Out32(GPIO_OEN_1, GPIO_MIO31_MASK);
-
-		/* Set MIO31 to HIGH */
-		RegVal = XFsbl_In32(GPIO_DATA_1) | GPIO_MIO31_MASK;
-		XFsbl_Out32(GPIO_DATA_1, RegVal);
-
-		(void)usleep(DELAY_1_US);
-    // xil_printf("Test Sleep 10 -> 1\r\n");
-		// (void)sleep(10);
-
-		/* Set MIO31 to LOW */
-		RegVal = XFsbl_In32(GPIO_DATA_1) & ~(GPIO_MIO31_MASK);
-		XFsbl_Out32(GPIO_DATA_1, RegVal);
-
-		(void)usleep(DELAY_5_US);
-    // xil_printf("Test Sleep 1 -> 0\r\n");
-		// (void)sleep(1);
-
-		/* Set MIO31 to HIGH */
-		RegVal = XFsbl_In32(GPIO_DATA_1) | GPIO_MIO31_MASK;
-		XFsbl_Out32(GPIO_DATA_1, RegVal);
-    xil_printf("PCIe Reset Complete\r\n");
-	}
-
-}
-#endif
-// TE Mod finished                                        
 /*****************************************************************************/
 /**
  * This function does board specific initialization.
@@ -883,29 +815,6 @@ void XFsbl_TeReset(void)
 u32 XFsbl_BoardInit(void)
 {
 	u32 Status;
-// TE Mod :
-#if defined(XPS_BOARD_TE0808_9EG_1E_TEBF0808)
-  xil_printf("\r\n--------------------------------------------------------------------------------\r\n");
-  xil_printf("TE0808 Board Initialisation\r\n");
-  Status = si534x_i2c_init();                      // Configure I2C Bus 0 driver instance
-  if (Status != XFSBL_SUCCESS) {
-     xil_printf("Error:I2C Init\r\n");
-     goto END;
-  }
-  Status = si534x_i2c_write(0x77, 0x00,  0x10);    // Configure I2C Switch
-  if (Status != XFSBL_SUCCESS) {
-     xil_printf("Error: Configure I2C Switch\r\n");
-     goto END;
-  }
-  Status = si534x_init(0x69);                      // Configure clocks
-  if (Status != XFSBL_SUCCESS) {
-     xil_printf("Error: Configure si534x CLK\r\n");
-     goto END;
-  }
-  XFsbl_TeReset();
-  xil_printf("\r\n--------------------------------------------------------------------------------\r\n");
-#endif
-// TE Mod finished
 #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106)		\
 		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111) \
 		|| defined(XPS_BOARD_ZCU216) || defined(XPS_BOARD_ZCU208) \

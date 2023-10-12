@@ -8,13 +8,13 @@ application and the modified lwIP library.
 
 The build script does the following:
 
-#. Creates a Vitis workspace in the `Vitis` directory of the source repository.
-#. Creates a subdirectory called `embeddedsw` to be used as a local software repository
+1. Creates a Vitis workspace in the `Vitis` directory of the source repository.
+2. Creates a subdirectory called `embeddedsw` to be used as a local software repository
    containing the modified lwIP library.
-#. Copies the sources from the `EmbeddedSw` directory of the repository to the local 
+3. Copies the sources from the `EmbeddedSw` directory of the repository to the local 
    software repository (`embeddedsw`), then copies any remaining/unmodified sources
    from the Vitis installation directory into the local software repository.
-#. Generates a lwIP Echo Server example application for each exported Vivado design
+4. Generates a lwIP Echo Server example application for each exported Vivado design
    that is found in the `Vivado` directory. Most users will only have one exported
    Vivado design.
 
@@ -77,7 +77,7 @@ Selection of the Ethernet port can be changed by modifying the defines contained
 `platform_config.h` file in the application sources. Set `PLATFORM_EMAC_BASEADDR`
 to one of the following values:
 
-### ZedBoard, MicroZed and PicoZed designs
+### ZedBoard and PicoZed designs
 
 * Ethernet FMC Port 0: `XPAR_AXIETHERNET_0_BASEADDR`
 * Ethernet FMC Port 1: `XPAR_AXIETHERNET_1_BASEADDR`

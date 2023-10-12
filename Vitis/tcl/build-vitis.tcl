@@ -29,7 +29,6 @@ set template_app "lwIP Echo Server"
 set mb_combine_bit_elf 1
 
 # Possible targets (board name in lower case for the board.h file)
-dict set target_dict mz_7020 { mz }
 dict set target_dict pynqzu { pynqzu }
 dict set target_dict pz_7030 { pz }
 dict set target_dict uzeg_pci { uzeg_pci }

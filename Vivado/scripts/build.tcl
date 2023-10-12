@@ -34,7 +34,6 @@ if {![string equal $ver $version_required]} {
 set_param board.repoPaths [get_property LOCAL_ROOT_DIR [xhub::get_xstores xilinx_board_store]]
 
 # Possible targets
-dict set target_dict mz_7020 { avnet.com microzed_7020 zynq rgmii-0123-axieth }
 dict set target_dict pynqzu { tul.com.tw pynqzu zynqmp rgmii-0123-pynqzu }
 dict set target_dict pz_7030 { avnet.com picozed_7030_fmc2 zynq rgmii-0123-axieth }
 dict set target_dict tebf0808 { trenz.biz te0808_9eg_1e_tebf0808 zynqmp rgmii-0123 }

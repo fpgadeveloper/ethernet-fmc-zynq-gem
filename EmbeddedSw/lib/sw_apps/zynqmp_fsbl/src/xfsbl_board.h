@@ -1,8 +1,28 @@
 /******************************************************************************
-* Copyright (c) 2015 - 2022 Xilinx, Inc.  All rights reserved.
-* SPDX-License-Identifier: MIT
+*
+* Copyright (C) 2015 - 17 Xilinx, Inc.  All rights reserved.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*
+*
+*
 ******************************************************************************/
-
 
 /*****************************************************************************/
 /**
@@ -16,13 +36,11 @@
 *
 * Ver   Who  Date        Changes
 * ----- ---- -------- -------------------------------------------------------
-* 1.00  ssc  01/20/16 Initial release
+* 1.0   ssc  01/20/16 Initial release
 * 2.0   bv   12/05/16 Made compliance to MISRAC 2012 guidelines
 *                     Added ZCU106 support
-* 3.0	bkm  04/18/18 Added Board specific code w.r.t VADJ
-* 4.0   bsv  11/12/19 Added support for ZCU216 board
-*       bsv  02/05/20 Added support for ZCU208 board
-* 5.0   bsv  01/05/22 Added support for ZCU670 board
+* 3.0	bkm	 18/4/18  Added Board specific code w.r.t VADJ
+*
 *
 * </pre>
 *
@@ -39,19 +57,8 @@ extern "C" {
 
 /***************************** Include Files *********************************/
 #include "xfsbl_hw.h"
-// TE Mod :
-#if defined(XPS_BOARD_TE0808_9EG_1E_TEBF0808)
-#define GPIO_MIO31_MASK	0x00000020U
-#define GPIO_MIO30_MASK	0x00000010U
-#define ICM_CFG_VAL_PCIE	0X1U
-#define DELAY_1_US			0x1U
-#define DELAY_5_US			0x5U
-#endif
-// TE Mod finished     
 #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106)		\
-		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111) \
-		|| defined(XPS_BOARD_ZCU216) || defined(XPS_BOARD_ZCU208) \
-		|| defined(XPS_BOARD_ZCU670)
+		|| defined(XPS_BOARD_ZCU104) || defined(XPS_BOARD_ZCU111)
 #include "xiicps.h"
 /************************** Constant Definitions *****************************/
 #define GPIO_MIO31_MASK	0x00000020U

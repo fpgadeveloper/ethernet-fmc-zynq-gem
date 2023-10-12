@@ -133,31 +133,21 @@ set_property PACKAGE_PIN J6 [get_ports mdio_io_port_3_mdc]
 set_property PACKAGE_PIN J8 [get_ports mdio_io_port_3_mdio_io]
 set_property PACKAGE_PIN K8 [get_ports reset_port_3]
 
-set gmii_to_rgmii_0_iodelay [get_cells -hierarchical -filter { PRIMITIVE_TYPE == IO.IODELAY.IDELAYE2 && NAME =~  "*/gmii_to_rgmii_0/*gen_rgmii_rx_zq.rxdata_bus[*].delay_rgmii_rxd*" } ] 
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 $gmii_to_rgmii_0_iodelay
-set_property IDELAY_VALUE 13 $gmii_to_rgmii_0_iodelay
 create_clock -period 8.000 -name rgmii_port_3_rx_clk -waveform {0.000 4.000} [get_ports rgmii_port_3_rxc]
 
+create_clock -period 8.000 -name ref_clk_clk_p -waveform {0.000 4.000} [get_ports ref_clk_clk_p]
+
+# IODELAY group for GMII-to-RGMII block
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells *_i/gmii_to_rgmii_0/U0/i_*_gmii_to_rgmii_0_0_idelayctrl]
+set gmii_to_rgmii_0_iodelay [get_cells -hierarchical -filter { PRIMITIVE_TYPE == IO.IODELAY.IDELAYE2 && NAME =~  "*/gmii_to_rgmii_0/*delay_rgmii_rx*" } ] 
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 $gmii_to_rgmii_0_iodelay
+set_property IDELAY_VALUE 13 $gmii_to_rgmii_0_iodelay
+
+# IODELAY groups for AXI Ethernet ports
+set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells *_i/axi_ethernet_0/inst/mac/inst/tri_mode_ethernet_mac_idelayctrl_common_i]
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells {*_i/axi_ethernet_0/inst/mac/inst/tri_mode_ethernet_mac_i/rgmii_interface/delay_rgmii_rx* {*_i/axi_ethernet_0/inst/mac/inst/tri_mode_ethernet_mac_i/rgmii_interface/rxdata_bus[*].delay_rgmii_rx*}}]
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells {*_i/axi_ethernet_1/inst/mac/inst/rgmii_interface/delay_rgmii_rx* {*_i/axi_ethernet_1/inst/mac/inst/rgmii_interface/rxdata_bus[*].delay_rgmii_rx*}}]
 set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells {*_i/axi_ethernet_2/inst/mac/inst/rgmii_interface/delay_rgmii_rx* {*_i/axi_ethernet_2/inst/mac/inst/rgmii_interface/rxdata_bus[*].delay_rgmii_rx*}}]
-
-set gmii_to_rgmii_0_iodelay_rx_ctl [get_cells -hierarchical -filter { PRIMITIVE_TYPE == IO.IODELAY.IDELAYE2 && NAME =~  "*/gmii_to_rgmii_0/*gen_rgmii_rx_zq.delay_rgmii_rx_ctl" }] 
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 $gmii_to_rgmii_0_iodelay_rx_ctl 
-set_property IDELAY_VALUE 16 $gmii_to_rgmii_0_iodelay_rx_ctl
-
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp0 [get_cells *_i/axi_ethernet_0/inst/mac/inst/tri_mode_ethernet_mac_idelayctrl_common_i]
-# IODELAY group for GMII-to-RGMII block
-set_property IODELAY_GROUP tri_mode_ethernet_mac_iodelay_grp1 [get_cells *_i/gmii_to_rgmii_0/U0/i_*_gmii_to_rgmii_0_0_idelayctrl]
-
-
-#create_generated_clock -name rgmii_port_3_txc -source [get_pins *_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/rgmii_txc_out/C] -divide_by 1 -add -master_clock gmii_clk_125m_out [get_ports rgmii_port_3_txc]
-#create_generated_clock -name rgmii_port_3_txc_1 -source [get_pins *_i/gmii_to_rgmii_0/U0/i_gmii_to_rgmii_block/*_gmii_to_rgmii_0_0_core/i_gmii_to_rgmii/i_gmii_to_rgmii/rgmii_txc_out/C] -divide_by 1 -add -master_clock gmii_clk_25m_out [get_ports rgmii_port_3_txc]
-#set_clock_groups -physically_exclusive -group [get_clocks -include_generated_clocks rgmii_port_3_txc] -group [get_clocks -include_generated_clocks rgmii_port_3_txc_1]
-#set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks gmii_clk_25m_out] -group [get_clocks -include_generated_clocks gmii_clk_125m_out]
-#set_clock_groups -logically_exclusive -group [get_clocks -include_generated_clocks gmii_clk_2_5m_out] -group [get_clocks -include_generated_clocks gmii_clk_25m_out]
-
-create_clock -period 8.000 -name ref_clk_clk_p -waveform {0.000 4.000} [get_ports ref_clk_clk_p]
 
 #False path constraints to async inputs coming directly to synchronizer
 set_false_path -to [get_pins -hier -filter {name =~ *idelayctrl_reset_gen/*reset_sync*/PRE }]

@@ -29,7 +29,6 @@ users are advised to use a Linux virtual machine to build the PetaLinux projects
    ```
 4. Build the Vivado and PetaLinux project for your specific target platform by running the following
    commands and replacing `<target>` with one of the following: 
-   `mz_7020`,
    `pynqzu`,
    `pz_7030`,
    `uzeg_pci`,
@@ -103,7 +102,6 @@ losing data on one of your hard drives.
 
 1. Plug the SD card into your target board.
 2. Ensure that the target board is configured to boot from SD card:
-   * **MicroZed:** Jumpers JP1,JP2,JP3 (on the SoM) are in positions 1-2,2-3,2-3 respectively
    * **PicoZed:** DIP switch SW1 (on the SoM) is set to 11 (1=ON,2=ON)
    * **ZedBoard:** Jumpers MIO6-2 must be set to 01100
    * **ZC706:** DIP switch SW11 must be set to 00110 (1=OFF,2=OFF,3=ON,4=ON,5=OFF)
@@ -138,7 +136,6 @@ boot will hang during at a message similar to this: `Waiting for root device /de
 1. Prepare the SD card according to the [instructions above](#prepare-the-sd-card) and plug the SD card 
    into your target board.
 2. Ensure that the target board is configured to boot from JTAG:
-   * **MicroZed:** Jumpers JP1,JP2,JP3 (on the SoM) are in position 1-2
    * **PicoZed:** DIP switch SW1 (on the SoM) is set to 00 (1=OFF,2=OFF)
    * **ZedBoard:** Jumpers MIO6-2 must be set to 00000
    * **ZC706:** DIP switch SW11 must be set to 00000 (1=OFF,2=OFF,3=OFF,4=OFF,5=OFF)
@@ -200,7 +197,7 @@ sudo screen /dev/ttyUSB0 115200
 
 ## Port configurations
 
-### MicroZed, PicoZed, ZC702, ZC706, ZedBoard
+### PicoZed, ZC702, ZC706, ZedBoard
 
 * eth0: Ethernet port of the dev board (GEM0)
 * eth1: Ethernet FMC Port 3 (GEM1)
@@ -354,7 +351,7 @@ PING 192.168.2.10 (192.168.2.10): 56 data bytes
 There is an issue in the PetaLinux 2020.2 release that affects the **AXI Ethernet** connected ports on
 **Zynq** based designs. On these ports, it seems to be necessary to use the following procedure to bring 
 up a port. Note that the interface and IP address were chosen as examples, but this procedure applies to 
-all AXI Ethernet connected ports (eth2, eth3 and eth4) on the Zynq based designs (MicroZed, PicoZed, 
+all AXI Ethernet connected ports (eth2, eth3 and eth4) on the Zynq based designs (PicoZed, 
 ZedBoard, ZC702 and ZC706).
 
 ```
@@ -369,4 +366,5 @@ operation. We have not yet determined the cause of this issue
 but if you have any information, please let us know.
 
 [Ethernet FMC]: https://ethernetfmc.com
+[supported Linux distributions]: https://docs.xilinx.com/r/2022.1-English/ug1144-petalinux-tools-reference-guide/Setting-Up-Your-Environment
 

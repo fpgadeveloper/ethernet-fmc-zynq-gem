@@ -12,7 +12,6 @@ TARGET ?= none
 JOBS ?= 8
 
 # valid targets (template name, flash size, flash interface, port config)
-mz_7020_target := zynq 0 0 ports-0123-axieth
 pynqzu_target := zynqMP 0 0 ports-0123
 pz_7030_target := zynq 0 0 ports-0123-axieth
 uzeg_pci_target :=zynqMP 0 0 ports-0123

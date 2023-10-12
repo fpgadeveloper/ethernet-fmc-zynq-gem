@@ -18,6 +18,7 @@ The designs for the boards listed below **require a license** to build. To build
 you will need to either buy a license or download a 30-day evaluation license for Vivado ML Enterprise Edition:
 
 * [ZC706]
+* [ZCU102]
 * [ZCU111]
 * [ZCU208]
 * [Trenz TEBF0808]
@@ -25,13 +26,11 @@ you will need to either buy a license or download a 30-day evaluation license fo
 The designs for all of the remaining [target boards](supported_carriers) can be built with the Vivado ML Standard 
 Edition **without a license**. That includes the following boards:
 
-* [MicroZed 7020 FMC Carrier]
 * [PicoZed 7030 FMC Carrier v2]
 * [ZedBoard]
 * [UltraZed EG PCIe Carrier]
 * [UltraZed EV carrier]
 * [ZCU104]
-* [ZCU102]
 * [ZCU106]
 * [PYNQ-ZU]
 
@@ -43,7 +42,6 @@ the FMC connector on which to connect the mezzanine card.
 
 | Target design     | GEM Eth ports  | AXI Eth ports   | Target board and connector     |
 |-------------------|----------------|-----------------|--------------------------------|
-| `mz_7020`         | PORT3          | PORT0,1,2       | [MicroZed 7020 FMC Carrier]    |
 | `pynqzu`          | PORT0,1,2,3    |                 | [PYNQ-ZU]                      |
 | `pz_7030`         | PORT3          | PORT0,1,2       | [PicoZed 7030 FMC Carrier v2]  |
 | `uzeg_pci`        | PORT0,1,2,3    |                 | [UltraZed EG PCIe Carrier]     |
@@ -116,7 +114,6 @@ to build the Vivado and PetaLinux projects with a single command.
    make project TARGET=<target>
    ```
    Valid targets are: 
-   `mz_7020`,
    `pynqzu`,
    `pz_7030`,
    `uzeg_pci`,
@@ -178,7 +175,6 @@ design if it has not already been done.
    make petalinux TARGET=<target>
    ```
    Valid targets are: 
-   `mz_7020`,
    `pynqzu`,
    `pz_7030`,
    `uzeg_pci`,
@@ -230,7 +226,6 @@ Now when you use `make` to build the PetaLinux projects, they will be configured
 [ZCU111]: https://www.xilinx.com/zcu111
 [ZCU208]: https://www.xilinx.com/zcu208
 [Trenz TEBF0808]: https://shop.trenz-electronic.de/en/TEBF0808-04A-UltraITX-Baseboard-for-Trenz-Electronic-TE080X-UltraSOM
-[MicroZed 7020 FMC Carrier]: https://www.avnet.com/opasdata/d120001/medias/docus/187/PB-AES-MBCC-FMC-G-V2-Product-Brief.pdf
 [PicoZed 7030 FMC Carrier v2]: https://www.avnet.com/wps/portal/silica/products/product-highlights/2016/xilinx-picozed-fmc-carrier-card-v2/
 [ZedBoard]: https://digilent.com/reference/programmable-logic/zedboard/start
 [UltraZed EG PCIe Carrier]: https://www.xilinx.com/products/boards-and-kits/1-mb9rqb.html

@@ -2,6 +2,7 @@
 
 ## 2022.1 Changes
 
+* Removed design for MicroZed FMC carrier (Avnet has discontinued the product).
 * Removed design for TEBF0808 due to errors when applying the board preset:
 ```
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1" }  [get_bd_cells zynq_ultra_ps_e_0]

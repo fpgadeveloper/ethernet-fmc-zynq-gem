@@ -5,7 +5,6 @@
 | Carrier board                                                    | FMC  |
 |------------------------------------------------------------------|------|
 | Zynq-7000 [ZedBoard]                                             | LPC  |
-| Zynq-7000 [MicroZed FMC Carrier] with [MicroZed 7020]            | LPC  |
 | Zynq-7000 [PicoZed FMC Carrier Card V2] with [PicoZed 7030]      | LPC  |
 | Zynq-7000 [ZC706 Evaluation board]                               | LPC  |
 |                                                                  | HPC  |
@@ -48,7 +47,7 @@ provide us with the pinout of your carrier and we'll be happy to check compatibi
 * The UltraZed designs use 4x GEMs to connect to ports 0-3 of the Ethernet FMC. These designs use up all 4 GEMs,
   leaving the on-board Ethernet port unusable.
 
-### ZedBoard, MicroZed and PicoZed
+### ZedBoard and PicoZed
 
 When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
 you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
@@ -61,8 +60,6 @@ The on-board Ethernet port on all of these designs is connected to GEM0 and is u
 [compatibility list]: https://ethernetfmc.com/documentation/compatiblility.html
 [Ethernet FMC]: https://ethernetfmc.com
 [ZedBoard]: https://www.avnet.com/wps/portal/us/products/avnet-boards/avnet-board-families/zedboard/zedboard-board-family
-[MicroZed FMC Carrier]: http://zedboard.org/product/microzed-fmc-carrier
-[MicroZed 7020]: http://microzed.org
 [PicoZed FMC Carrier Card V2]: http://zedboard.org/product/picozed-fmc-carrier-card-v2
 [PicoZed 7030]: http://picozed.org
 [UltraZed-EG PCIe Carrier Card]: https://www.xilinx.com/products/boards-and-kits/1-mb9rqb.html

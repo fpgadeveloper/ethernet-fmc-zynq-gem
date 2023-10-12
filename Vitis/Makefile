@@ -17,7 +17,6 @@ TARGET ?= none
 JOBS ?= 8
 
 # valid targets
-mz_7020_target := 0
 pynqzu_target := 0
 pz_7030_target := 0
 uzeg_pci_target := 0

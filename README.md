@@ -33,7 +33,7 @@ In order to test this design on hardware, you will need the following:
 * Vivado 2022.1
 * Vitis 2022.1
 * PetaLinux Tools 2022.1
-* [Ethernet FMC](http://ethernetfmc.com "Ethernet FMC")
+* [Ethernet FMC](https://ethernetfmc.com "Ethernet FMC")
 * One of the [supported evaluation boards](https://zynqgem.ethernetfmc.com/en/latest/supported_carriers.html)
 * For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
@@ -41,7 +41,6 @@ In order to test this design on hardware, you will need the following:
 
 #### Zynq boards
 
-* [MicroZed 7020 FMC Carrier](https://www.avnet.com/opasdata/d120001/medias/docus/187/PB-AES-MBCC-FMC-G-V2-Product-Brief.pdf)
 * [PicoZed 7030 FMC Carrier v2](https://www.avnet.com/wps/portal/silica/products/product-highlights/2016/xilinx-picozed-fmc-carrier-card-v2/)
 * [ZC706](https://www.xilinx.com/zc706)
 * [ZedBoard](https://digilent.com/reference/programmable-logic/zedboard/start)

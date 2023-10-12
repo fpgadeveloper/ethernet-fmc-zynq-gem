@@ -37,7 +37,7 @@ The BSP files for each supported target platform are contained in the `PetaLinux
 1. Download and install the PetaLinux release that you intend to use.
 2. Download and install the BSP for the target platform for the release that you intend to use.
 
-   * For MicroZed, PicoZed, ZedBoard, UltraZed-EG and UltraZed-EV contact your [Avnet rep](https://www.avnet.com)
+   * For PicoZed, ZedBoard, UltraZed-EG and UltraZed-EV, download the BSP from the [Avnet downloads] page
    * For ZC706, ZCU102, ZCU104 and ZCU106, download the BSP from the 
      [Xilinx downloads] page
    * For PYNQ-ZU, there is a PetaLinux BSP maintainted in the [PYNQ-ZU Git repo](https://github.com/Xilinx/PYNQ-ZU)
@@ -158,4 +158,7 @@ CONFIG_SUBSYSTEM_FPGA_MANAGER=n
 ```
    
 
+
+[Xilinx downloads]: https://www.xilinx.com/support/download.html
+[Avnet downloads]: https://avnet.me/zedsupport
 
