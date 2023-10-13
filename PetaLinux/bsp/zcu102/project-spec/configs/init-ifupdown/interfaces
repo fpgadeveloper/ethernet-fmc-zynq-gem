@@ -17,6 +17,8 @@ iface atml0 inet dhcp
 auto eth0
 iface eth0 inet dhcp
 iface eth1 inet dhcp
+iface eth2 inet dhcp
+iface eth3 inet dhcp
 
 # Ethernet/RNDIS gadget (g_ether)
 # ... or on host side, usbnet and random hwaddr
