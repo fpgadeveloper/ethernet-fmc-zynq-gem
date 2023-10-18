@@ -57,18 +57,6 @@
 
 };
 
-&gem3 {
-   status = "okay";
-   phy-mode = "rgmii-id";
-   phy-handle = <&phy0>;
-   phy0: phy@0 {
-      reg = <0x0>;
-      ti,rx-internal-delay = <0x5>;
-      ti,tx-internal-delay = <0x5>;
-      ti,fifo-depth = <0x1>;
-   };
-};
-
 &i2c1 {
    i2cswitch@70 { /* U7 on UZ3EG SOM, U8 on UZ7EV SOM */
       compatible = "nxp,pca9543";

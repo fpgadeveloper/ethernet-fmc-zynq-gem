@@ -6,12 +6,10 @@
 |------------------------------------------------------------------|------|
 | Zynq-7000 [ZedBoard]                                             | LPC  |
 | Zynq-7000 [PicoZed FMC Carrier Card V2] with [PicoZed 7030]      | LPC  |
-| Zynq-7000 [ZC706 Evaluation board]                               | LPC  |
-|                                                                  | HPC  |
+| Zynq-7000 [ZC706 Evaluation board]                               | LPC, HPC  |
 | Zynq UltraScale+ [UltraZed-EG PCIe Carrier Card]                 | LPC  |
 | Zynq UltraScale+ [UltraZed EV Carrier Card]                      | HPC  |
-| Zynq UltraScale+ [ZCU102 Evaluation board]                       | HPC0 |
-|                                                                  | HPC1 |
+| Zynq UltraScale+ [ZCU102 Evaluation board]                       | HPC0, HPC1 |
 | Zynq UltraScale+ [ZCU104 Evaluation board]                       | LPC  |
 | Zynq UltraScale+ [ZCU106 Evaluation board]                       | HPC0 |
 | Zynq UltraScale+ [ZCU111 Evaluation board]                       | FMC+ |
@@ -60,8 +58,8 @@ The on-board Ethernet port on all of these designs is connected to GEM0 and is u
 [compatibility list]: https://ethernetfmc.com/documentation/compatiblility.html
 [Ethernet FMC]: https://ethernetfmc.com
 [ZedBoard]: https://www.avnet.com/wps/portal/us/products/avnet-boards/avnet-board-families/zedboard/zedboard-board-family
-[PicoZed FMC Carrier Card V2]: http://zedboard.org/product/picozed-fmc-carrier-card-v2
-[PicoZed 7030]: http://picozed.org
+[PicoZed FMC Carrier Card V2]: https://www.avnet.com/wps/portal/silica/products/product-highlights/2016/xilinx-picozed-fmc-carrier-card-v2/
+[PicoZed 7030]: https://www.avnet.com/wps/portal/us/products/avnet-boards/avnet-board-families/picozed/picozed-board-family
 [UltraZed-EG PCIe Carrier Card]: https://www.xilinx.com/products/boards-and-kits/1-mb9rqb.html
 [UltraZed EV Carrier Card]: https://www.xilinx.com/products/boards-and-kits/1-y3n9v1.html
 [ZC706 Evaluation board]: https://www.xilinx.com/zc706

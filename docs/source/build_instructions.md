@@ -14,25 +14,10 @@ git clone https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem.git
 
 ## License requirements
 
-The designs for the boards listed below **require a license** to build. To build the designs for these boards,
-you will need to either buy a license or download a 30-day evaluation license for Vivado ML Enterprise Edition:
-
-* [ZC706]
-* [ZCU102]
-* [ZCU111]
-* [ZCU208]
-* [Trenz TEBF0808]
-
-The designs for all of the remaining [target boards](supported_carriers) can be built with the Vivado ML Standard 
-Edition **without a license**. That includes the following boards:
-
-* [PicoZed 7030 FMC Carrier v2]
-* [ZedBoard]
-* [UltraZed EG PCIe Carrier]
-* [UltraZed EV carrier]
-* [ZCU104]
-* [ZCU106]
-* [PYNQ-ZU]
+Some of the designs in this repository target dev boards for which a license is required to generate a bitstream. 
+Others can be built with the Vivado ML Standard Edition **without a license**. The table of target designs in the 
+following section contains a column specifying which designs require a license, and which can be built without a 
+license.
 
 ## Target designs
 
@@ -40,20 +25,20 @@ This repo contains several designs that target the various supported development
 FMC connectors. The table below lists the target design name, the Ethernet ports supported by the design and 
 the FMC connector on which to connect the mezzanine card.
 
-| Target design     | GEM Eth ports  | AXI Eth ports   | Target board and connector     |
-|-------------------|----------------|-----------------|--------------------------------|
-| `pynqzu`          | PORT0,1,2,3    |                 | [PYNQ-ZU]                      |
-| `pz_7030`         | PORT3          | PORT0,1,2       | [PicoZed 7030 FMC Carrier v2]  |
-| `uzeg_pci`        | PORT0,1,2,3    |                 | [UltraZed EG PCIe Carrier]     |
-| `uzev`            | PORT0,1,2,3    |                 | [UltraZed EV carrier]          |
-| `zc706_lpc`       | PORT3          | PORT0,1,2       | [ZC706], LPC connector         |
-| `zcu102_hpc0`     | PORT0,1,2,3    |                 | [ZCU102], HPC0 connector       |
-| `zcu102_hpc1`     | PORT3          | PORT0,1,2       | [ZCU102], HPC1 connector       |
-| `zcu104`          | PORT0,1,2,3    |                 | [ZCU104]                       |
-| `zcu106_hpc0`     | PORT0,1,2,3    |                 | [ZCU106], HPC0 connector       |
-| `zcu111`          | PORT0,1,2,3    |                 | [ZCU111]                       |
-| `zcu208`          | PORT0,1,2,3    |                 | [ZCU208]                       |
-| `zedboard`        | PORT3          | PORT0,1,2       | [ZedBoard]                     |
+| Target design     | GEM Eth ports  | AXI Eth ports   | Target board and connector     | License<br> required |
+|-------------------|----------------|-----------------|--------------------------------|----|
+| `pynqzu`          | PORT0,1,2,3    |                 | [PYNQ-ZU]                      | NO |
+| `pz_7030`         | PORT3          | PORT0,1,2       | [PicoZed 7030 FMC Carrier v2]  | NO |
+| `uzeg_pci`        | PORT0,1,2,3    |                 | [UltraZed EG PCIe Carrier]     | NO |
+| `uzev`            | PORT0,1,2,3    |                 | [UltraZed EV carrier]          | NO |
+| `zc706_lpc`       | PORT3          | PORT0,1,2       | [ZC706], LPC connector         | YES |
+| `zcu102_hpc0`     | PORT0,1,2,3    |                 | [ZCU102], HPC0 connector       | YES |
+| `zcu102_hpc1`     | PORT3          | PORT0,1,2       | [ZCU102], HPC1 connector       | YES |
+| `zcu104`          | PORT0,1,2,3    |                 | [ZCU104]                       | NO |
+| `zcu106_hpc0`     | PORT0,1,2,3    |                 | [ZCU106], HPC0 connector       | NO |
+| `zcu111`          | PORT0,1,2,3    |                 | [ZCU111]                       | YES |
+| `zcu208`          | PORT0,1,2,3    |                 | [ZCU208]                       | YES |
+| `zedboard`        | PORT3          | PORT0,1,2       | [ZedBoard]                     | NO |
 
 ## Windows users
 
@@ -225,7 +210,6 @@ Now when you use `make` to build the PetaLinux projects, they will be configured
 [ZC706]: https://www.xilinx.com/zc706
 [ZCU111]: https://www.xilinx.com/zcu111
 [ZCU208]: https://www.xilinx.com/zcu208
-[Trenz TEBF0808]: https://shop.trenz-electronic.de/en/TEBF0808-04A-UltraITX-Baseboard-for-Trenz-Electronic-TE080X-UltraSOM
 [PicoZed 7030 FMC Carrier v2]: https://www.avnet.com/wps/portal/silica/products/product-highlights/2016/xilinx-picozed-fmc-carrier-card-v2/
 [ZedBoard]: https://digilent.com/reference/programmable-logic/zedboard/start
 [UltraZed EG PCIe Carrier]: https://www.xilinx.com/products/boards-and-kits/1-mb9rqb.html

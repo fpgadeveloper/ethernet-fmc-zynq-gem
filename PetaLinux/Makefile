@@ -134,7 +134,7 @@ petalinux: check_target
 		echo "$(TARGET) is locked. Skipping..."; \
 	else \
 		touch $(PETL_LOCK); \
-		$(MAKE) petalinux_locked TARGET=$(TARGET) JOBS=$(JOBS); \
+		$(MAKE) --no-print-directory petalinux_locked TARGET=$(TARGET) JOBS=$(JOBS); \
 		rm -f $(PETL_LOCK); \
 	fi
 
@@ -185,6 +185,7 @@ $(PETL_COMP_DIR): | $(PETL_DIR)
 	cd $(TARGET) && petalinux-config --get-hw-description $(VIV_XSA) --silentconfig
 	
 $(PETL_DIR): $(VIV_XSA)
+	@if [ -d $@ ]; then echo "Project $(TARGET) already exists but is outdated. Use 'make clean TARGET=$(TARGET)' to remove it."; exit 1; fi
 	petalinux-create --type project --template $(call get_template_name,$(TARGET)) --name $(TARGET)
 
 $(VIV_XSA):
@@ -192,9 +193,11 @@ $(VIV_XSA):
 
 .PHONY: all
 all:
+	@{ \
 	for targ in $(TARGET_LIST); do \
 		$(MAKE) --no-print-directory petalinux TARGET=$${targ} JOBS=$(JOBS); \
-	done
+	done; \
+	}
 
 .PHONY: clean
 clean: check_target

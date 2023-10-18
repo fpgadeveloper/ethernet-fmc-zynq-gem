@@ -2,6 +2,9 @@
 
 ## 2022.1 Changes
 
+* Added Makefiles to improve the build experience for Linux users
+* Converted documentation to markdown (from reStructuredText)
+* Removed the unnecessary postfix _qgige from all designs
 * Removed design for MicroZed FMC carrier (Avnet has discontinued the product).
 * Removed design for TEBF0808 due to errors when applying the board preset:
 ```

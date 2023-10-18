@@ -144,6 +144,12 @@
    status = "okay";
    max-frequency = <50000000>;
    no-1-8-v;   /* for 1.0 silicon */
+   disable-wp;
+   broken-cd;
+   xlnx,mio-bank = <1>;
+   /* Do not run SD in HS mode from bootloader */
+   sdhci-caps-mask = <0 0x200000>;
+   sdhci-caps = <0 0>;
 };
 
 &psgtr {

@@ -229,7 +229,7 @@ thus unusable.
 This example will bring up a port.
 
 ```
-root@zynqgem:~# ifconfig eth1 up
+root@zynqgem:~# sudo ifconfig eth1 up
 [  378.871550] pps pps1: new PPS source ptp1
 [  378.875583] macb ff0c0000.ethernet: gem-ptp-timer ptp clock registered.
 [  382.943505] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
@@ -242,7 +242,7 @@ root@zynqgem:~# ifconfig eth1 up
 This example sets a fixed IP address to a port.
 
 ```
-root@zynqgem:~# ifconfig eth1 192.168.2.31 up
+root@zynqgem:~# sudo ifconfig eth1 192.168.2.31 up
 [  424.839768] pps pps1: new PPS source ptp1
 [  424.843798] macb ff0c0000.ethernet: gem-ptp-timer ptp clock registered.
 [  428.927505] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
@@ -256,7 +256,7 @@ This example enables a port and obtains an IP address for the port via DHCP. Not
 port must be connected to a DHCP enabled router.
 
 ```
-root@zynqgem:~# udhcpc -i eth1
+root@zynqgem:~# sudo udhcpc -i eth1
 udhcpc: started, v1.31.0
 [  314.831199] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
 [  314.839489] macb ff0c0000.ethernet eth1: link up (1000/Full)
@@ -346,18 +346,18 @@ PING 192.168.2.10 (192.168.2.10): 56 data bytes
 
 ## Known Issues
 
-### AXI Ethernet issue on Zynq designs 2020.2
+### AXI Ethernet issue on Zynq designs 2022.1
 
-There is an issue in the PetaLinux 2020.2 release that affects the **AXI Ethernet** connected ports on
+There is an issue in the PetaLinux 2022.1 release that affects the **AXI Ethernet** connected ports on
 **Zynq** based designs. On these ports, it seems to be necessary to use the following procedure to bring 
 up a port. Note that the interface and IP address were chosen as examples, but this procedure applies to 
 all AXI Ethernet connected ports (eth2, eth3 and eth4) on the Zynq based designs (PicoZed, 
 ZedBoard, ZC702 and ZC706).
 
 ```
-ifconfig eth0 up
-ifconfig eth0 down
-ifconfig eth0 192.168.1.10 up
+sudo ifconfig eth0 up
+sudo ifconfig eth0 down
+sudo ifconfig eth0 192.168.1.10 up
 ```
 
 In earlier releases, it was only necessary to run the last command to bring up a port. This issue

@@ -53,38 +53,6 @@ if { $argc >= 1 } {
   set target ""
 }
 
-# Modifies the psu_init.c in the FSBL for the UltraZed EG
-# This removes the line that runs function serdes_illcalib() which seems to cause the
-# psu_init sequence to hang.
-proc patch_psu_init_uzeg {filename} {
-  set fd [open "${filename}" "r"]
-  set file_data [read $fd]
-  close $fd
-  set data [split $file_data "\n"]
-  
-  # Find the call to serdes_illcalib() and comment it out
-  set new_filename "${filename}.txt"
-  set fd [open "$new_filename" "w"]
-  foreach line $data {
-    if {[str_contains $line "serdes_illcalib("]} {
-			puts $fd "// Opsero mod"
-      puts $fd "//$line"
-			puts $fd "// End of Opsero mod"
-    } else {
-      puts $fd $line
-    }
-  }
-  close $fd
-
-  # Delete the old linker script
-  file delete $filename
-  
-  # Rename new linker script to the old filename
-  file rename $new_filename $filename
-  
-  return 0
-}
-
 # ----------------------------------------------------------------------------------------------
 # Custom modifications functions
 # ----------------------------------------------------------------------------------------------
@@ -93,10 +61,7 @@ proc patch_psu_init_uzeg {filename} {
 # These functions are called after creating the platform/application and before build.
 
 proc custom_platform_mods {platform_name} {
-  # For UltraZed EG design, patch the psu_init.c file
-  if { $platform_name == "uz_pci" } {
-    patch_psu_init_uzeg "./uz_pci/zynqmp_fsbl/psu_init.c"
-  }
+  # No custom mods required
 }
 
 proc custom_app_mods {platform_name app_name} {
