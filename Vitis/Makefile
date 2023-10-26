@@ -8,8 +8,6 @@ RM = rm -rf
 ROOT_DIR = $(shell pwd)
 XSCT = $(XILINX_VITIS)/bin/xsct
 BD_NAME = zynqgem
-APP_POSTFIX = _echo_server
-SYS_POSTFIX = $(APP_POSTFIX)_system
 
 # defaults
 .DEFAULT_GOAL := workspace
@@ -17,28 +15,48 @@ TARGET ?= none
 JOBS ?= 8
 
 # valid targets
-pynqzu_target := 0
-pz_7030_target := 0
-uzeg_pci_target := 0
-uzev_target := 0
-zc706_lpc_target := 0
-zcu102_hpc0_target := 0
-zcu102_hpc1_target := 0
-zcu104_target := 0
-zcu106_hpc0_target := 0
-zcu111_target := 0
-zcu208_target := 0
-zedboard_target := 0
+pynqzu_target := zynqMP
+pz_7030_target := zynq
+uzeg_pci_target := zynqMP
+uzev_target := zynqMP
+zc706_lpc_target := zynq
+zcu102_hpc0_target := zynqMP
+zcu102_hpc1_target := zynqMP
+zcu104_target := zynqMP
+zcu106_hpc0_target := zynqMP
+zcu111_target := zynqMP
+zcu208_target := zynqMP
+zedboard_target := zynq
 
 TARGET_LIST := $(sort $(patsubst %_target,%,$(filter %_target,$(.VARIABLES))))
 
 # Vitis paths
 VIT_SCRIPT_WS = tcl/build-vitis.tcl
+VIT_TARGET_WS = $(ROOT_DIR)/$(TARGET)_workspace
+VIT_LOCK = $(ROOT_DIR)/.$(TARGET).lock
+VIT_BOOT = $(ROOT_DIR)/boot
+VIT_BOOT_TARG = $(VIT_BOOT)/$(TARGET)
 
 # Vivado paths
 VIV_DIR = $(ROOT_DIR)/../Vivado
 VIV_PRJ_DIR = $(VIV_DIR)/$(TARGET)
 VIV_XSA = $(VIV_PRJ_DIR)/$(BD_NAME)_wrapper.xsa
+
+# These macros return values from the valid target lists defined above
+define get_template_name
+$(word 1,$($(1)_target))
+endef
+
+# The name of the boot image of the baremetal app depends on the device
+ifeq ($(call get_template_name,$(TARGET)), microblaze)
+	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/$(TARGET).bit
+else ifeq ($(call get_template_name,$(TARGET)), zynq)
+	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/BOOT.BIN
+else ifeq ($(call get_template_name,$(TARGET)), zynqMP)
+	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/BOOT.BIN
+else ifeq ($(call get_template_name,$(TARGET)), versal)
+	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/BOOT.BIN
+endif
 
 .PHONY: help
 help:
@@ -50,8 +68,11 @@ help:
 	@echo '  make all JOBS=<val>'
 	@echo '    Create the Vitis workspace and add applications for all targets.'
 	@echo ''
-	@echo '  make clean'
-	@echo '    Delete the Vitis workspace and all applications.'
+	@echo '  make clean TARGET=<target>'
+	@echo '    Delete the Vitis workspace and all applications for specified target.'
+	@echo ''
+	@echo '  make clean_all'
+	@echo '    Delete all Vitis workspaces and all applications.'
 	@echo ''
 	@echo 'Parameters:'
 	@echo ''
@@ -66,23 +87,43 @@ help:
 
 .PHONY: all
 all:
+	@{ \
 	for targ in $(TARGET_LIST); do \
-		$(MAKE) workspace TARGET=$$targ; \
-	done
+		$(MAKE) --no-print-directory workspace TARGET=$$targ; \
+	done; \
+	}
 
 .PHONY: workspace
-workspace: check_target $(VIV_XSA)
+workspace: check_target
+	@if [ -f $(VIT_LOCK) ]; then \
+		echo "$(TARGET) is locked. Skipping..."; \
+	else \
+		touch $(VIT_LOCK); \
+		$(MAKE) workspace_locked TARGET=$(TARGET) JOBS=$(JOBS); \
+		rm -f $(VIT_LOCK); \
+	fi
+
+workspace_locked: $(VIT_TARGET_WS) $(VIT_BOOT_FILE)
+
+$(VIT_TARGET_WS) $(VIT_BOOT_FILE): $(VIV_XSA)
+	@if [ -d $@ ]; then echo "Workspace for $(TARGET) already exists but is outdated. Use 'make clean TARGET=$(TARGET)' to remove it."; exit 1; fi
 	$(XSCT) $(VIT_SCRIPT_WS) $(TARGET)
 
 $(VIV_XSA):
 	$(MAKE) -C $(VIV_DIR) xsa TARGET=$(TARGET) JOBS=$(JOBS)
 
 .PHONY: clean
-clean:
+clean: check_target
+	$(RM) $(TARGET)_workspace
+
+.PHONY: clean_all
+clean_all:
+	@{ \
 	for targ in $(TARGET_LIST); do \
-		$(RM) $${targ} $${targ}$(APP_POSTFIX) $${targ}$(SYS_POSTFIX); \
-	done
-	$(RM) boot .metadata .Xil IDE.log .analytics updatemem*.jou updatemem*.log RemoteSystemsTempFiles embeddedsw
+		$(RM) $${targ}_workspace; \
+	done; \
+	$(RM) .Xil RemoteSystemsTempFiles; \
+	}
 
 check_target:
 ifndef $(TARGET)_target

@@ -47,7 +47,6 @@ In order to test this design on hardware, you will need the following:
 
 #### Zynq UltraScale+ MPSoC boards
 
-* [Trenz TEBF0808](https://shop.trenz-electronic.de/en/TEBF0808-04A-UltraITX-Baseboard-for-Trenz-Electronic-TE080X-UltraSOM)
 * [ZCU104](https://www.xilinx.com/zcu104)
 * [ZCU102](https://www.xilinx.com/zcu102)
 * [ZCU106](https://www.xilinx.com/zcu106)
@@ -59,6 +58,11 @@ In order to test this design on hardware, you will need the following:
 
 * [ZCU111](https://www.xilinx.com/zcu111)
 * [ZCU208](https://www.xilinx.com/zcu208)
+
+## Build instructions
+
+* [For Windows users](https://zynqgem.ethernetfmc.com/en/latest/build_instructions.html#windows-users)
+* [For Linux users](https://zynqgem.ethernetfmc.com/en/latest/build_instructions.html#linux-users)
 
 ## Contribute
 
