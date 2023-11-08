@@ -21,9 +21,8 @@ we cannot always provide support if you have trouble updating the designs.
 3. In a text editor, open the `Vivado/scripts/xsa.tcl` file and perform the following changes:
    * Update the `version_required` variable value to the tools version number 
      that you are using.
-4. **Windows users only:** In a text editor, open the `Vivado/build-<target>.bat` file for
-   the design that you wish to update, and update the tools version number to the one you are using 
-   (eg. 2022.1).
+4. **Windows users only:** In a text editor, open the `Vivado/build-vivado.bat` file and update 
+   the tools version number to the one you are using (eg. 2022.1).
 
 After completing the above, you should now be able to use the [build instructions](build_instructions) to
 build the Vivado project. If there were no significant changes to the tools and/or IP, the build script 
@@ -37,10 +36,11 @@ The BSP files for each supported target platform are contained in the `PetaLinux
 1. Download and install the PetaLinux release that you intend to use.
 2. Download and install the BSP for the target platform for the release that you intend to use.
 
-   * For PicoZed, ZedBoard, UltraZed-EG and UltraZed-EV, download the BSP from the [Avnet downloads] page
+   * For PicoZed, UltraZed-EG and UltraZed-EV, download the BSP from the [Avnet downloads] page
    * For ZC706, ZCU102, ZCU104 and ZCU106, download the BSP from the 
      [Xilinx downloads] page
    * For PYNQ-ZU, there is a PetaLinux BSP maintainted in the [PYNQ-ZU Git repo](https://github.com/Xilinx/PYNQ-ZU)
+   * For the ZedBoard, we use the ZC702 BSP which can be downloaded from the [Xilinx downloads] page
 
 3. Update the BSP files for the target platform in the `PetaLinux/bsp/<platform>` directory. 
    These are the specific directories to update:
@@ -91,57 +91,229 @@ CONFIG_ethtool
 
 This BSP modification applies to all target platforms.
 
-1. Append the following line after `/include/ "system-conf.dtsi"` in `project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi`:
+1. Append the following line after `/include/ "system-conf.dtsi"` in 
+   `project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi`:
 
 ```
 /include/ "port-config.dtsi"
 ```
 
-2. Append the following line after `SRC_URI += "file://system-user.dtsi"` in `project-spec/meta-user/recipes-bsp/device-tree/device-tree.bbappend`:
+2. Append the following line after `SRC_URI:append = " file://config file://system-user.dtsi` in 
+   `project-spec/meta-user/recipes-bsp/device-tree/device-tree.bbappend`:
 
 ```
-SRC_URI += "file://port-config.dtsi"
+SRC_URI:append = " file://port-config.dtsi"
 ```
 
 ### Add kernel configs
 
 This BSP modification applies to all target platforms.
 
-1. Add the following lines to the top of file `project-spec/meta-user/recipes-kernel/linux/linux-xlnx/bsp.cfg`:
+1. Append the following lines to file `project-spec/meta-user/recipes-kernel/linux/linux-xlnx/bsp.cfg`:
 
 ```
 # Required by all designs
 CONFIG_XILINX_GMII2RGMII=y
-
-# Required by BSP
+CONFIG_NET_VENDOR_MARVELL=y
+CONFIG_MVMDIO=y
+CONFIG_MARVELL_PHY=y
+CONFIG_AMD_PHY=y
+CONFIG_XILINX_PHY=y
 ```
+
+### Mods for all Zynq-7000 designs
+
+The following modifications apply to all the Zynq-7000 based designs (PicoZed, ZC702, ZC706).
+
+1. Append the following lines to `project-spec/configs/config`. These options configure the design
+   to use the SD card to store the root filesystem.
+
+```
+# SD card for root filesystem
+
+CONFIG_SUBSYSTEM_BOOTARGS_AUTO=n
+CONFIG_SUBSYSTEM_USER_CMDLINE="earlycon console=ttyPS0,115200 clk_ignore_unused root=/dev/mmcblk0p2 rw rootwait cma=1536M"
+
+CONFIG_SUBSYSTEM_ROOTFS_INITRD=n
+CONFIG_SUBSYSTEM_ROOTFS_EXT4=y
+CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk0p2"
+CONFIG_SUBSYSTEM_RFS_FORMATS="tar.gz ext4 ext4.gz "
+```
+
+2. Append the following line after `SRC_URI:append = " file://config file://system-user.dtsi` in 
+   `project-spec/meta-user/recipes-bsp/device-tree/device-tree.bbappend`:
+
+```
+SRC_URI:append = " file://emacps.patch"
+```
+
+3. Add the following EMACs patch to `project-spec/meta-user/recipes-bsp/device-tree/files/emacps.patch`.
+   This patch is required to prevent a build error.
+   Note that the patch may have to be updated or it may not be necessary in future tool versions.
+
+```
+diff --git a/emacps/data/emacps.tcl b/emacps/data/emacps.tcl
+index 98f5117..7475ac3 100644
+--- a/emacps/data/emacps.tcl
++++ b/emacps/data/emacps.tcl
+@@ -166,7 +166,10 @@ proc generate {drv_handle} {
+            if {[string match -nocase $node "&gem1"]} {
+                 set zynq_periph [get_cells -hier -filter {IP_NAME == processing_system7}]
+                 set port0_pins [::hsi::utils::get_sink_pins [get_pins -of_objects [get_cells -hier $zynq_periph] "ENET1_MDIO_O"]]
+-                set sink_periph [::hsi::get_cells -of_objects $port0_pins]
++                set sink_periph ""
++                if {[llength $port0_pins]} {
++                    set sink_periph [::hsi::get_cells -of_objects $port0_pins]
++                }
+                 if {[llength $sink_periph]} {
+                     set ip_name [get_property IP_NAME $sink_periph]
+                 }
+```
+
+### Mods for all ZynqMP designs
+
+These BSP modifications must be applied to all ZynqMP designs.
+
+1. Append the following lines to `project-spec/configs/config`. These options configure the design
+   to use the SD card to store the root filesystem.
+
+```
+# SD card for root filesystem
+
+CONFIG_SUBSYSTEM_BOOTARGS_AUTO=n
+CONFIG_SUBSYSTEM_USER_CMDLINE="earlycon console=ttyPS0,115200 clk_ignore_unused root=/dev/mmcblk0p2 rw rootwait cma=1536M"
+
+CONFIG_SUBSYSTEM_ROOTFS_INITRD=n
+CONFIG_SUBSYSTEM_ROOTFS_EXT4=y
+CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk0p2"
+CONFIG_SUBSYSTEM_RFS_FORMATS="tar.gz ext4 ext4.gz "
+```
+
+### Mods for PicoZed FMC Carrier v2
+
+These modifications are specific to the PicoZed FMC Carrier v2 BSP.
+
+1. Append the following lines to `project-spec/configs/config`:
+
+```
+# PZ configs
+
+CONFIG_YOCTO_MACHINE_NAME="zynq-generic"
+CONFIG_USER_LAYER_0=""
+CONFIG_SUBSYSTEM_PRIMARY_SD_PSU_SD_0_SELECT=n
+CONFIG_SUBSYSTEM_PRIMARY_SD_PSU_SD_1_SELECT=y
+CONFIG_SUBSYSTEM_SD_PSU_SD_0_SELECT=n
+```
+
+2. Append the following lines to file `project-spec/meta-user/recipes-kernel/linux/linux-xlnx/bsp.cfg`:
+
+```
+# Required by PZ BSP
+CONFIG_USB_ACM=y
+CONFIG_USB_F_ACM=m
+CONFIG_USB_U_SERIAL=m
+CONFIG_USB_CDC_COMPOSITE=m
+CONFIG_I2C_XILINX=y
+```
+
+### Mods for ZedBoard
+
+These modifications are specific to the ZedBoard BSP.
+
+```{note}
+Note that Avnet no longer maintains a BSP for the ZedBoard, so we are instead using the BSP for the ZC702
+and making modifications for it to work with the ZedBoard.
+```
+
+1. Append the following lines to `project-spec/configs/config`:
+
+```
+# ZedBoard configs
+
+CONFIG_YOCTO_MACHINE_NAME="zynq-generic"
+```
+
+2. Append the following lines to file `project-spec/meta-user/recipes-kernel/linux/linux-xlnx/bsp.cfg`:
+
+```
+# Required by ZedBoard BSP
+CONFIG_USB_SUSPEND=y
+CONFIG_USB_OTG=y
+CONFIG_USB_GADGET=y
+CONFIG_USB_GADGET_XUSBPS=y
+CONFIG_XILINX_ZED_USB_OTG=y
+# CONFIG_USB_ETH is not set
+# CONFIG_USB_ETH_RNDIS is not set
+CONFIG_USB_ZERO=m
+```
+
+### Mods for UltraZed-EG PCIe Carrier
+
+These modifications are specific to the UltraZed-EG PCIe Carrier BSP.
+
+1. Append the following lines to `project-spec/configs/config`:
+
+```
+# UZ-EG configs
+
+CONFIG_YOCTO_MACHINE_NAME="zynqmp-generic"
+CONFIG_USER_LAYER_0=""
+CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk1p2"
+CONFIG_SUBSYSTEM_USER_CMDLINE=" earlycon console=ttyPS0,115200 clk_ignore_unused root=/dev/mmcblk1p2 rw rootwait cma=1000M"
+CONFIG_SUBSYSTEM_PRIMARY_SD_PSU_SD_0_SELECT=n
+CONFIG_SUBSYSTEM_PRIMARY_SD_PSU_SD_1_SELECT=y
+CONFIG_SUBSYSTEM_SD_PSU_SD_0_SELECT=n
+```
+
+2. Overwrite the device tree file 
+   `project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi` with the one that is in the
+   repository.
+
+### Mods for UltraZed-EV Carrier
+
+These modifications are specific to the UltraZed-EV BSP.
+
+1. Append the following lines to `project-spec/configs/config`.
+
+```
+# UZ-EV configs
+
+CONFIG_YOCTO_MACHINE_NAME="zynqmp-generic"
+CONFIG_USER_LAYER_0=""
+CONFIG_SUBSYSTEM_SDROOT_DEV="/dev/mmcblk1p2"
+CONFIG_SUBSYSTEM_USER_CMDLINE=" earlycon console=ttyPS0,115200 clk_ignore_unused root=/dev/mmcblk1p2 rw rootwait cma=1000M"
+CONFIG_SUBSYSTEM_PRIMARY_SD_PSU_SD_0_SELECT=n
+CONFIG_SUBSYSTEM_PRIMARY_SD_PSU_SD_1_SELECT=y
+CONFIG_SUBSYSTEM_SD_PSU_SD_0_SELECT=n
+```
+
+2. Append the following lines to `project-spec/meta-user/conf/petalinuxbsp.conf`.
+
+```
+IMAGE_BOOT_FILES:zynqmp = "BOOT.BIN boot.scr Image system.dtb"
+```
+
+3. Overwrite the device tree file 
+   `project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi` with the one that is in the
+   repository.
 
 ### Mods for ZCU104
 
 These modifications are specific to the ZCU104 BSP.
 
-1. Append the following lines to `project-spec/configs/config`:
-
-```
-# ZCU104 port configs
-
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_0_SELECT=y
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_1_SELECT=n
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_2_SELECT=n
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_SELECT=n
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_0_USE_DHCP=y
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_1_USE_DHCP=y
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_2_USE_DHCP=y
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_USE_DHCP=y
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_0_MAC="00:0a:35:00:22:01"
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_1_MAC="00:0a:35:00:22:02"
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_2_MAC="00:0a:35:00:22:03"
-CONFIG_SUBSYSTEM_ETHERNET_PSU_ETHERNET_3_MAC="00:0a:35:00:22:04"
-```
-   
-2. Add patch for FSBL to `project-spec/meta-user/recipes-bsp/fsbl/`. You will have to update this
+1. Add patch for FSBL to `project-spec/meta-user/recipes-bsp/embeddedsw/`. You will have to update this
    patch for the version of PetaLinux that you are using. Refer to the existing patch files in that
    location for guidance.
+
+```
+project-spec
+           +--- meta-user
+                        +--- recipes-bsp
+                                       +--- embeddedsw
+                                                     +--- files
+                                                     |        +--- zcu104_vadj_fsbl.patch
+                                                     +--- fsbl-firmware_%.bbappend
+```
 
 ### Mods for ZCU106
 
