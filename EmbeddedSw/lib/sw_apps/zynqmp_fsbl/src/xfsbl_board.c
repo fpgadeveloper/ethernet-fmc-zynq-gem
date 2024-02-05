@@ -106,6 +106,16 @@ static u32 XFsbl_ReadMinMaxEepromVadj(XIicPs* I2c0InstancePtr, u32 *MinVadj, u32
 		/** For MISRA-C compliance */
 	}
 
+	/* Set the read address to zero */
+	WriteBuffer[0U] = 0x00U;
+	Status = XIicPs_MasterSendPolled(I2c0InstancePtr,
+				WriteBuffer, 1U, EepromAddr);
+	if (Status != XST_SUCCESS) {
+		UStatus = XFSBL_ERROR_I2C_WRITE;
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_ERROR_I2C_WRITE\r\n");
+		goto END;
+	}
+
 	/* Read the contents of FMC EEPROM to Read_Buffer */
 		Status = XIicPs_MasterRecvPolled(I2c0InstancePtr, Read_Buffer,
 			EepromByteCount, EepromAddr);
