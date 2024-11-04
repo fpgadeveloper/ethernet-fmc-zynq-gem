@@ -1,4 +1,4 @@
-# Opsero Electronic Design Inc. 2023
+# Opsero Electronic Design Inc. 2024
 #
 # This Makefile can be used to build the PetaLinux projects.
 
@@ -12,11 +12,12 @@ TARGET ?= none
 JOBS ?= 8
 
 # valid targets (template name, flash size, flash interface, port config)
+# UPDATER START
 pynqzu_target := zynqMP 0 0 ports-0123
 pz_7030_target := zynq 0 0 ports-0123-axieth
-uzeg_pci_target :=zynqMP 0 0 ports-0123
-uzev_target := zynqMP 0 0 ports-0123
 zc706_lpc_target := zynq 0 0 ports-0123-axieth
+uzeg_pci_target := zynqMP 0 0 ports-0123
+uzev_target := zynqMP 0 0 ports-0123
 zcu102_hpc0_target := zynqMP 0 0 ports-0123
 zcu102_hpc1_target := zynqMP 0 0 ports-012-
 zcu104_target := zynqMP 0 0 ports-0123
@@ -24,6 +25,7 @@ zcu106_hpc0_target := zynqMP 0 0 ports-0123
 zcu111_target := zynqMP 0 0 ports-0123
 zcu208_target := zynqMP 0 0 ports-0123
 zedboard_target := zynq 0 0 ports-0123-axieth
+# UPDATER END
 
 TARGET_LIST := $(sort $(patsubst %_target,%,$(filter %_target,$(.VARIABLES))))
 
@@ -80,14 +82,22 @@ ifeq ($(call get_template_name,$(TARGET)), microblaze)
 	SSTATE_ARCH = microblaze
 	BUILD_PRODUCTS = $(PETL_FSBOOT_ELF) $(PETL_UBOOT_ELF) $(PETL_DTB)
 	PKG_PRODUCTS = $(PETL_BOOT_MCS)
+	PKG_CMD = petalinux-package boot --force --fpga $(VIV_BIT) --u-boot --kernel --flash-size $(call get_flash_size,$(TARGET)) --flash-intf $(call get_flash_intf,$(TARGET)) --format MCS
 else ifeq ($(call get_template_name,$(TARGET)), zynq)
 	SSTATE_ARCH = arm
 	BUILD_PRODUCTS = $(PETL_ZYNQ_FSBL_ELF) $(PETL_DTB)
 	PKG_PRODUCTS = $(PETL_BOOT_BIN)
+	PKG_CMD = petalinux-package boot --fsbl ./images/linux/zynq_fsbl.elf --fpga $(VIV_BIT) --u-boot
 else ifeq ($(call get_template_name,$(TARGET)), zynqMP)
 	SSTATE_ARCH = arch64
 	BUILD_PRODUCTS = $(PETL_BL31_ELF) $(PETL_PMUFW_ELF) $(PETL_ZYNQMP_FSBL_ELF) $(PETL_DTB)
 	PKG_PRODUCTS = $(PETL_BOOT_BIN)
+	PKG_CMD = petalinux-package boot --fsbl ./images/linux/zynqmp_fsbl.elf --fpga $(VIV_BIT) --u-boot
+else ifeq ($(call get_template_name,$(TARGET)), versal)
+	SSTATE_ARCH = arch64
+	BUILD_PRODUCTS = $(PETL_BL31_ELF) $(PETL_DTB)
+	PKG_PRODUCTS = $(PETL_BOOT_BIN)
+	PKG_CMD = petalinux-package boot --plm --psmfw --u-boot --dtb
 endif
 
 ifneq ($(SSTATE_PATH),)
@@ -140,34 +150,12 @@ petalinux: check_target
 
 petalinux_locked: package
 
-# Package rule for microblaze designs
-ifeq ($(call get_template_name,$(TARGET)), microblaze)
 package: $(PKG_PRODUCTS)
 $(PKG_PRODUCTS): $(BUILD_PRODUCTS)
 	@echo 'Packaging PetaLinux project for $(TARGET)'
-	cd $(TARGET) && petalinux-package --boot --force --fpga $(VIV_BIT) --u-boot --kernel --flash-size $(call get_flash_size,$(TARGET)) --flash-intf $(call get_flash_intf,$(TARGET))
+	cd $(TARGET) && $(PKG_CMD)
 	
-# Package rule for zynq designs
-else ifeq ($(call get_template_name,$(TARGET)), zynq)
-package: $(PKG_PRODUCTS)
-$(PKG_PRODUCTS): $(BUILD_PRODUCTS)
-	@echo 'Packaging PetaLinux project for $(TARGET)'
-	cd $(TARGET) && petalinux-package --boot --fsbl ./images/linux/zynq_fsbl.elf --fpga $(VIV_BIT) --u-boot
-	
-# Package rule for zynqMP designs
-else ifeq ($(call get_template_name,$(TARGET)), zynqMP)
-package: $(PKG_PRODUCTS)
-$(PKG_PRODUCTS): $(BUILD_PRODUCTS)
-	@echo 'Packaging PetaLinux project for $(TARGET)'
-	cd $(TARGET) && petalinux-package --boot --fsbl ./images/linux/zynqmp_fsbl.elf --fpga $(VIV_BIT) --u-boot
-	
-endif
-
-PETL_BUILD_DEPS = $(PETL_FSBOOT_ELF) $(PETL_UBOOT_ELF) $(PETL_DTB) \
-                  $(PETL_ZYNQ_FSBL_ELF) \
-                  $(PETL_BL31_ELF) $(PETL_PMUFW_ELF) $(PETL_ZYNQMP_FSBL_ELF)
-
-$(PETL_BUILD_DEPS): $(PETL_CFG_DONE)
+$(BUILD_PRODUCTS): $(PETL_CFG_DONE)
 	cd $(TARGET) && petalinux-build
 
 $(PETL_CFG_DONE): | $(PETL_COMP_DIR)

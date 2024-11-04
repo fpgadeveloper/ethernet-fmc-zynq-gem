@@ -1,4 +1,4 @@
-# Opsero Electronic Design Inc. 2023
+# Opsero Electronic Design Inc. 2024
 #
 # This Makefile can be used to build the Vitis workspace.
 
@@ -15,11 +15,12 @@ TARGET ?= none
 JOBS ?= 8
 
 # valid targets
+# UPDATER START
 pynqzu_target := zynqMP
 pz_7030_target := zynq
+zc706_lpc_target := zynq
 uzeg_pci_target := zynqMP
 uzev_target := zynqMP
-zc706_lpc_target := zynq
 zcu102_hpc0_target := zynqMP
 zcu102_hpc1_target := zynqMP
 zcu104_target := zynqMP
@@ -27,6 +28,7 @@ zcu106_hpc0_target := zynqMP
 zcu111_target := zynqMP
 zcu208_target := zynqMP
 zedboard_target := zynq
+# UPDATER END
 
 TARGET_LIST := $(sort $(patsubst %_target,%,$(filter %_target,$(.VARIABLES))))
 

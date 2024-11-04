@@ -1,4 +1,4 @@
-# Opsero Electronic Design Inc. 2023
+# Opsero Electronic Design Inc. 2024
 #
 # This Makefile can be used to build all projects and gather the boot images.
 
@@ -12,11 +12,12 @@ TARGET ?= none
 JOBS ?= 8
 
 # valid targets (template name, both (plnx+baremetal) or baremetal_only)
+# UPDATER START
 pynqzu_target := zynqMP both
-pz_7030_target :zynq both
+pz_7030_target := zynq both
+zc706_lpc_target := zynq both
 uzeg_pci_target := zynqMP both
 uzev_target := zynqMP both
-zc706_lpc_target := zynq both
 zcu102_hpc0_target := zynqMP both
 zcu102_hpc1_target := zynqMP both
 zcu104_target := zynqMP both
@@ -24,6 +25,7 @@ zcu106_hpc0_target := zynqMP both
 zcu111_target := zynqMP both
 zcu208_target := zynqMP both
 zedboard_target := zynq both
+# UPDATER END
 
 TARGET_LIST := $(sort $(patsubst %_target,%,$(filter %_target,$(.VARIABLES))))
 
@@ -55,8 +57,8 @@ VIT_BOOT_TARG = $(VIT_BOOT)/$(TARGET)
 # outputs
 BOOTIMAGE_DIR = $(ROOT_DIR)/bootimages
 TEMPBOOT_DIR = $(BOOTIMAGE_DIR)/$(BD_NAME)_$(TARGET)
-PETL_ZIP = $(BOOTIMAGE_DIR)/$(BD_NAME)_$(TARGET)_petalinux-2022-1.zip
-BARE_ZIP = $(BOOTIMAGE_DIR)/$(BD_NAME)_$(TARGET)_standalone-2022-1.zip
+PETL_ZIP = $(BOOTIMAGE_DIR)/$(BD_NAME)_$(TARGET)_petalinux-2024-1.zip
+BARE_ZIP = $(BOOTIMAGE_DIR)/$(BD_NAME)_$(TARGET)_standalone-2024-1.zip
 BOOTIMAGE_LOCK = $(ROOT_DIR)/.$(TARGET).lock
 
 # These macros return values from the valid target lists defined above

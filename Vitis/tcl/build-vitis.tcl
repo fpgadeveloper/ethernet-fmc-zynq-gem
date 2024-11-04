@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------
-# Opsero Electronic Design Inc. Copyright 2023
+# Opsero Electronic Design Inc. Copyright 2024
 # -------------------------------------------------------------------------------------
 
 # Description
@@ -36,11 +36,12 @@ set template_app "lwIP Echo Server"
 set mb_combine_bit_elf 1
 
 # Possible targets (board name in lower case for the board.h file)
+# UPDATER START
 dict set target_dict pynqzu { pynqzu }
-dict set target_dict pz_7030 { pz }
-dict set target_dict uzeg_pci { uzeg_pci }
-dict set target_dict uzev { uzev}
+dict set target_dict pz_7030 { picozed_7030_fmc2 }
 dict set target_dict zc706_lpc { zc706 }
+dict set target_dict uzeg_pci { ultrazed_3eg_pciecc }
+dict set target_dict uzev { ultrazed_7ev_cc }
 dict set target_dict zcu102_hpc0 { zcu102 }
 dict set target_dict zcu102_hpc1 { zcu102 }
 dict set target_dict zcu104 { zcu104 }
@@ -48,6 +49,7 @@ dict set target_dict zcu106_hpc0 { zcu106 }
 dict set target_dict zcu111 { zcu111 }
 dict set target_dict zcu208 { zcu208 }
 dict set target_dict zedboard { zedboard }
+# UPDATER END
 
 # ----------------------------------------------------------------------------------------------
 # Custom modifications functions

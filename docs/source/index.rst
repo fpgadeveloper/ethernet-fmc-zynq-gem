@@ -6,7 +6,8 @@
 Zynq GEM Reference Designs
 ==========================
 
-This is the documentation for the Zynq GEM reference designs for the `Ethernet FMC`_.
+This is the documentation for the Zynq GEM reference designs for the `Ethernet FMC`_
+and `Robust Ethernet FMC`_.
 
 
 .. toctree::
@@ -24,4 +25,6 @@ This is the documentation for the Zynq GEM reference designs for the `Ethernet F
    revision_history
 
 
-.. _Ethernet FMC: https://ethernetfmc.com
+.. _Ethernet FMC: https://ethernetfmc.com/docs/ethernet-fmc/overview/
+.. _Robust Ethernet FMC: https://ethernetfmc.com/docs/robust-ethernet-fmc/overview/
+

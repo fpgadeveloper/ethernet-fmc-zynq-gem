@@ -1,4 +1,4 @@
-# Opsero Electronic Design Inc. Copyright 2023
+# Opsero Electronic Design Inc. Copyright 2024
 #
 # Project build script
 #
@@ -17,7 +17,7 @@
 #*****************************************************************************************
 
 # Check the version of Vivado used
-set version_required "2022.1"
+set version_required "2024.1"
 set ver [lindex [split $::env(XILINX_VIVADO) /] end]
 if {![string equal $ver $version_required]} {
   puts "###############################"
@@ -34,20 +34,20 @@ if {![string equal $ver $version_required]} {
 set_param board.repoPaths [get_property LOCAL_ROOT_DIR [xhub::get_xstores xilinx_board_store]]
 
 # Possible targets
+# UPDATER START
 dict set target_dict pynqzu { tul.com.tw pynqzu zynqmp rgmii-0123-pynqzu }
 dict set target_dict pz_7030 { avnet.com picozed_7030_fmc2 zynq rgmii-0123-axieth }
-dict set target_dict tebf0808 { trenz.biz te0808_9eg_1e_tebf0808 zynqmp rgmii-0123 }
-dict set target_dict uzeg_pci { avnet.com ultrazed_eg_pciecc_production zynqmp rgmii-0123 }
-dict set target_dict uzev { avnet.com ultrazed_7ev_cc zynqmp rgmii-0123 }
 dict set target_dict zc706_lpc { xilinx.com zc706 zynq rgmii-0123-axieth }
+dict set target_dict uzeg_pci { avnet.com ultrazed_3eg_pciecc zynqmp rgmii-0123 }
+dict set target_dict uzev { avnet.com ultrazed_7ev_cc zynqmp rgmii-0123 }
 dict set target_dict zcu102_hpc0 { xilinx.com zcu102 zynqmp rgmii-0123-zcu10x }
 dict set target_dict zcu102_hpc1 { xilinx.com zcu102 zynqmp rgmii-012- }
 dict set target_dict zcu104 { xilinx.com zcu104 zynqmp rgmii-0123-zcu10x }
 dict set target_dict zcu106_hpc0 { xilinx.com zcu106 zynqmp rgmii-0123-zcu10x }
-dict set target_dict zcu106_hpc1 { xilinx.com zcu106 zynqmp rgmii-01-- }
 dict set target_dict zcu111 { xilinx.com zcu111 zynqmp rgmii-0123 }
 dict set target_dict zcu208 { xilinx.com zcu208 zynqmp rgmii-0123 }
 dict set target_dict zedboard { avnet.com zedboard zynq rgmii-0123-axieth }
+# UPDATER END
 
 # Function to display the options and get user input
 proc selectTarget {target_dict} {
@@ -214,10 +214,10 @@ set_property -name "top" -value "${block_name}_wrapper" -objects $obj
 
 # Create 'synth_1' run (if not found)
 if {[string equal [get_runs -quiet synth_1] ""]} {
-  create_run -name synth_1 -part ${fpga_part} -flow {Vivado Synthesis 2022} -strategy "Vivado Synthesis Defaults" -report_strategy {No Reports} -constrset constrs_1
+  create_run -name synth_1 -part ${fpga_part} -flow {Vivado Synthesis 2024} -strategy "Vivado Synthesis Defaults" -report_strategy {No Reports} -constrset constrs_1
 } else {
   set_property strategy "Vivado Synthesis Defaults" [get_runs synth_1]
-  set_property flow "Vivado Synthesis 2022" [get_runs synth_1]
+  set_property flow "Vivado Synthesis 2024" [get_runs synth_1]
 }
 set obj [get_runs synth_1]
 
@@ -226,10 +226,10 @@ current_run -synthesis [get_runs synth_1]
 
 # Create 'impl_1' run (if not found)
 if {[string equal [get_runs -quiet impl_1] ""]} {
-  create_run -name impl_1 -part ${fpga_part} -flow {Vivado Implementation 2022} -strategy "Vivado Implementation Defaults" -report_strategy {No Reports} -constrset constrs_1 -parent_run synth_1
+  create_run -name impl_1 -part ${fpga_part} -flow {Vivado Implementation 2024} -strategy "Vivado Implementation Defaults" -report_strategy {No Reports} -constrset constrs_1 -parent_run synth_1
 } else {
   set_property strategy "Vivado Implementation Defaults" [get_runs impl_1]
-  set_property flow "Vivado Implementation 2022" [get_runs impl_1]
+  set_property flow "Vivado Implementation 2024" [get_runs impl_1]
 }
 set obj [get_runs impl_1]
 set_property -name "steps.write_bitstream.args.readback_file" -value "0" -objects $obj

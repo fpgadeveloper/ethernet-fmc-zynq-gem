@@ -2,19 +2,35 @@
 
 ## List of supported boards
 
-| Carrier board                                                    | FMC  |
-|------------------------------------------------------------------|------|
-| Zynq-7000 [ZedBoard]                                             | LPC  |
-| Zynq-7000 [PicoZed FMC Carrier Card V2] with [PicoZed 7030]      | LPC  |
-| Zynq-7000 [ZC706 Evaluation board]                               | LPC, HPC  |
-| Zynq UltraScale+ [UltraZed-EG PCIe Carrier Card]                 | LPC  |
-| Zynq UltraScale+ [UltraZed EV Carrier Card]                      | HPC  |
-| Zynq UltraScale+ [ZCU102 Evaluation board]                       | HPC0, HPC1 |
-| Zynq UltraScale+ [ZCU104 Evaluation board]                       | LPC  |
-| Zynq UltraScale+ [ZCU106 Evaluation board]                       | HPC0 |
-| Zynq UltraScale+ [ZCU111 Evaluation board]                       | FMC+ |
-| Zynq UltraScale+ [ZCU208 Evaluation board]                       | FMC+ |
-| Zynq UltraScale+ [PYNQ-ZU Evaluation board]                      | LPC  |
+{% set unique_boards = {} %}
+{% for design in data.designs %}
+    {% if design.publish %}
+        {% if design.board not in unique_boards %}
+            {% set _ = unique_boards.update({design.board: {"group": design.group, "link": design.link, "connectors": []}}) %}
+        {% endif %}
+        {% if design.connector not in unique_boards[design.board]["connectors"] and '&' not in design.connector %}
+            {% set _ = unique_boards[design.board]["connectors"].append(design.connector) %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{% for group in data.groups %}
+    {% set boards_in_group = [] %}
+    {% for name, board in unique_boards.items() %}
+        {% if board.group == group.label %}
+            {% set _ = boards_in_group.append(board) %}
+        {% endif %}
+    {% endfor %}
+
+    {% if boards_in_group | length > 0 %}
+### {{ group.name }} boards
+
+| Carrier board        | Supported FMC connector(s)    |
+|---------------------|--------------|
+{% for name,board in unique_boards.items() %}{% if board.group == group.label %}| [{{ name }}]({{ board.link }}) | {% for connector in board.connectors %}{{ connector }} {% endfor %} |
+{% endif %}{% endfor %}
+{% endif %}
+{% endfor %}
 
 ## Unlisted boards
 
