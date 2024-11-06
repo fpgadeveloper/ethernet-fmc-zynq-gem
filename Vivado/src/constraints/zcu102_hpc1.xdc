@@ -202,6 +202,14 @@ set_property LOC BUFGCE_X0Y49 $gmii_to_rgmii_2_bufg
 set_property BEL BUFCE $gmii_to_rgmii_2_bufio
 set_property LOC BUFGCE_X0Y48 $gmii_to_rgmii_2_bufio
 
+# IDELAY CTRL groups
+set_property IODELAY_GROUP iodelay_grp1 [get_cells *_i/util_idelay_ctrl_0/inst/dlyctrl]
+set_property IODELAY_GROUP iodelay_grp2 [get_cells -hierarchical -filter { PRIMITIVE_TYPE == I/O.DELAY.IDELAYE3 && NAME =~ "*gmii_to_rgmii_0*" } ]
+set_property IODELAY_GROUP iodelay_grp2 [get_cells -hierarchical -filter { PRIMITIVE_TYPE == I/O.DELAY.IDELAYE3 && NAME =~ "*gmii_to_rgmii_1*" } ]
+
+set_property IODELAY_GROUP iodelay_grp2 [get_cells *_i/gmii_to_rgmii_2/U0/i_zynqgem_gmii_to_rgmii_2_0_idelayctrl]
+set_property IODELAY_GROUP iodelay_grp2 [get_cells -hierarchical -filter { PRIMITIVE_TYPE == I/O.DELAY.IDELAYE3 && NAME =~ "*gmii_to_rgmii_2*" } ]
+
 # Since Vivado 2019.2, when we connect a GEM MDIO interface to EMIO, this sets parameter PSU__ENET0__GRP_MDIO_INTERNAL to 1
 # (see file "<vivado-path>\2019.2\data\PS\8series\data\zynqconfig\enet\enet0_preset.xml")
 # which in turn enables a new create_clock constraint for the MDIO clock output

@@ -2,7 +2,7 @@
 
 ## Description
 
-This project demonstrates the use of the Opsero [Quad Gigabit Ethernet FMC](http://ethernetfmc.com "Ethernet FMC").
+This project demonstrates the use of the Opsero [Ethernet FMC] (OP031) and [Robust Ethernet FMC] (OP041).
 The design uses the GMII-to-RGMII IP core to connect the hard GEMs of the Zynq PS to the Ethernet FMC
 PHYs. The designs target both the Zynq and ZynqMP devices and are illustrated by the block diagrams below.
 
@@ -16,6 +16,8 @@ PHYs. The designs target both the Zynq and ZynqMP devices and are illustrated by
 
 Important links:
 
+* Datasheet for [Ethernet FMC]
+* Datasheet for [Robust Ethernet FMC]
 * The user guide for these reference designs is hosted here: [Zynq GEM for Ethernet FMC docs](https://zynqgem.ethernetfmc.com "Zynq GEM for Ethernet FMC docs")
 * To report a bug: [Report an issue](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/issues "Report an issue").
 * For technical support: [Contact Opsero](https://opsero.com/contact-us "Contact Opsero").
@@ -41,7 +43,7 @@ In order to test this design on hardware, you will need the following:
 
 This repo contains several designs that target various supported development boards and their
 FMC connectors. The table below lists the target design name, the number of ports supported by the design and 
-the FMC connector on which to connect the Ethernet FMC Max. Some of the target designs
+the FMC connector on which to connect the mezzanine card. Some of the target designs
 require a license to generate a bitstream with the AMD Xilinx tools.
 
 <!-- updater start -->

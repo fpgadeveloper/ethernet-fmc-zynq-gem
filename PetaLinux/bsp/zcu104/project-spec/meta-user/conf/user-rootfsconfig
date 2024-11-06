@@ -9,4 +9,5 @@ CONFIG_packagegroup-petalinux-audio
 CONFIG_gstreamer-vcu-notebooks
 CONFIG_iperf3
 CONFIG_ethtool
+CONFIG_phytool
 

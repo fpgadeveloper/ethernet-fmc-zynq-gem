@@ -72,7 +72,7 @@
       "board": "UltraZed-EG PCIe Carrier",
       "link": "https://www.xilinx.com/products/boards-and-kits/1-mb9rqb.html",
       "url": "avnet.com",
-      "boardname": "ultrazed_3eg_pciecc",
+      "boardname": "ultrazed_eg_pciecc_production",
       "lanes": [0,1,2,3],
       "connector": "LPC",
       "group": "zu",

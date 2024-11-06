@@ -9,4 +9,5 @@ CONFIG_rfdc-selftest
 CONFIG_rfclk
 CONFIG_iperf3
 CONFIG_ethtool
+CONFIG_phytool
 
