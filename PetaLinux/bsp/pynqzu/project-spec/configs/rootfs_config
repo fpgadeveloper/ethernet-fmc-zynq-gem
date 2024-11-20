@@ -4080,8 +4080,6 @@ CONFIG_Init-manager-systemd=y
 # user packages 
 #
 # CONFIG_gpio-demo is not set
-CONFIG_gstreamer-vcu-examples=y
-# CONFIG_gstreamer-vcu-notebooks is not set
 # CONFIG_peekpoke is not set
 
 #

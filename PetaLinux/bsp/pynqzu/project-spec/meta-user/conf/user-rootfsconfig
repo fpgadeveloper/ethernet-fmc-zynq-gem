@@ -3,7 +3,9 @@
 
 CONFIG_gpio-demo
 CONFIG_peekpoke
-CONFIG_packagegroup-petalinux-v4lutils
+
+# Ethernet FMC additions
+
 CONFIG_iperf3
 CONFIG_ethtool
 CONFIG_phytool

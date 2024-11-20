@@ -16,8 +16,7 @@ PHYs. The designs target both the Zynq and ZynqMP devices and are illustrated by
 
 Important links:
 
-* Datasheet for [Ethernet FMC]
-* Datasheet for [Robust Ethernet FMC]
+* Datasheets for [Ethernet FMC] and [Robust Ethernet FMC]
 * The user guide for these reference designs is hosted here: [Zynq GEM for Ethernet FMC docs](https://zynqgem.ethernetfmc.com "Zynq GEM for Ethernet FMC docs")
 * To report a bug: [Report an issue](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/issues "Report an issue").
 * For technical support: [Contact Opsero](https://opsero.com/contact-us "Contact Opsero").

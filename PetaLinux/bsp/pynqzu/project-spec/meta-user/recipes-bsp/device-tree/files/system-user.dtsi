@@ -7,13 +7,6 @@
 / {
 	model = "TUL PYNQ-ZU RevB";
 
-	axi {
-		audio0:audio-codec-ctrl@800e0000 {
-			compatible = "generic-uio";
-			reg = <0x0 0x800e0000 0x0 0x10000>;
-		};
-	};
-
 	reserved-memory {
 		#address-cells = <2>;
 		#size-cells = <2>;
