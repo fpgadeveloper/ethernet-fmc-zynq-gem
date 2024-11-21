@@ -1,5 +1,9 @@
 # Revision History
 
+## 2024.1 Changes
+
+* Improved documentation, centralized target design info to a JSON file
+
 ## 2022.1 Changes
 
 * Added Makefiles to improve the build experience for Linux users
