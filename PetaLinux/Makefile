@@ -24,7 +24,7 @@ zcu104_target := zynqMP 0 0 ports-0123
 zcu106_hpc0_target := zynqMP 0 0 ports-0123
 zcu111_target := zynqMP 0 0 ports-0123
 zcu208_target := zynqMP 0 0 ports-0123
-zedboard_target := zynq 0 0 ports-0123-axieth
+zedboard_target := zynq 0 0 ports-3
 # UPDATER END
 
 TARGET_LIST := $(sort $(patsubst %_target,%,$(filter %_target,$(.VARIABLES))))
@@ -89,12 +89,12 @@ else ifeq ($(call get_template_name,$(TARGET)), zynq)
 	PKG_PRODUCTS = $(PETL_BOOT_BIN)
 	PKG_CMD = petalinux-package boot --fsbl ./images/linux/zynq_fsbl.elf --fpga $(VIV_BIT) --u-boot
 else ifeq ($(call get_template_name,$(TARGET)), zynqMP)
-	SSTATE_ARCH = arch64
+	SSTATE_ARCH = aarch64
 	BUILD_PRODUCTS = $(PETL_BL31_ELF) $(PETL_PMUFW_ELF) $(PETL_ZYNQMP_FSBL_ELF) $(PETL_DTB)
 	PKG_PRODUCTS = $(PETL_BOOT_BIN)
 	PKG_CMD = petalinux-package boot --fsbl ./images/linux/zynqmp_fsbl.elf --fpga $(VIV_BIT) --u-boot
 else ifeq ($(call get_template_name,$(TARGET)), versal)
-	SSTATE_ARCH = arch64
+	SSTATE_ARCH = aarch64
 	BUILD_PRODUCTS = $(PETL_BL31_ELF) $(PETL_DTB)
 	PKG_PRODUCTS = $(PETL_BOOT_BIN)
 	PKG_CMD = petalinux-package boot --plm --psmfw --u-boot --dtb
