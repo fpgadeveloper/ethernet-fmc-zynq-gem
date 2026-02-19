@@ -118,8 +118,6 @@ set design_name ${target}
 set block_name zynqgem
 set board_url [lindex [dict get $target_dict $target] 0]
 set board_name [lindex [dict get $target_dict $target] 1]
-# Append Avnet bdf to the board repo paths (needed for Auboard)
-set_param board.repoPaths [concat [get_param board.repoPaths] [list "submodules/bdf"]]
 set proj_board [get_board_parts "$board_url:$board_name:*" -latest_file_version]
 # Check if the board files are installed, if not, install them
 if { $proj_board == "" } {
