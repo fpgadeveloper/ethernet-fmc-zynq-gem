@@ -27,3 +27,11 @@ def pre_platform_build(platform, domain_name, arch):
         domain = platform.get_domain(domain_name)
         domain.set_config(option="lib", param="XILTIMER_tick_timer",
                           value=tick_timer, lib_name="xiltimer")
+
+    # Enable XCLOCKING on ZynqMP so SetUpSLCRDivisors() can configure
+    # the GEM reference clock to match the negotiated PHY speed.
+    if arch == "zynqmp":
+        print(f"Enabling standalone_clocking (XCLOCKING) for {arch}")
+        domain = platform.get_domain(domain_name)
+        domain.set_config(option="os", param="standalone_clocking",
+                          value="true")

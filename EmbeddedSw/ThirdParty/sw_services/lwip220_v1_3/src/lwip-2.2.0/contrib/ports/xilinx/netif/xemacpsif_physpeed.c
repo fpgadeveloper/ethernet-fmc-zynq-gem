@@ -175,8 +175,6 @@
 
 #define IEEE_CTRL_ISOLATE_DISABLE               0xFBFF
 
-#define XPAR_GMII2RGMIICON_0N_ETH1_ADDR 8
-
 u32_t phymapemac0[32];
 u32_t phymapemac1[32];
 
@@ -1422,6 +1420,56 @@ static void SetUpSLCRDivisors(XEmacPs *xemacpsp __attribute__((unused)),
 	else if (speed == 10)
 	{
 		Xil_ClockSetRate(ClockId, CLOCK_FREQ_10MBPS, &SetClockRate);
+	}
+#elif defined(PLATFORM_ZYNQ)
+	/* Zynq-7000 SDT: program SLCR GEM clock divisors directly.
+	 * The non-SDT path uses XPAR divisor defines which don't exist in SDT
+	 * mode, so we read the initial register values (set by FSBL for the
+	 * default speed, typically 1000 Mbps) and scale DIV1 for other speeds.
+	 */
+	{
+		volatile UINTPTR slcrBaseAddress;
+		u32_t SlcrTxClkCntrl;
+		u32_t SlcrDiv0, SlcrDiv1;
+		static u32_t InitialDiv0[2] = {0, 0};
+		static u32_t InitialDiv1[2] = {0, 0};
+		UINTPTR mac_baseaddr = xemacpsp->Config.BaseAddress;
+		u32_t gem_idx = (mac_baseaddr == ZYNQ_EMACPS_0_BASEADDR) ? 0 : 1;
+
+		Xil_Out32(SLCR_UNLOCK_ADDR, SLCR_UNLOCK_KEY_VALUE);
+
+		if (mac_baseaddr == ZYNQ_EMACPS_0_BASEADDR) {
+			slcrBaseAddress = SLCR_GEM0_CLK_CTRL_ADDR;
+		} else {
+			slcrBaseAddress = SLCR_GEM1_CLK_CTRL_ADDR;
+		}
+
+		if (Xil_In32(slcrBaseAddress) & SLCR_GEM_SRCSEL_EMIO) {
+			return;
+		}
+
+		/* Save initial divisors on first call (FSBL sets these for 1000 Mbps) */
+		if (InitialDiv0[gem_idx] == 0) {
+			SlcrTxClkCntrl = Xil_In32(slcrBaseAddress);
+			InitialDiv0[gem_idx] = (SlcrTxClkCntrl >> 8) & 0x3F;
+			InitialDiv1[gem_idx] = (SlcrTxClkCntrl >> 20) & 0x3F;
+		}
+
+		SlcrDiv0 = InitialDiv0[gem_idx];
+		SlcrDiv1 = InitialDiv1[gem_idx];
+
+		if (speed == 100) {
+			SlcrDiv1 *= 5;
+		} else if (speed == 10) {
+			SlcrDiv1 *= 50;
+		}
+
+		SlcrTxClkCntrl = Xil_In32(slcrBaseAddress);
+		SlcrTxClkCntrl &= EMACPS_SLCR_DIV_MASK;
+		SlcrTxClkCntrl |= (SlcrDiv1 << 20);
+		SlcrTxClkCntrl |= (SlcrDiv0 << 8);
+		Xil_Out32(slcrBaseAddress, SlcrTxClkCntrl);
+		Xil_Out32(SLCR_LOCK_ADDR, SLCR_LOCK_KEY_VALUE);
 	}
 #else
 	xil_printf("Using default Speed from design\r\n");
