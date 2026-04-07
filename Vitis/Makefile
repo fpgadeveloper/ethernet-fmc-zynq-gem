@@ -55,10 +55,6 @@ $(word 1,$($(1)_target))
 endef
 
 # The name of the boot image depends on the device family.
-# NOTE: For MicroBlaze, make-boot.py may produce either:
-#   - $(BD_NAME)_boot.bit (when combine_bit_elf=true), or
-#   - $(BD_NAME).bit      (when combine_bit_elf=false)
-# We don't hard-depend on the exact filename here; see the bootfile target.
 ifeq ($(call get_template_name,$(TARGET)), microblaze)
   ifeq ($(COMBINE_BIT_ELF), true)
 	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/$(BD_NAME)_boot.bit
