@@ -24,7 +24,7 @@ zcu104_target := zynqMP 0 0 ports-0123
 zcu106_hpc0_target := zynqMP 0 0 ports-0123
 zcu111_target := zynqMP 0 0 ports-0123
 zcu208_target := zynqMP 0 0 ports-0123
-zedboard_target := zynq 0 0 ports-3
+zedboard_target := zynq 0 0 ports-0123-axieth
 # UPDATER END
 
 TARGET_LIST := $(sort $(patsubst %_target,%,$(filter %_target,$(.VARIABLES))))

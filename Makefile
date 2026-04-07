@@ -4,7 +4,6 @@
 
 RM = rm -rf
 ROOT_DIR = $(shell pwd)
-BD_NAME = zynqgem
 
 # defaults
 .DEFAULT_GOAL := bootimage
@@ -13,6 +12,7 @@ JOBS ?= 8
 
 # valid targets (template name, both (plnx+baremetal) or baremetal_only)
 # UPDATER START
+BD_NAME = zynqgem
 pynqzu_target := zynqMP both
 pz_7030_target := zynq both
 zc706_lpc_target := zynq both

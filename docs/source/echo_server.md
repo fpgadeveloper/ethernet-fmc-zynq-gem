@@ -86,62 +86,20 @@ from the PC, the PC should be configured with a fixed IP address on the same sub
 ## Change the target port
 
 The echo server example design currently can only target one Ethernet port at a time.
-Selection of the Ethernet port can be changed by modifying the defines contained in the
-`platform_config.h` file in the application sources. Set `PLATFORM_EMAC_BASEADDR`
-to one of the following values:
+Selection of the Ethernet port can be changed by modifying the ``ETHERNET_PORT`` define
+in the ``platform_config.h.in`` file located in the workspace application sources
+(eg. ``<target>_workspace/echo_server/src/platform_config.h.in``).
+Set ``ETHERNET_PORT`` to one of the following values:
 
-### ZedBoard and PicoZed designs
+* ``0``: Ethernet FMC Port 0
+* ``1``: Ethernet FMC Port 1
+* ``2``: Ethernet FMC Port 2
+* ``3``: Ethernet FMC Port 3
 
-* Ethernet FMC Port 0: `XPAR_AXIETHERNET_0_BASEADDR`
-* Ethernet FMC Port 1: `XPAR_AXIETHERNET_1_BASEADDR`
-* Ethernet FMC Port 2: `XPAR_AXIETHERNET_2_BASEADDR`
-* Ethernet FMC Port 3: `XPAR_XEMACPS_1_BASEADDR`
-* On-board Ethernet port: `XPAR_XEMACPS_0_BASEADDR`
-
-### ZCU102 design (HPC0)
-
-* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
-* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
-* Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
-* Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR`
-* ZCU102's on-board Ethernet port: Not usable
-
-### ZCU102 design (HPC1)
-
-* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
-* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
-* Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
-* ZCU102's on-board Ethernet port: `XPAR_XEMACPS_3_BASEADDR`
-
-### ZCU106 design (HPC0)
-
-* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
-* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
-* Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
-* Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR`
-* ZCU106's on-board Ethernet port: Not usable
-
-### ZCU106 design (HPC1)
-
-* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
-* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
-* Ethernet FMC Port 2: Not usable
-* ZCU106's on-board Ethernet port: `XPAR_XEMACPS_3_BASEADDR`
-
-### UltraZed, TE0808 design
-
-* Ethernet FMC Port 0: `XPAR_XEMACPS_0_BASEADDR`
-* Ethernet FMC Port 1: `XPAR_XEMACPS_1_BASEADDR`
-* Ethernet FMC Port 2: `XPAR_XEMACPS_2_BASEADDR`
-* Ethernet FMC Port 3: `XPAR_XEMACPS_3_BASEADDR`
-* On-board Ethernet port: Not usable
-
-### BSP Setting
-
-* When using ports that use AXI Ethernet IP, the BSP setting `use_axieth_on_zynq` must be set to 1.
-* When using ports that use Zynq GEM, the BSP setting `use_axieth_on_zynq` must be set to 0.
-
-To change BSP settings: right click on the BSP and click `Board Support Package Settings` from the context menu.
+The correct base address for the selected port is resolved automatically based on the
+target hardware. On Zynq-7000 designs (ZedBoard, PicoZed), ports 0-2 are routed through
+AXI Ethernet and port 3 uses a PS GEM. On Zynq UltraScale+ designs, all four ports
+use PS GEMs.
 
 ## Example usage
 

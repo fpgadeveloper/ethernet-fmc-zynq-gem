@@ -7,7 +7,6 @@ MKDIR = mkdir -p
 RM = rm -rf
 ROOT_DIR = $(shell pwd)
 VIVADO = $(XILINX_VIVADO)/bin/vivado
-BD_NAME = zynqgem
 
 # defaults
 .DEFAULT_GOAL := xsa
@@ -16,6 +15,7 @@ JOBS ?= 8
 
 # valid targets
 # UPDATER START
+BD_NAME = zynqgem
 pynqzu_target := 0
 pz_7030_target := 0
 zc706_lpc_target := 0
