@@ -1,5 +1,6 @@
 {
   "bd_name": "zynqgem",
+  "prj_name": "ethernet-fmc-zynq-gem",
   "groups": [
     {
       "label": "fpga",
