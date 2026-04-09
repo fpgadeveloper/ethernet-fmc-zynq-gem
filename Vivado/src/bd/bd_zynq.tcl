@@ -90,7 +90,7 @@ connect_bd_intf_net [get_bd_intf_ports ref_clk] [get_bd_intf_pins clk_wiz_0/CLK_
 
 if {$use_axi_eth} {
    # Add the concat for the interrupts
-   create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat xlconcat_0
+   create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconcat:1.0 xlconcat_0
    connect_bd_net [get_bd_pins xlconcat_0/dout] [get_bd_pins processing_system7_0/IRQ_F2P]
    set_property -dict [list CONFIG.NUM_PORTS {12}] [get_bd_cells xlconcat_0]
 
@@ -308,7 +308,7 @@ connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_0/MDIO_PHY] [get_bd_intf_por
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:rgmii_rtl:1.0 rgmii_port_3
 connect_bd_intf_net [get_bd_intf_pins gmii_to_rgmii_0/RGMII] [get_bd_intf_ports rgmii_port_3]
 # PHY RESET for GMII-to-RGMII port 3
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_reduced_logic util_reduced_logic_0
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilreduced_logic:1.0 util_reduced_logic_0
 set_property -dict [list CONFIG.C_SIZE {1}] [get_bd_cells util_reduced_logic_0]
 connect_bd_net -net [get_bd_nets rst_ps7_0_100M_peripheral_aresetn] [get_bd_pins util_reduced_logic_0/Op1] [get_bd_pins rst_ps7_0_100M/peripheral_aresetn]
 create_bd_port -dir O reset_port_3
@@ -325,11 +325,11 @@ connect_bd_net -net [get_bd_nets rst_ps7_0_100M_peripheral_reset] [get_bd_pins g
 
 # Create Ethernet FMC reference clock output enable and frequency select
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant ref_clk_oe
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 ref_clk_oe
 create_bd_port -dir O -from 0 -to 0 ref_clk_oe
 connect_bd_net [get_bd_pins /ref_clk_oe/dout] [get_bd_ports ref_clk_oe]
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant ref_clk_fsel
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 ref_clk_fsel
 create_bd_port -dir O -from 0 -to 0 ref_clk_fsel
 connect_bd_net [get_bd_pins /ref_clk_fsel/dout] [get_bd_ports ref_clk_fsel]
 

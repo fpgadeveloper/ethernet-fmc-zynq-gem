@@ -180,11 +180,11 @@ if {$num_gems > 2} {
 }
 
 # Create Ethernet FMC reference clock output enable and frequency select
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant ref_clk_oe
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 ref_clk_oe
 create_bd_port -dir O -from 0 -to 0 ref_clk_oe
 connect_bd_net [get_bd_pins /ref_clk_oe/dout] [get_bd_ports ref_clk_oe]
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant ref_clk_fsel
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 ref_clk_fsel
 create_bd_port -dir O -from 0 -to 0 ref_clk_fsel
 connect_bd_net [get_bd_pins /ref_clk_fsel/dout] [get_bd_ports ref_clk_fsel]
 
