@@ -39,3 +39,10 @@
     usb-phy = <&usb0>;
 };
 
+
+/* 2025.01 u-boot data-aborts probing gem0 because pcw.dtsi does not populate
+ * phy-handle. This design's Ethernet FMC test uses the PL AXI Ethernet cores
+ * (ports-0123-axieth overlay), not PS GEM, so disabling gem0 avoids the crash. */
+&gem0 {
+    status = "disabled";
+};
