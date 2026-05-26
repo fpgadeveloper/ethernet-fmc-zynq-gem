@@ -38,7 +38,8 @@ users are advised to use a Linux virtual machine to build the PetaLinux projects
 The last command will launch the build process for the corresponding Vivado project if that project
 has not already been built and it's hardware exported.
 
-```{tip} The top-level `make bootimage TARGET=<target>` in the repo root
+```{tip}
+The top-level `make bootimage TARGET=<target>` in the repo root
 will also drive the Vivado, Vitis, and PetaLinux builds end-to-end and
 collect the SD-card-ready outputs into
 `bootimages/ethernet-fmc-zynq-gem_<target>_petalinux-2025-2.zip` (and a
