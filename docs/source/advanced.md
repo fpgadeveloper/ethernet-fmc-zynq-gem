@@ -389,10 +389,53 @@ the stock one?"* — it is what to re-apply if you ever do that.
 
 * **SD-card root filesystem** configured in `configs/config`:
   `CONFIG_SUBSYSTEM_ROOTFS_EXT4`, `CONFIG_SUBSYSTEM_SDROOT_DEV`,
-  `CONFIG_SUBSYSTEM_USER_CMDLINE` (with `cma=1536M` for the AXI DMA
-  buffers).
-* **U-Boot patch `0001-ubifs-distroboot-support.patch`** on most
-  ZynqMP boards.
+  `CONFIG_SUBSYSTEM_USER_CMDLINE`. The cmdline carries a `cma=` value
+  sized for the design:
+    - Zynq-7000 (`zedboard`, `pz_7030`, `zc706_lpc`): `cma=256M`
+      (the AXI DMA ring on the four AXI Ethernet cores does not need
+      more, and the Zynq-7000 only has 512 MiB / 1 GiB total).
+    - ZynqMP (`zcu102_hpc0`, `zcu102_hpc1`, `zcu104`, `zcu106_hpc0`,
+      `zcu111`, `zcu208`, `pynqzu`): `cma=1536M`.
+    - UltraZed-EG / UltraZed-EV: `cma=1000M` (these boards have less
+      DDR than the AMD eval boards).
+  The stock AMD 2025.2 PetaLinux template for Zynq-7000 also sets
+  `CONFIG_SUBSYSTEM_MEMORY_MANUAL_LOWER_MEMORYSIZE` to the full 2 GiB
+  even on boards with only 512 MiB; the per-board `configs/config`
+  here resets it to the actual installed size (e.g. `0x20000000`
+  for ZedBoard).
+* **U-Boot patch `0001-ubifs-distroboot-support.patch`** on all
+  ZynqMP boards. Adds an `mtdparts` + `ubi` prologue to the QSPI
+  `bootcmd_qspi*` distroboot stanza so that a UBIFS-backed
+  `boot.scr` is picked up when booting from QSPI flash. The patch is
+  AMD-authored (the upstream tag is `[UBOOT PATCH] ubifs: distroboot
+  support`) and is replicated verbatim under each ZynqMP board BSP.
+
+### Zynq-7000 BSPs (gem-disable workaround)
+
+The `system-user.dtsi` for `pz_7030`, `zc706_lpc`, and `zedboard`
+disables the PS `&gem0` node:
+
+```dts
+&gem0 {
+    status = "disabled";
+};
+```
+
+The Vivado designs route the on-board PHY to `&gem1` and the FMC ports
+to AXI Ethernet, so `gem0` is unused. In PetaLinux 2025.2, however,
+`pcw.dtsi` exports `gem0` without a `phy-handle` and the 2025.01 U-Boot
+data-aborts when it walks the node looking for a PHY. Disabling
+`gem0` in the device tree avoids the crash. This is specific to the
+Zynq-7000 targets in this repo and is *not* needed on ZynqMP, which
+populates the GEM phy-handles via the `ports-0123` overlay.
+
+### Zynq-7000 BSPs (U-Boot storage probes)
+
+`PetaLinux/bsp/<board>/project-spec/meta-user/recipes-bsp/u-boot/files/bsp.cfg`
+on Zynq-7000 boards explicitly disables NAND, OneNAND, and SPI-flash
+environment probing because the supported carriers don't expose those
+devices to the PS. Without these, the 2025.01 U-Boot prints errors
+and (on PicoZed) aborts on the first NAND probe.
 
 ### ZynqMP BSPs (additionally)
 
@@ -408,6 +451,8 @@ the stock one?"* — it is what to re-apply if you ever do that.
   default `mmcblk0p2`.
 * **`PRIMARY_SD_PSU_SD_1_SELECT=y`** to route the boot SD interface
   through PSU SD1 instead of SD0.
+* **`cma=1000M`** instead of `cma=1536M` (the carriers ship with less
+  DDR than the AMD eval boards).
 * **Custom `system-user.dtsi`** with carrier-specific peripheral
   configuration.
 * **`meta-xilinx-tools/recipes-bsp/uboot-device-tree/`** overlay that
@@ -419,7 +464,10 @@ the stock one?"* — it is what to re-apply if you ever do that.
   `recipes-bsp/embeddedsw/files/`, registered via
   `fsbl-firmware_%.bbappend`. The ZCU104 FSBL is patched to program the
   on-board IRPS5401 PMBus regulator to 1.8V before the FMC PHYs come
-  out of reset.
+  out of reset. Specifically, the patch (a) corrects the I2C MUX
+  channel select to channel 6 so the FSBL reads the FMC card's EEPROM
+  at address 0x50 rather than the ZCU104 board EEPROM at 0x54, and
+  (b) reads enough EEPROM bytes to include the VADJ voltage record.
 
 ### Port-config overlays
 

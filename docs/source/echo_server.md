@@ -54,15 +54,17 @@ TCP packets sent to port 6001 will be echoed back
 Start PHY autonegotiation 
 Waiting for PHY to complete autonegotiation.
 autonegotiation complete 
-auto-negotiated link speed: 1000
-Board IP: 192.168.1.116
+link speed for phy address 0: 1000
+Board IP: 192.168.2.72
 Netmask : 255.255.255.0
-Gateway : 192.168.1.1
+Gateway : 192.168.2.1
 TCP echo server started @ port 7
 ```
 
 The above output results when the target port is connected to a router with DHCP. The assigned
-board IP can vary.
+board IP can vary. On Zynq-7000 designs the link-speed line may instead read
+`auto-negotiated link speed: 1000` depending on which lwIP MAC backend the
+selected port uses.
 
 ## UART settings
 

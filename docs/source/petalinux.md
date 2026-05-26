@@ -38,6 +38,15 @@ users are advised to use a Linux virtual machine to build the PetaLinux projects
 The last command will launch the build process for the corresponding Vivado project if that project
 has not already been built and it's hardware exported.
 
+```{tip} The top-level `make bootimage TARGET=<target>` in the repo root
+will also drive the Vivado, Vitis, and PetaLinux builds end-to-end and
+collect the SD-card-ready outputs into
+`bootimages/ethernet-fmc-zynq-gem_<target>_petalinux-2025-2.zip` (and a
+companion `_standalone-2025-2.zip` for the Vitis side). The `boot/`
+directory inside that zip mirrors the files that the *Boot from SD card*
+section below copies to the FAT32 partition.
+```
+
 ## Boot from SD card
 
 ### Prepare the SD card
@@ -67,20 +76,22 @@ losing data on one of your hard drives.
    * Format the `boot` partition (FAT32) by typing `sudo mkfs.vfat -F 32 -n boot /dev/sdX1`
    * Format the `root` partition (ext4) by typing `sudo mkfs.ext4 -L root /dev/sdX2`
 
-2. Copy the following files to the `boot` partition of the SD card:
-   Assuming the `boot` partition was mounted to `/media/user/boot`, follow these instructions:
+2. Copy the following files to the `boot` partition of the SD card.
+   In this repo, the PetaLinux build outputs land in
+   `PetaLinux/<target>/images/linux/`. Assuming the `boot` partition
+   was mounted to `/media/user/boot`, run:
    ```
    $ cd /media/user/boot/
-   $ sudo cp /<petalinux-project>/images/linux/BOOT.BIN .
-   $ sudo cp /<petalinux-project>/images/linux/boot.scr .
-   $ sudo cp /<petalinux-project>/images/linux/image.ub .
+   $ sudo cp <repo>/PetaLinux/<target>/images/linux/BOOT.BIN .
+   $ sudo cp <repo>/PetaLinux/<target>/images/linux/boot.scr .
+   $ sudo cp <repo>/PetaLinux/<target>/images/linux/image.ub .
    ```
 
 3. Create the root file system by extracting the `rootfs.tar.gz` file to the `root` partition.
    Assuming the `root` partition was mounted to `/media/user/root`, follow these instructions:
    ```
    $ cd /media/user/root/
-   $ sudo cp /<petalinux-project>/images/linux/rootfs.tar.gz .
+   $ sudo cp <repo>/PetaLinux/<target>/images/linux/rootfs.tar.gz .
    $ sudo tar xvf rootfs.tar.gz -C .
    $ sync
    ```
@@ -154,8 +165,6 @@ To boot PetaLinux on hardware via JTAG, use the following commands in a Linux co
 
 An explanation of the above command is provided by the `petalinux-boot` command:
 ```none
-For microblaze, it will download the bitstream to target board, and
-then boot the kernel image on target board.
 For Zynq, it will download the bitstream and FSBL to target board,
 and then boot the u-boot and then the kernel on target
 board.
@@ -186,44 +195,80 @@ sudo screen /dev/ttyUSB0 115200
 
 ## Port configurations
 
-### PicoZed, ZC702, ZC706, ZedBoard
+```{note} PetaLinux 2025.2 ships with systemd-based predictable interface
+names. Zynq-7000 designs (which expose the PS GEM as an `axi_ethernet`-
+adjacent `macb` interface) typically rename the interface from `ethN` to
+`enx<mac>` (MAC-derived). Zynq UltraScale+ designs rename the PS GEMs to
+`end0`–`end3`. The logical port-to-MAC assignments below are unchanged;
+only the interface name changes. Use `ip link` or the `ifconfig` output
+to see the actual name on your board.
+```
 
-* eth0: Ethernet port of the dev board (GEM0)
-* eth1: Ethernet FMC Port 3 (GEM1)
-* eth2: Ethernet FMC Port 0 (AXI Ethernet)
-* eth3: Ethernet FMC Port 1 (AXI Ethernet)
-* eth4: Ethernet FMC Port 2 (AXI Ethernet)
+### PicoZed, ZC706, ZedBoard
 
-### ZCU104, ZCU102 (HPC0), ZCU106 (HPC0)
+The Zynq-7000 designs use three AXI Ethernet Subsystem cores plus one PS
+GEM for the FMC ports. The on-board RJ45 of these boards is wired to
+PS GEM0; in the current PetaLinux configuration `gem0` is left disabled
+(see *Zynq-7000 BSPs (gem-disable workaround)* in [advanced](advanced.md))
+so the on-board Ethernet is **not** available under Linux in this repo's
+PetaLinux images, despite being usable electrically:
 
-* eth0: Ethernet FMC Port 0 (GEM0)
-* eth1: Ethernet FMC Port 1 (GEM1)
-* eth2: Ethernet FMC Port 2 (GEM2)
-* eth3: Ethernet FMC Port 3 (GEM3)
+* GEM1 (Ethernet FMC Port 3) → `enx<mac>` (the example logs show
+  `enx000a35000125`, i.e. MAC `00:0A:35:00:01:25`)
+* AXI Ethernet 0 (Ethernet FMC Port 0) → `enx<mac>` (`...122`)
+* AXI Ethernet 1 (Ethernet FMC Port 1) → `enx<mac>` (`...123`)
+* AXI Ethernet 2 (Ethernet FMC Port 2) → `enx<mac>` (`...124`)
+
+To enable the on-board Ethernet port, remove the `&gem0 { status =
+"disabled"; }` stanza from `PetaLinux/bsp/<board>/project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi`.
+The cost of doing so is that U-Boot will crash on first boot due to a
+missing `phy-handle`; see the advanced page for the workaround used.
+
+### ZCU104, ZCU102 (HPC0), ZCU106 (HPC0), UltraZed-EG, UltraZed-EV, PYNQ-ZU, ZCU111, ZCU208
+
+All four PS GEMs are used for the Ethernet FMC ports:
+
+* GEM0 (Ethernet FMC Port 0) → `end0`
+* GEM1 (Ethernet FMC Port 1) → `end1`
+* GEM2 (Ethernet FMC Port 2) → `end2`
+* GEM3 (Ethernet FMC Port 3) → `end3`
 
 Note that the Ethernet port of the dev board in these designs is not connected to any GEM and is
 thus unusable.
 
 ### ZCU102 (HPC1)
 
-* eth0: Ethernet FMC Port 0 (GEM0)
-* eth1: Ethernet FMC Port 1 (GEM1)
-* eth2: Ethernet FMC Port 2 (GEM2)
-* eth3: ZCU102 on-board Ethernet port (GEM3)
+Three of the four FMC ports are wired and the on-board RJ45 stays connected:
+
+* GEM0 (Ethernet FMC Port 0) → `end0`
+* GEM1 (Ethernet FMC Port 1) → `end1`
+* GEM2 (Ethernet FMC Port 2) → `end2`
+* GEM3 (ZCU102 on-board Ethernet port) → `end3`
 
 ## Example Usage
+
+The PetaLinux 2025.2 images in this repo log in as user `petalinux` with
+password `petalinux` (you will be prompted to change the password on
+first login on most targets). The shell prompt is
+`<hostname>-zynq-gem-2025-2:~$` and commands that need root privilege are
+run via `sudo`. The hostname is set per-target (e.g. `zcu102-zynq-gem-2025-2`,
+`pynqzu-zynq-gem-2025-2`, `zed-zynq-gem-2025-2`).
+
+The examples below use `end1` (ZynqMP) as the interface name; substitute
+the actual name from the port-configuration table above for your target
+(`end<N>` on ZynqMP, `enx<mac>` on Zynq-7000).
 
 ### Enable port
 
 This example will bring up a port.
 
 ```
-root@zynqgem:~# sudo ifconfig eth1 up
+zcu102-zynq-gem-2025-2:~$ sudo ifconfig end1 up
 [  378.871550] pps pps1: new PPS source ptp1
 [  378.875583] macb ff0c0000.ethernet: gem-ptp-timer ptp clock registered.
-[  382.943505] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
-[  382.951774] macb ff0c0000.ethernet eth1: link up (1000/Full)
-[  382.957441] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+[  382.943505] macb ff0c0000.ethernet end1: unable to generate target frequency: 125000000 Hz
+[  382.951774] macb ff0c0000.ethernet end1: Link is Up - 1Gbps/Full - flow control off
+[  382.957441] IPv6: ADDRCONF(NETDEV_CHANGE): end1: link becomes ready
 ```
 
 ### Enable port with fixed IP address
@@ -231,12 +276,12 @@ root@zynqgem:~# sudo ifconfig eth1 up
 This example sets a fixed IP address to a port.
 
 ```
-root@zynqgem:~# sudo ifconfig eth1 192.168.2.31 up
+zcu102-zynq-gem-2025-2:~$ sudo ifconfig end1 192.168.2.31 up
 [  424.839768] pps pps1: new PPS source ptp1
 [  424.843798] macb ff0c0000.ethernet: gem-ptp-timer ptp clock registered.
-[  428.927505] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
-[  428.935778] macb ff0c0000.ethernet eth1: link up (1000/Full)
-[  428.941450] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+[  428.927505] macb ff0c0000.ethernet end1: unable to generate target frequency: 125000000 Hz
+[  428.935778] macb ff0c0000.ethernet end1: Link is Up - 1Gbps/Full - flow control off
+[  428.941450] IPv6: ADDRCONF(NETDEV_CHANGE): end1: link becomes ready
 ```
 
 ### Enable port using DHCP
@@ -245,72 +290,71 @@ This example enables a port and obtains an IP address for the port via DHCP. Not
 port must be connected to a DHCP enabled router.
 
 ```
-root@zynqgem:~# sudo udhcpc -i eth1
-udhcpc: started, v1.31.0
-[  314.831199] macb ff0c0000.ethernet eth1: unable to generate target frequency: 125000000 Hz
-[  314.839489] macb ff0c0000.ethernet eth1: link up (1000/Full)
+zcu102-zynq-gem-2025-2:~$ sudo udhcpc -i end1
+udhcpc: started, v1.36.1
+[  314.831199] macb ff0c0000.ethernet end1: unable to generate target frequency: 125000000 Hz
+[  314.839489] macb ff0c0000.ethernet end1: Link is Up - 1Gbps/Full - flow control off
 [  314.845181] pps pps1: new PPS source ptp1
 [  314.849205] macb ff0c0000.ethernet: gem-ptp-timer ptp clock registered.
-[  314.855955] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
-udhcpc: sending discover
-udhcpc: sending select for 192.168.2.24
-udhcpc: lease of 192.168.2.24 obtained, lease time 259200
+[  314.855955] IPv6: ADDRCONF(NETDEV_CHANGE): end1: link becomes ready
+udhcpc: broadcasting discover
+udhcpc: broadcasting select for 192.168.2.24, server 192.168.2.1
+udhcpc: lease of 192.168.2.24 obtained from 192.168.2.1, lease time 259200
 RTNETLINK answers: File exists
 /etc/udhcpc.d/50default: Adding DNS 192.168.2.1
 ```
 
 ### Check port status
 
-In this example, we use the `ifconfig` command with no arguments to check the port status.
-The first interface (eth1) is connected to the Ethernet FMC port 0 and it has
-been enabled and configured with IP address 192.168.2.23.
+In this example, we use the `ifconfig` command with no arguments to check the port status,
+taken from a ZCU102 (HPC0) running PetaLinux 2025.2. `end3` is connected to the Ethernet FMC
+port 3 and obtained 192.168.2.64 via DHCP; the other FMC ports are present but down.
 
 ```
-root@zynqgem:~# ifconfig
-eth0      Link encap:Ethernet  HWaddr 00:0A:35:00:01:22
-          inet addr:192.168.2.23  Bcast:192.168.2.255  Mask:255.255.255.0
-          inet6 addr: fe80::20a:35ff:fe00:122/64 Scope:Link
-          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-          RX packets:5 errors:0 dropped:0 overruns:0 frame:0
-          TX packets:13 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:1000
-          RX bytes:794 (794.0 B)  TX bytes:2000 (1.9 KiB)
-          Interrupt:30
-
-lo        Link encap:Local Loopback
-          inet addr:127.0.0.1  Mask:255.0.0.0
-          inet6 addr: ::1/128 Scope:Host
-          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+zcu102-zynq-gem-2025-2:~$ ifconfig
+end0      Link encap:Ethernet  HWaddr 00:0A:35:00:01:22
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
           RX packets:0 errors:0 dropped:0 overruns:0 frame:0
           TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
           collisions:0 txqueuelen:1000
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:50
+
+end1      Link encap:Ethernet  HWaddr 00:0A:35:00:01:23
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          ...
+
+end3      Link encap:Ethernet  HWaddr 00:0A:35:00:01:25
+          inet addr:192.168.2.64  Bcast:192.168.2.255  Mask:255.255.255.0
+          inet6 addr: fe80::20a:35ff:fe00:125/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:25 errors:0 dropped:2 overruns:0 frame:0
+          TX packets:14 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:2431 (2.3 KiB)  TX bytes:1678 (1.6 KiB)
+          Interrupt:53
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          ...
 ```
 
 We can also use `ethtool` to check the port status as follows.
 
 ```
-root@zynqgem:~# ethtool eth0
-Settings for eth0:
-        Supported ports: [ TP MII FIBRE ]
+zcu102-zynq-gem-2025-2:~$ ethtool end3
+Settings for end3:
+        Supported ports: [ TP MII ]
         Supported link modes:   10baseT/Half 10baseT/Full
                                 100baseT/Half 100baseT/Full
                                 1000baseT/Half 1000baseT/Full
         Supported pause frame use: Symmetric Receive-only
         Supports auto-negotiation: Yes
-        Supported FEC modes: Not reported
         Advertised link modes:  10baseT/Half 10baseT/Full
                                 100baseT/Half 100baseT/Full
                                 1000baseT/Half 1000baseT/Full
         Advertised pause frame use: No
         Advertised auto-negotiation: Yes
-        Advertised FEC modes: Not reported
-        Link partner advertised link modes:  10baseT/Half 10baseT/Full
-                                             100baseT/Half 100baseT/Full
-                                             1000baseT/Full
-        Link partner advertised pause frame use: No
-        Link partner advertised auto-negotiation: Yes
-        Link partner advertised FEC modes: Not reported
         Speed: 1000Mb/s
         Duplex: Full
         Port: MII
@@ -322,16 +366,22 @@ Settings for eth0:
 
 ### Ping link partner using specific port
 
-In this example we ping the link partner at IP address 192.168.2.10 from interface eth1.
+In this example we ping a link partner at 192.168.2.98 over `end3`.
 
 ```
-root@zynqgem:~# ping -I eth0 192.168.2.10
-PING 192.168.2.10 (192.168.2.10): 56 data bytes
-64 bytes from 192.168.2.10: seq=0 ttl=128 time=0.448 ms
-64 bytes from 192.168.2.10: seq=1 ttl=128 time=0.416 ms
-64 bytes from 192.168.2.10: seq=2 ttl=128 time=0.418 ms
-64 bytes from 192.168.2.10: seq=3 ttl=128 time=0.409 ms
+zcu102-zynq-gem-2025-2:~$ ping 192.168.2.98
+PING 192.168.2.98 (192.168.2.98): 56 data bytes
+64 bytes from 192.168.2.98: seq=0 ttl=64 time=0.297 ms
+64 bytes from 192.168.2.98: seq=1 ttl=64 time=0.137 ms
+64 bytes from 192.168.2.98: seq=2 ttl=64 time=0.125 ms
+64 bytes from 192.168.2.98: seq=3 ttl=64 time=0.197 ms
+^C
+--- 192.168.2.98 ping statistics ---
+4 packets transmitted, 4 packets received, 0% packet loss
+round-trip min/avg/max = 0.125/0.189/0.297 ms
 ```
+
+To restrict the source interface explicitly, use `ping -I <iface> <addr>`.
 
 [Ethernet FMC]: https://docs.opsero.com/op031/datasheet/overview/
 [supported Linux distributions]: https://docs.amd.com/r/en-US/ug1144-petalinux-tools-reference-guide/Setting-Up-Your-Environment

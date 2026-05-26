@@ -1,5 +1,25 @@
 # Revision History
 
+## 2025.2 Changes
+
+* Updated for Vivado / Vitis / PetaLinux 2025.2.
+* Vitis flow migrated to the universal Python driver (`Vitis/py/build-vitis.py`)
+  with per-target workspace layout and SDT-mode platforms.
+* PetaLinux BSPs reorganised under `PetaLinux/bsp/<board>` and
+  `PetaLinux/bsp/ports-<config>` overlays; per-target projects composed
+  at build time by `PetaLinux/Makefile`.
+* Added top-level `Makefile` that produces SD-card-ready boot zips under
+  `bootimages/`.
+* Workarounds applied for known 2025.2 quirks on Zynq-7000: PS `gem0`
+  disabled in `system-user.dtsi` to avoid a U-Boot data abort caused by
+  a missing `phy-handle` in `pcw.dtsi`; `cma=256M` instead of the stock
+  template's `cma=1536M`; explicit DDR size in `configs/config` to
+  override the stock 2 GiB default on boards with 512 MiB / 1 GiB.
+* UltraZed-EG / UltraZed-EV BSPs use `cma=1000M` and route the rootfs
+  through PSU SD1 (`mmcblk1p2`).
+* PetaLinux predictable interface names: ZynqMP ports appear as
+  `end0`–`end3`; Zynq-7000 ports as `enx<mac>`.
+
 ## 2024.1 Changes
 
 * Improved documentation, centralized target design info to a JSON file

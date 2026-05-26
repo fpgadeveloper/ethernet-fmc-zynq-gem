@@ -23,13 +23,21 @@ Check the following if the project fails to build or generate a bitstream:
 Check the following if you are unable to get ports working in PetaLinux.
 
 1. **Check the interface-to-port assignment for your design**   
-   The assignment of interfaces (eg. eth0, eth1, eth2, etc) to ports (eg. Ethernet FMC port 0, 1, 2 and 3) is specific to the design that
-   you are using. The interface to port assignment is documented [here](https://zynqgem.ethernetfmc.com/en/latest/petalinux.html#port-configurations).
+   The assignment of interfaces to ports (Ethernet FMC port 0, 1, 2 and 3) is specific to the design that
+   you are using. PetaLinux 2025.2 uses systemd predictable interface names, so the PS GEM ports appear as
+   `end0`–`end3` on Zynq UltraScale+ and as `enx<mac>` on Zynq-7000. The interface-to-port assignment is documented [here](https://zynqgem.ethernetfmc.com/en/latest/petalinux.html#port-configurations).
 
 2. **Each port must be assigned to a different subnet**   
-   If you assign interface eth0 to IP address 192.168.1.10, then you must use a different subnet for the IP address of eth1, eth2 and eth3.
+   If you assign one interface to IP address 192.168.1.10, then you must use a different subnet for the IP address of the other interfaces.
    Multiple ports that are managed under Linux must be assigned to different subnets, or they will not work.
-   An example address assignment would be eth0=192.168.1.10, eth1=192.168.2.10, eth2=192.168.3.10, eth3=192.168.4.10.
+   An example address assignment would be `end0=192.168.1.10`, `end1=192.168.2.10`, `end2=192.168.3.10`, `end3=192.168.4.10`.
+
+3. **GEM `unable to generate target frequency: 125000000 Hz`**   
+   This message is benign — the macb driver complains that it cannot
+   exactly produce the 125 MHz GMII transmit clock from the available
+   PS clock dividers, then falls back to a slightly different value
+   that the GMII-to-RGMII shim accepts. The link still trains at
+   1 Gbps/Full. It does not need to be acted on.
 
 ### Dropped pings/packets
 

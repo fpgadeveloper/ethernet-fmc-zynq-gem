@@ -8,9 +8,11 @@ boards.
 In the Zynq designs, the first three ports of the Ethernet FMC are connected to the
 AXI Ethernet Subsystem IP which are then connected to the system memory via AXI DMA IP.
 The fourth port of the Ethernet FMC is connected to the GMII-to-RGMII IP which
-connects to hard GEM0 of the Zynq PS via the FPGA fabric (EMIO). The Ethernet port of
-the Zynq development board (ie. the on-board Ethernet port) connects directly to the
-hard GEM1 of the Zynq PS via MIO.
+connects to one of the hard GEMs of the Zynq PS via the FPGA fabric (EMIO). The Ethernet
+port of the Zynq development board (ie. the on-board Ethernet port) connects directly to
+the other hard GEM of the Zynq PS via MIO. The PetaLinux device tree in this repo
+disables the on-board GEM by default; see [petalinux](petalinux.md) for how to re-enable
+it.
 
 ![Zynq GEM design block diagram](images/zynq-gem-design-block-diagram.png)
 

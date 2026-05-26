@@ -63,11 +63,18 @@ provide us with the pinout of your carrier and we'll be happy to check compatibi
 
 ### ZedBoard and PicoZed
 
-When changing `ETH_FMC_PORT` from 0-2 to 3 (ie. when switching to GEM1), it has been noticed that
-you have to power cycle the board. When the SDK project is configured for AXI Ethernet, it must make some
-Zynq configurations that are not compatible with the GEM1 configuration.
+When changing `ETHERNET_PORT` (in `platform_config.h.in`, see the
+[stand-alone echo server](echo_server.md) page) from 0–2 to 3 — that is,
+when switching from the AXI Ethernet cores to GEM1 — it has been noticed
+that you have to power cycle the board. When the standalone application
+is configured for AXI Ethernet, the platform makes some Zynq PS
+configurations that are not compatible with the GEM1 configuration.
 
-The on-board Ethernet port on all of these designs is connected to GEM0 and is usable.
+The on-board Ethernet port on all of these designs is connected to GEM0. The reference
+PetaLinux images in this repo disable GEM0 (to avoid a U-Boot crash, see [advanced](advanced.md));
+the on-board port is therefore not used by default but can be re-enabled by editing the
+board's `system-user.dtsi`. The standalone echo server targets one port at a time and does
+not drive the on-board port either.
 
 
 [contact Opsero]: https://opsero.com/contact-us
