@@ -8,11 +8,15 @@
  * domain by device-tree.bbappend. Ported from the Ethernet FMC Zynq GEM PetaLinux BSP.
  */
 
-#include "include/dt-bindings/input/input.h"
-#include "include/dt-bindings/gpio/gpio.h"
-#include "include/dt-bindings/pinctrl/pinctrl-zynqmp.h"
-#include "include/dt-bindings/phy/phy.h"
-#include "include/dt-bindings/interrupt-controller/irq.h"
+/*
+ * The EDF device-tree recipe sets KERNEL_INCLUDE="" so the kernel dt-bindings
+ * headers do not resolve in the cpp preprocessing pass (-nostdinc -I<workdir>).
+ * Inline the only macros actually used below; the other dropped headers
+ * (input/gpio/pinctrl/irq) contributed nothing referenced in this dtsi.
+ */
+/* From include/dt-bindings/phy/phy.h */
+#define PHY_TYPE_SATA 1
+#define PHY_TYPE_USB3 4
 
 /* From include/dt-bindings/clk/versaclock.h */
 #define VC5_LVPECL   0
