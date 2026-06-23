@@ -121,24 +121,12 @@ def get_vivado_build_targets(data):
     return(targets)
 
 def get_petalinux_targets(data):
-    lanecfg_exceptions = {'pz_7030': '-axieth','zc706_lpc': '-axieth','zedboard': '-axieth'}
     templates = {'fpga': 'microblaze', 'z7': 'zynq', 'zu': 'zynqMP', 'versal': 'versal'}
     targets = []
     for design in data['designs']:
         if not design['petalinux']:
             continue
-        lanecfg = 'ports-'
-        if len(design['lanes']) > 4:
-            length = 8
-        else:
-            length = 4
-        for lane in range(length):
-            if lane in design['lanes']:
-                lanecfg += str(lane)
-            else:
-                lanecfg += '-'
-        if design['label'] in lanecfg_exceptions:
-            lanecfg += lanecfg_exceptions[design['label']]
+        lanecfg = design.get('portcfg', '')
         template = templates[design['group']]
         target = '{}_target := {} {} {} {}'.format(design['label'],template,design['flashsize'],design['flashintf'],lanecfg)
         targets.append(target)
