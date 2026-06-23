@@ -48,25 +48,25 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 <!-- updater start -->
 ### Zynq-7000 designs
 
-| Target board          | Target design      | Ports       | FMC Slot(s) | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|
-| [PicoZed 7030]        | `pz_7030`          | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [ZC706]               | `zc706_lpc`        | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Enterprise | -     |
-| [ZedBoard]            | `zedboard`         | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| Target board          | Target design      | Ports       | FMC Slot(s) | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|-------|
+| [PicoZed 7030]        | `pz_7030`          | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [ZC706]               | `zc706_lpc`        | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| [ZedBoard]            | `zedboard`         | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
 
 ### Zynq UltraScale+ designs
 
-| Target board          | Target design      | Ports       | FMC Slot(s) | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|
-| [PYNQ-ZU]             | `pynqzu`           | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [UltraZed-EG PCIe Carrier] | `uzeg_pci`         | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [UltraZed-EV Carrier] | `uzev`             | 4x          | HPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [ZCU102]              | `zcu102_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | Enterprise | -     |
-| [ZCU102]              | `zcu102_hpc1`      | 3x          | HPC1        | :white_check_mark: | :white_check_mark: | Enterprise | -     |
-| [ZCU104]              | `zcu104`           | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [ZCU106]              | `zcu106_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [ZCU111]              | `zcu111`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | -     |
-| [ZCU208]              | `zcu208`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| Target board          | Target design      | Ports       | FMC Slot(s) | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|-------|
+| [PYNQ-ZU]             | `pynqzu`           | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [UltraZed-EG PCIe Carrier] | `uzeg_pci`         | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [UltraZed-EV Carrier] | `uzev`             | 4x          | HPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [ZCU102]              | `zcu102_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| [ZCU102]              | `zcu102_hpc1`      | 3x          | HPC1        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| [ZCU104]              | `zcu104`           | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [ZCU106]              | `zcu106_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [ZCU111]              | `zcu111`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| [ZCU208]              | `zcu208`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
 
 [PicoZed 7030]: https://www.xilinx.com/products/boards-and-kits/1-hypn9d.html
 [ZC706]: https://www.xilinx.com/zc706

@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+// Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
+
+/*
+ * SoC-side board fixups for zcu106 (ZynqMP), layered on top of the
+ * gen-machineconf / lopper-generated Linux device tree (which already carries
+ * the PS config and the design's PL hardware from the XSA). Scoped to the Linux
+ * domain by device-tree.bbappend. Ported from the Ethernet FMC Zynq GEM PetaLinux BSP.
+ */
+
+/* 2025.2 gen-machineconf assigns port-number=0 to uart1, making ttyPS0 map
+ * to uart1. Vitis bsp.yaml confirms this board uses psu_uart_0, so force
+ * ttyPS0 back to uart0. */
+&uart0 {
+   port-number = <0>;
+};
+&uart1 {
+   port-number = <1>;
+};
+/ {
+   aliases {
+      serial0 = &uart0;
+      serial1 = &uart1;
+   };
+   chosen {
+      stdout-path = "serial0:115200n8";
+   };
+};
