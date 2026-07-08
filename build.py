@@ -714,8 +714,14 @@ def stage_yocto(ctx: Context):
         shutil.copyfile(ctx.xsa, hw_xsa)
     # 3. Configure (sdtgen + gen-machineconf parse-sdt + BSP/overlay/sstate).
     #    Re-run when the XSA or the board conf is newer than the done-marker.
-    board = ctx.target.split("_")[0]
-    bsp = ydir / "bsp" / board
+    #    Prefer a target-specific bsp (e.g. bsp/zcu102_hpc1) over the board-level
+    #    one (bsp/zcu102) when it exists -- mirrors the PetaLinux convention where
+    #    a design variant whose hardware differs (e.g. fewer MIPI camera ports)
+    #    gets its own bsp instead of sharing the board's.
+    bsp = ydir / "bsp" / ctx.target
+    if not bsp.is_dir():
+        bsp = ydir / "bsp" / ctx.target.split("_")[0]
+    board = bsp.name
     conf_append = bsp / "conf" / "local.conf.append"
     done = work / "configdone.txt"
     offline = ydir / "offline.txt"
