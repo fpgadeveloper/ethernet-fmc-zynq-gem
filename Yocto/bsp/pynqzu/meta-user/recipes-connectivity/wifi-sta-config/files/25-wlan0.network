@@ -1,0 +1,22 @@
+# Wi-Fi station interface (PYNQ-ZU WILC3000): DHCP once wpa_supplicant@wlan0
+# has associated. Credentials: /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+# (written on the board at runtime, see wifi-sta-setup).
+[Match]
+Name=wlan0
+
+[Link]
+# Don't hold network-online.target / systemd-networkd-wait-online for Wi-Fi:
+# with no credentials configured wlan0 never comes up.
+RequiredForOnline=no
+# networkd only configures wlan0 (DHCP); wpa_supplicant@wlan0 is the one that
+# raises it, and only once credentials exist. Without credentials the radio
+# stays down (no firmware load at boot).
+ActivationPolicy=manual
+
+[Network]
+DHCP=ipv4
+IPv6AcceptRA=no
+
+[DHCPv4]
+ClientIdentifier=mac
+RouteMetric=20

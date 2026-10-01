@@ -1,0 +1,59 @@
+From: Opsero <noreply@opsero.com>
+Subject: [PATCH] wifi: wilc1000: refuse config requests before the first open
+
+Until the interface is opened for the first time no firmware runs and no
+TX thread drains the queue, yet wilc->quit is still 0 (zeroed allocation),
+so wilc_wlan_txq_add_cfg_pkt() accepts config packets. A station dump on
+the down interface (NL80211_CMD_GET_STATION dump, as systemd-networkd
+sends for every Wi-Fi link it enumerates, or `iw dev wlan0 station dump`) reaches
+dump_station() -> wilc_get_rssi(), which queues a WID_RSSI query, times
+out after 3 s ("Failed to get RSSI value") and leaves the queue entry
+behind, together with a pending txq_event completion. The next open
+starts the TX thread before it downloads the firmware; the thread wakes
+on that completion at once and pushes the stale packet to the chip
+(VMM table write, firmware interrupt) while no firmware runs, then keeps
+retrying during the download. The chip's TX handshake does not recover:
+the firmware never answers the config requests of the start sequence,
+each times out ("Failed to configure firmware", "WLAN initialization
+FAILED") and the open fails with -EINVAL. The failure path empties the
+queue and sets wilc->quit, which is why a second open then works.
+
+ - dump_station(): return -ENOENT (no station) while the firmware is not
+   running, as get_station() and get_tx_power() already refuse to talk
+   to an uninitialized chip.
+ - wilc_cfg80211_init(): start with wilc->quit = 1, the state a close
+   leaves behind, so any other config request made before the first
+   open is refused instead of being queued.
+
+Upstream-Status: Pending
+Signed-off-by: Opsero <noreply@opsero.com>
+---
+--- a/drivers/net/wireless/microchip/wilc1000/cfg80211.c
++++ b/drivers/net/wireless/microchip/wilc1000/cfg80211.c
+@@ -1329,6 +1329,10 @@
+ 	if (idx != 0)
+ 		return -ENOENT;
+ 
++	/* No firmware running: no station, and nothing to ask the chip. */
++	if (!vif->wilc->initialized)
++		return -ENOENT;
++
+ 	ret = wilc_get_rssi(vif, &sinfo->signal);
+ 	if (ret)
+ 		return ret;
+@@ -1820,6 +1824,15 @@
+ 
+ 	wlan_init_locks(wl);
+ 
++	/*
++	 * The firmware only runs between wilc_wlan_init() (first open) and
++	 * wilc_wlan_cleanup() (close), which clear and set this flag. Start
++	 * in the closed state so a config request that reaches the driver
++	 * before the first open is refused, as it is after a close, instead
++	 * of being left on the TX queue for the next firmware start.
++	 */
++	wl->quit = 1;
++
+ 	ret = wilc_wlan_cfg_init(wl);
+ 	if (ret)
+ 		goto free_wl;

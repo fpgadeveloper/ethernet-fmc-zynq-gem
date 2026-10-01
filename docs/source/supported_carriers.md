@@ -40,41 +40,66 @@ provide us with the pinout of your carrier and we'll be happy to check compatibi
 
 ## Board specific notes
 
-### ZCU106
-
-* The HPC0 connector on this board supports all 4 ports of the Ethernet FMC. This design uses up all 4 GEMs,
-  leaving the ZCU106's on-board Ethernet port unusable.
+For the FMC card variant (1.8 V or 2.5 V) to use with each board, see
+[Choosing the FMC variant](requirements.md#choosing-the-fmc-variant).
 
 ### ZCU102
 
 * This design supports the ZCU102 Rev 1.0 board. Use a commit before 2017/02/13 for the older Rev-D board design.
   Note that the FMC pinouts differ between Rev 1.0 and Rev D: [Answer record 68050](https://www.xilinx.com/support/answers/68050.html)
-* The HPC0 design uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC. This design uses up all 4 GEMs,
-  leaving the ZCU102's on-board Ethernet port unusable.
-* The HPC1 design uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left unconnected
-  because certain pins required by the Ethernet FMC (namely LA30, LA31 and LA32) are left unconnected 
+* The HPC0 design (`zcu102_hpc0`) uses 4x GEMs to connect to ports 0-3 of the Ethernet FMC. This design uses up
+  all 4 GEMs, leaving the ZCU102's on-board Ethernet port unusable.
+* The HPC1 design (`zcu102_hpc1`) uses 3x GEMs to connect to ports 0-2 of the Ethernet FMC. The 4th port is left
+  unconnected because certain pins required by the Ethernet FMC (namely LA30, LA31 and LA32) are left unconnected
   on the HPC1 connector of the ZCU102 board. The ZCU102's on-board Ethernet port connects to GEM3 and is usable
-  in this design.
+  in this design (under Linux it is the fourth interface, MAC address `00:0a:35:00:01:25`).
+
+### ZCU104
+
+* The ZCU104 powers the FMC connector (VADJ) only after its first-stage boot loader (FSBL) has read the voltage
+  record from the FMC card's EEPROM. The stock 2025.2 FSBL reads the wrong EEPROM, so VADJ would stay off and none
+  of the FMC ports would work. The FSBL built by this repository (PetaLinux, Yocto and standalone boot images) is
+  patched to read the FMC card's EEPROM and enable VADJ.
+* All 4 GEMs are used for the Ethernet FMC, so the ZCU104's on-board Ethernet port is not available.
+
+### ZCU106
+
+* The HPC0 connector on this board supports all 4 ports of the Ethernet FMC. This design uses up all 4 GEMs,
+  leaving the ZCU106's on-board Ethernet port unusable.
+
+### ZCU111 and ZCU208
+
+* The Ethernet FMC goes on the FMC+ connector. All 4 GEMs are used for the Ethernet FMC, so the on-board Ethernet
+  port is not available.
 
 ### UltraZed-EG and UltraZed-EV
 
 * The UltraZed designs use 4x GEMs to connect to ports 0-3 of the Ethernet FMC. These designs use up all 4 GEMs,
   leaving the on-board Ethernet port unusable.
+* The SD card is the second SD/MMC device on these SOMs (the eMMC is the first), so the Linux root file system
+  is on `/dev/mmcblk1`.
 
-### ZedBoard and PicoZed
+### PYNQ-ZU
 
-When changing `ETHERNET_PORT` (in `platform_config.h.in`, see the
-[stand-alone echo server](echo_server.md) page) from 0–2 to 3 — that is,
-when switching from the AXI Ethernet cores to GEM1 — it has been noticed
-that you have to power cycle the board. When the standalone application
-is configured for AXI Ethernet, the platform makes some Zynq PS
-configurations that are not compatible with the GEM1 configuration.
+* The PYNQ-ZU has no Ethernet port of its own; all 4 GEMs are used for the Ethernet FMC.
+* The board has on-board Wi-Fi (Microchip WILC3000). The Yocto image supports it as a station
+  (client); see [Wi-Fi on the PYNQ-ZU](yocto.md#wi-fi-on-the-pynq-zu). The PetaLinux image does not include
+  Wi-Fi support.
+* The board's USB-UART enumerates as two serial ports on your PC; the Linux console is on the second one.
 
-The on-board Ethernet port on all of these designs is connected to GEM0. The reference
-PetaLinux images in this repo disable GEM0 (to avoid a U-Boot crash, see [advanced](advanced.md));
-the on-board port is therefore not used by default but can be re-enabled by editing the
-board's `system-user.dtsi`. The standalone echo server targets one port at a time and does
-not drive the on-board port either.
+### ZedBoard, PicoZed and ZC706
+
+* Ethernet FMC ports 0-2 use AXI Ethernet Subsystem cores and port 3 uses the PS GEM1 (see
+  [Description](description.md#zynq-7000-designs)).
+* The on-board Ethernet port of these boards is connected to GEM0 through MIO. The Linux images (PetaLinux and
+  Yocto) enable it, so it can be used alongside the four FMC ports. Its PHY is at MDIO address 0 on the
+  ZedBoard and PicoZed, and at address 7 on the ZC706; the device trees of this repository describe both.
+* The standalone echo server targets one Ethernet FMC port at a time and does not drive the on-board port.
+* When changing `ETHERNET_PORT` (in `platform_config.h.in`, see the
+  [stand-alone echo server](echo_server.md) page) from 0-2 to 3 (that is, when switching from the AXI Ethernet
+  cores to GEM1), it has been noticed that you have to power cycle the board. When the standalone application
+  is configured for AXI Ethernet, the platform makes some Zynq PS configurations that are not compatible with
+  the GEM1 configuration.
 
 
 [contact Opsero]: https://opsero.com/contact-us

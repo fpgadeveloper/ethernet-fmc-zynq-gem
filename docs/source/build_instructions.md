@@ -38,9 +38,9 @@ the FMC connector on which to connect the mezzanine card.
     {% if designs_in_group | length > 0 %}
 ### {{ group.name }} designs
 
-| Target board        | Target design     | Ports   | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|---------------------|-------------------|---------|-------------|-----|-----|-----|-----|
-{% for design in data.designs %}{% if design.group == group.label and design.publish %}| [{{ design.board }}]({{ design.link }}) | `{{ design.label }}` | {{ design.lanes | length }}x | {{ design.connector }} | {% if design.baremetal %} ✅ {% else %} ❌ {% endif %} | {% if design.petalinux %} ✅ {% else %} ❌ {% endif %} | {{ "Enterprise" if design.license else "Standard 🆓" }} | {{ "Required" if design.ip_license else "-" }} |
+| Target board        | Target design     | Ports   | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|---------------------|-------------------|---------|-------------|-----|-----|-----|-----|-----|
+{% for design in data.designs %}{% if design.group == group.label and design.publish %}| [{{ design.board }}]({{ design.link }}) | `{{ design.label }}` | {{ design.lanes | length }}x | {{ design.connector }} | {% if design.baremetal %} ✅ {% else %} ❌ {% endif %} | {% if design.petalinux %} ✅ {% else %} ❌ {% endif %} | {% if design.yocto %} ✅ {% else %} ❌ {% endif %} | {{ "Enterprise" if design.license else "Standard 🆓" }} | {{ "Required" if design.ip_license else "-" }} |
 {% endif %}{% endfor %}
 {% endif %}
 {% endfor %}
@@ -50,6 +50,10 @@ Notes:
 1. The Vivado Edition column indicates which designs are supported by the Vivado *Standard* Edition, the
    FREE edition which can be used without a license. Vivado *Enterprise* Edition requires
    a license however a 30-day evaluation license is available from the AMD Xilinx Licensing site.
+2. The Zynq-7000 designs (`pz_7030`, `zc706_lpc`, `zedboard`) contain the AXI Ethernet Subsystem, whose
+   Tri-Mode Ethernet MAC needs an IP license to generate a bitstream. An evaluation license can be
+   obtained from AMD ([instructions](https://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/)).
+   The Zynq UltraScale+ designs use only the PS GEMs and the GMII-to-RGMII core, which need no IP license.
    
 ## Cross-platform build runner
 
@@ -75,7 +79,7 @@ To see the available targets and the state of a build:
 ```
 
 ```{note}
-The embedded Linux images (PetaLinux) can only be built on a
+The embedded Linux images (PetaLinux and Yocto) can only be built on a
 native Linux machine; everything else builds on Windows too. On Windows, the
 runner refuses the Linux-only stages up front and prints the exact command
 to run on the Linux machine.
@@ -170,10 +174,29 @@ connection), you can follow these instructions.
 
 The PetaLinux builds will then be configured for offline build.
 
+### Build Yocto
+
+The Yocto (AMD EDF) build also requires a native Linux machine, with the Yocto host packages
+and Google's `repo` tool installed (see [Yocto requirements](yocto.md#requirements)). The runner
+sources the Vivado and Vitis settings itself and builds the Vivado XSA first if it does not
+already exist:
+
+```
+./build.sh yocto --target <target>
+```
+
+Valid targets for Yocto are:
+{% for design in data.designs if design.yocto and design.publish %} `{{ design.label }}`{{ ", " if not loop.last else "." }} {% endfor %}
+
+The output products are written to `Yocto/<target>/images/linux/`. The first build of a target
+downloads the Yocto layers and sources and builds from scratch, which takes a long time and needs
+roughly 40 to 60 GB of disk space per target; later builds are incremental. See [Yocto](yocto.md)
+for the details, including an offline (sstate mirror) build.
+
 ### Build everything
 
 This builds everything that the target supports — the Vivado project and XSA,
-the standalone application and the PetaLinux image — and gathers the boot
+the standalone application and the PetaLinux and Yocto images — and gathers the boot
 images into `bootimages/*.zip`:
 
 ```
@@ -183,5 +206,24 @@ images into `bootimages/*.zip`:
 
 On Windows, `all` builds everything that the host can build and reports the
 Linux-only stages as `BLOCKED` rather than failing.
+
+The boot image zips are:
+
+| Zip | Contents |
+|-----|----------|
+| `ethernet-fmc-zynq-gem_<target>_standalone-2025-2.zip` | `BOOT.BIN` of the lwIP echo server (FSBL, bitstream and application) |
+| `ethernet-fmc-zynq-gem_<target>_petalinux-2025-2.zip` | `boot/` (`BOOT.BIN`, `boot.scr`, `image.ub`) and `root/` (`rootfs.tar.gz`) for a two-partition SD card |
+| `ethernet-fmc-zynq-gem_<target>_yocto-2025-2.zip` | `rootfs.wic.xz` and `rootfs.wic.bmap` (full SD card image), `BOOT.BIN` and a `readme.txt` |
+
+A zip is rewritten when the artifacts it gathers are newer than the zip, so re-running
+`./build.sh package --target <target>` after a rebuild always packages the new image.
+
+### Clean up
+
+`./build.sh clean --target <target>` deletes everything generated for a target (after a
+confirmation prompt). `./build.sh clean --target <target> --keep-boot` deletes only the
+rebuildable intermediates (Vivado project apart from the XSA, Vitis workspace, PetaLinux and
+Yocto build trees) and keeps the deliverables; use it to free disk space after a successful
+build. `--stage <stage>` limits the clean to one stage.
 
 [supported Linux distributions]: https://docs.amd.com/r/en-US/ug1144-petalinux-tools-reference-guide/Setting-Up-Your-Environment

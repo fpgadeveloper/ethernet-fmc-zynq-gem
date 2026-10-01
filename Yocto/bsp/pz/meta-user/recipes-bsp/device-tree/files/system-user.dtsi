@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: MIT
+// Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
+
+/*
+ * SoC-side board fixups for pz (Zynq-7000), layered on top of the
+ * gen-machineconf / lopper-generated Linux device tree (which already carries
+ * the PS config and the design's PL hardware from the XSA). Scoped to the Linux
+ * domain by device-tree.bbappend. Ported from the Ethernet FMC Zynq GEM PetaLinux BSP.
+ * The Ethernet wiring (FMC ports 0-2 = PL AXI Ethernet, FMC port 3 = PS GEM1,
+ * board RJ45 = PS GEM0, their PHYs and MACs) is supplied by the
+ * bsp/port-configs/ports-0123-axieth overlay (port-config.dtsi), which is
+ * included after this file; GEM0 and GEM1 must stay enabled.
+ *
+ * compatible: the parse-sdt/lopper board merge overwrites the root compatible
+ * with only the board string and drops the SoC-family "xlnx,zynq-7000" that the
+ * base zynq-7000.dtsi sets. The kernel's Zynq machine matches on
+ * "xlnx,zynq-7000"; without it the kernel falls back to the generic ARM DT
+ * machine, zynq_early_slcr_init() never runs, and the clock PLL setup
+ * NULL-derefs -> panic during of_clk_init. Put it back (same value as the
+ * PetaLinux build of this design).
+ *
+ * bootargs: not set here. The kernel command line comes from
+ * BSP_EXTRA_BOOTARGS (conf/local.conf.append), appended to the boot.scr
+ * "setenv bootargs" line by meta-user/recipes-bsp/u-boot/u-boot-edf-scr_%.bbappend.
+ */
+
+/ {
+	compatible = "xlnx,zynq-7000";
+};
+
+/ {
+
+   xlnk {
+      compatible = "xlnx,xlnk-1.0";
+   };
+
+};
+
+/* QSPI partitions are defined with petalinux-config and described in system.conf.dtsi */
+&qspi {
+   #address-cells = <1>;
+   #size-cells = <0>;
+   status = "okay";
+   is-dual = <0>;
+   num-cs = <1>;
+   flash0: flash@0 {
+      compatible = "n25q128a11";
+      reg = <0x0>;
+      spi-tx-bus-width = <1>;
+      spi-rx-bus-width = <4>;
+      spi-max-frequency = <50000000>;      
+      #address-cells = <1>;
+      #size-cells = <1>;
+   };
+};
+
+/ {
+    usb_phy0:usb_phy@0 {
+        compatible="usb-nop-xceiv";
+        #phy-cells = <0>;
+    };
+};
+
+
+&usb0 {
+    dr_mode = "otg";
+    usb-phy = <&usb0>;
+};
+

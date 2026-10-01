@@ -8,9 +8,15 @@ PHYs. The designs target both the Zynq and ZynqMP devices and are illustrated by
 
 ### Zynq Design
 
+The Zynq-7000 has two GEMs: GEM1 drives Ethernet FMC port 3 through a GMII-to-RGMII core, and GEM0
+stays on the board's own Ethernet port. Ethernet FMC ports 0-2 use AXI Ethernet Subsystem cores.
+
 ![Zynq GEM design block diagram](docs/source/images/zynq-gem-design-block-diagram.png "Zynq GEM design block diagram")
 
 ### ZynqMP Design
+
+GEM0 to GEM3 drive Ethernet FMC ports 0 to 3, each through its own GMII-to-RGMII core
+(`zcu102_hpc1`: GEM0-2 to FMC ports 0-2, GEM3 to the ZCU102's own Ethernet port).
 
 ![ZynqMP GEM design block diagram](docs/source/images/zynqmp-gem-design-block-diagram.png "ZynqMP GEM design block diagram")
 
@@ -24,7 +30,7 @@ Important links:
 
 ## Requirements
 
-This project is designed for version 2025.2 of the Xilinx tools (Vivado/Vitis/PetaLinux). 
+This project is designed for version 2025.2 of the Xilinx tools (Vivado/Vitis/PetaLinux/Yocto EDF). 
 If you are using an older version of the Xilinx tools, then refer to the 
 [release tags](https://github.com/fpgadeveloper/ethernet-fmc-zynq-gem/tags "releases")
 to find the version of this repository that matches your version of the tools.
@@ -33,10 +39,12 @@ In order to test this design on hardware, you will need the following:
 
 * Vivado 2025.2
 * Vitis 2025.2
-* PetaLinux Tools 2025.2
-* [Ethernet FMC] or [Robust Ethernet FMC]
+* PetaLinux Tools 2025.2 (for the PetaLinux images; Linux host only)
+* For the Yocto images: a Linux host with the Yocto host packages and Google's `repo` tool
+* [Ethernet FMC] or [Robust Ethernet FMC], in the voltage variant (1.8 V or 2.5 V) that matches the
+  board's VADJ
 * One of the target platforms listed below
-* For designs containing AXI Ethernet Subsystem IP: [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
+* For the Zynq-7000 designs (they contain the AXI Ethernet Subsystem IP): [Xilinx Soft TEMAC license](http://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
 
 ## Target designs
 
@@ -48,25 +56,25 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 <!-- updater start -->
 ### Zynq-7000 designs
 
-| Target board          | Target design      | Ports       | FMC Slot(s) | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|
-| [PicoZed 7030]        | `pz_7030`          | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [ZC706]               | `zc706_lpc`        | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Enterprise | -     |
-| [ZedBoard]            | `zedboard`         | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| Target board          | Target design      | Ports       | FMC Slot(s) | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|-------|
+| [PicoZed 7030]        | `pz_7030`          | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | Required |
+| [ZC706]               | `zc706_lpc`        | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [ZedBoard]            | `zedboard`         | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | Required |
 
 ### Zynq UltraScale+ designs
 
-| Target board          | Target design      | Ports       | FMC Slot(s) | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|
-| [PYNQ-ZU]             | `pynqzu`           | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [UltraZed-EG PCIe Carrier] | `uzeg_pci`         | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [UltraZed-EV Carrier] | `uzev`             | 4x          | HPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [ZCU102]              | `zcu102_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | Enterprise | -     |
-| [ZCU102]              | `zcu102_hpc1`      | 3x          | HPC1        | :white_check_mark: | :white_check_mark: | Enterprise | -     |
-| [ZCU104]              | `zcu104`           | 4x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [ZCU106]              | `zcu106_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
-| [ZCU111]              | `zcu111`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | -     |
-| [ZCU208]              | `zcu208`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| Target board          | Target design      | Ports       | FMC Slot(s) | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|-------|
+| [PYNQ-ZU]             | `pynqzu`           | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [UltraZed-EG PCIe Carrier] | `uzeg_pci`         | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [UltraZed-EV Carrier] | `uzev`             | 4x          | HPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [ZCU102]              | `zcu102_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| [ZCU102]              | `zcu102_hpc1`      | 3x          | HPC1        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| [ZCU104]              | `zcu104`           | 4x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [ZCU106]              | `zcu106_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | -     |
+| [ZCU111]              | `zcu111`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
+| [ZCU208]              | `zcu208`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | -     |
 
 [PicoZed 7030]: https://www.xilinx.com/products/boards-and-kits/1-hypn9d.html
 [ZC706]: https://www.xilinx.com/zc706
@@ -83,14 +91,19 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 
 ## Software
 
-These reference designs can be driven by either a standalone application or within a PetaLinux environment. 
-The repository includes all necessary scripts and code to build both environments. The table 
-below outlines the corresponding applications available in each environment:
+These reference designs can be driven by a standalone application or by embedded Linux, built with
+either PetaLinux or Yocto (AMD EDF). The repository includes all necessary scripts and code to build
+all three. The table below outlines the corresponding applications available in each environment:
 
 | Environment      | Available Applications  |
 |------------------|-------------------------|
 | Standalone       | lwIP Echo Server |
 | PetaLinux        | Built-in Linux commands<br>Additional tools: ethtool, phytool, iperf3 |
+| Yocto            | Built-in Linux commands<br>Additional tools: ethtool, phytool, iperf3<br>PYNQ-ZU: on-board Wi-Fi (`wifi-sta-setup`) |
+
+In the Linux images of the Zynq-7000 boards, the board's own Ethernet port is available as well as
+the four Ethernet FMC ports. How to identify the ports, test them and the throughput to expect are
+described in the [user guide](https://zynqgem.ethernetfmc.com).
 
 ## Build instructions
 
@@ -137,6 +150,15 @@ bit file, depending on the device family):
 
 ```
 ./build.sh petalinux --target <target>
+```
+
+#### Build Yocto (Linux only)
+
+Builds the Yocto (AMD EDF) image, a full SD card image (`rootfs.wic.xz`) plus `BOOT.BIN`, in
+`Yocto/<target>/images/linux/`:
+
+```
+./build.sh yocto --target <target>
 ```
 
 #### Build everything

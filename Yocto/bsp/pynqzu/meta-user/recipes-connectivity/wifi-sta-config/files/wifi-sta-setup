@@ -1,0 +1,78 @@
+#!/bin/sh
+# Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
+# SPDX-License-Identifier: MIT
+#
+# wifi-sta-setup - write wlan0 station credentials and bring Wi-Fi up.
+#
+#   wifi-sta-setup <SSID> [<country>]      passphrase read from stdin
+#   wifi-sta-setup --open <SSID> [<country>]   open network (no passphrase)
+#
+# The passphrase is taken from stdin (one line) so it never appears on the
+# command line / in the process list, and is stored as a PSK hash.
+# Writes /etc/wpa_supplicant/wpa_supplicant-wlan0.conf (mode 600), restarts
+# wpa_supplicant@wlan0 and waits up to 60 s for a DHCP IPv4 address.
+set -e
+
+IFACE=wlan0
+CONF=/etc/wpa_supplicant/wpa_supplicant-${IFACE}.conf
+OPEN=0
+if [ "$1" = "--open" ]; then OPEN=1; shift; fi
+SSID="$1"
+COUNTRY="${2:-US}"
+
+if [ -z "$SSID" ]; then
+	echo "usage: $0 [--open] <SSID> [<country>]  (passphrase on stdin)" >&2
+	exit 2
+fi
+if ! ip link show "$IFACE" >/dev/null 2>&1; then
+	echo "error: $IFACE not present (check: dmesg | grep -i wilc)" >&2
+	exit 1
+fi
+
+umask 077
+mkdir -p "$(dirname "$CONF")"
+TMP="$(mktemp "${CONF}.XXXXXX")"
+{
+	echo "ctrl_interface=/run/wpa_supplicant"
+	echo "ctrl_interface_group=0"
+	echo "update_config=1"
+	echo "country=${COUNTRY}"
+	echo
+} > "$TMP"
+if [ "$OPEN" = "1" ]; then
+	printf 'network={\n\tssid="%s"\n\tkey_mgmt=NONE\n}\n' "$SSID" >> "$TMP"
+else
+	IFS= read -r PSK || true
+	if [ -z "$PSK" ]; then
+		rm -f "$TMP"
+		echo "error: no passphrase on stdin (use --open for an open network)" >&2
+		exit 2
+	fi
+	# wpa_passphrase (8..63 chars) echoes the plaintext as a comment; drop it.
+	if ! NET="$(printf '%s\n' "$PSK" | wpa_passphrase "$SSID")"; then
+		rm -f "$TMP"
+		echo "error: wpa_passphrase failed: $NET" >&2
+		exit 2
+	fi
+	PSK=
+	printf '%s\n' "$NET" | grep -v '^[[:space:]]*#psk=' >> "$TMP"
+	NET=
+fi
+chmod 600 "$TMP"
+mv -f "$TMP" "$CONF"
+
+systemctl restart "wpa_supplicant@${IFACE}.service"
+
+i=0
+while [ $i -lt 60 ]; do
+	ADDR="$(ip -4 -o addr show dev "$IFACE" 2>/dev/null | awk '{print $4}' | head -n1)"
+	if [ -n "$ADDR" ]; then
+		echo "$IFACE up: $ADDR"
+		exit 0
+	fi
+	sleep 1
+	i=$((i + 1))
+done
+echo "error: no IPv4 address on $IFACE after 60 s" >&2
+wpa_cli -i "$IFACE" status >&2 || true
+exit 1

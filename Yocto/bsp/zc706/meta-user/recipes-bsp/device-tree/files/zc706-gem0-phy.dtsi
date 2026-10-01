@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: MIT
+// Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
+
+/*
+ * ZC706 board RJ45 (PS GEM0) PHY address fix, included LAST in the Linux
+ * device tree -- after the bsp/port-configs/ports-0123-axieth overlay's
+ * port-config.dtsi (see LATE_DT_INCLUDE_FILES in device-tree.bbappend).
+ *
+ * The shared ports-0123-axieth overlay describes the GEM0 board PHY at MDIO
+ * address 0, which is right for ZedBoard and PicoZed. The ZC706's board PHY
+ * (Marvell 88E1116R, upstream zynq-zc706.dts) is at address 7, so the
+ * overlay's gem0 PHY node is replaced here. phy-mode rgmii-id and the MAC stay
+ * as the overlay sets them; the PHY reset (MIO47) comes from the generated DT.
+ * Same override as the PetaLinux zc706 BSP's system-user.dtsi.
+ */
+
+&gem0 {
+    phy-handle = <&gem0_phy>;
+    mdio {
+        /delete-node/ phy@0;
+        gem0_phy: phy@7 {
+            device_type = "ethernet-phy";
+            reg = <7>;
+        };
+    };
+};

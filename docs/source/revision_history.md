@@ -2,6 +2,35 @@
 
 ## 2025.2 Changes
 
+### Yocto flow, board Ethernet ports, PYNQ-ZU Wi-Fi
+
+* Added the Yocto / AMD EDF flow for every Zynq-7000 and Zynq UltraScale+ target
+  (`./build.sh yocto --target <target>`), producing a full SD card image
+  (`rootfs.wic.xz`) and a `bootimages/*_yocto-2025-2.zip`. See [Yocto](yocto.md).
+* Yocto images: the board's kernel arguments (console on Zynq-7000, `cma=` size) are now added to
+  the boot script (they were missing before), and each image has its own hostname
+  (`<board>-zynqgem-2025-2`). `ethtool`, `phytool` and `iperf3` are included.
+* Zynq-7000 (ZedBoard, PicoZed, ZC706): the board's own Ethernet port (GEM0) is now described in
+  the device tree (PHY and MAC address) instead of being disabled, in both the PetaLinux and the
+  Yocto images, so it can be used next to the four FMC ports. The ZC706's board PHY is at MDIO
+  address 7 and is described as such.
+* Zynq-7000 Yocto images: fixed a kernel panic during early boot (the generated device tree lacked
+  the `xlnx,zynq-7000` compatible string).
+* ZCU104 Yocto image: the FSBL is patched to enable the FMC VADJ supply, as in the PetaLinux and
+  standalone flows; without it no FMC port works.
+* PYNQ-ZU Yocto image: on-board Wi-Fi (WILC3000) as a station, with `wifi-sta-setup`. The first
+  Wi-Fi bring-up no longer fails when the network manager queries the interface before the radio
+  firmware has started; `wlan0` is raised only by `wpa_supplicant`, with one retry. No login
+  prompt on `ttyPS1` any more (it kept failing and left the system "degraded").
+* `package` rewrites a boot image zip when the artifacts are newer than the zip (it used to keep
+  shipping an old zip after a rebuild).
+* Documentation: new block diagrams generated from the block design (the Zynq-7000 diagram had GEM0
+  and GEM1 swapped), new [Using and testing the ports](testing.md) page with the interface names
+  and expected `iperf3` results, how-to guides for the standalone, PetaLinux and Yocto flows,
+  FMC voltage variant guidance and troubleshooting.
+
+### Tool update
+
 * Updated for Vivado / Vitis / PetaLinux 2025.2.
 * Vitis flow migrated to the universal Python driver (`Vitis/py/build-vitis.py`)
   with per-target workspace layout and SDT-mode platforms.
@@ -12,7 +41,8 @@
   `bootimages/`.
 * Workarounds applied for known 2025.2 quirks on Zynq-7000: PS `gem0`
   disabled in `system-user.dtsi` to avoid a U-Boot data abort caused by
-  a missing `phy-handle` in `pcw.dtsi`; `cma=256M` instead of the stock
+  a missing `phy-handle` in `pcw.dtsi` (superseded: `gem0` is now
+  described with its PHY, see above); `cma=256M` instead of the stock
   template's `cma=1536M`; explicit DDR size in `configs/config` to
   override the stock 2 GiB default on boards with 512 MiB / 1 GiB.
 * UltraZed-EG / UltraZed-EV BSPs use `cma=1000M` and route the rootfs

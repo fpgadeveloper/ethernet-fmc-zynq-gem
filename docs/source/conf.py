@@ -30,6 +30,10 @@ extensions = [
   'myst_parser',
 ]
 
+# Generate anchors for headings up to level 4 so that links such as
+# page.md#section-name resolve.
+myst_heading_anchors = 4
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

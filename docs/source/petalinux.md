@@ -194,35 +194,26 @@ sudo screen /dev/ttyUSB0 115200
 
 ## Port configurations
 
-```{note}
-PetaLinux 2025.2 ships with systemd-based predictable interface
-names. Zynq-7000 designs (which expose the PS GEM as an `axi_ethernet`-
-adjacent `macb` interface) typically rename the interface from `ethN` to
-`enx<mac>` (MAC-derived). Zynq UltraScale+ designs rename the PS GEMs to
-`end0`–`end3`. The logical port-to-MAC assignments below are unchanged;
-only the interface name changes. Use `ip link` or the `ifconfig` output
-to see the actual name on your board.
-```
+PetaLinux 2025.2 uses the systemd predictable interface names, so the ports are not called
+`eth0` to `eth3`. The MAC address of each port is fixed by the device tree and is the reliable way
+to identify a port; the full table, and the interface names of the Yocto images (which differ),
+are on the [Using and testing the ports](testing.md#interface-names) page.
 
 ### PicoZed, ZC706, ZedBoard
 
-The Zynq-7000 designs use three AXI Ethernet Subsystem cores plus one PS
-GEM for the FMC ports. The on-board RJ45 of these boards is wired to
-PS GEM0; in the current PetaLinux configuration `gem0` is left disabled
-(see *Zynq-7000 BSPs (gem-disable workaround)* in [advanced](advanced.md))
-so the on-board Ethernet is **not** available under Linux in this repo's
-PetaLinux images, despite being usable electrically:
+The Zynq-7000 designs use three AXI Ethernet Subsystem cores plus the PS GEM1 for the FMC ports,
+and the board's own Ethernet port is on the PS GEM0. The interface names are derived from the MAC
+address (`enx<mac>`):
 
-* GEM1 (Ethernet FMC Port 3) → `enx<mac>` (the example logs show
-  `enx000a35000125`, i.e. MAC `00:0A:35:00:01:25`)
-* AXI Ethernet 0 (Ethernet FMC Port 0) → `enx<mac>` (`...122`)
-* AXI Ethernet 1 (Ethernet FMC Port 1) → `enx<mac>` (`...123`)
-* AXI Ethernet 2 (Ethernet FMC Port 2) → `enx<mac>` (`...124`)
+* AXI Ethernet 0 (Ethernet FMC port 0) → `enx000a35000122`
+* AXI Ethernet 1 (Ethernet FMC port 1) → `enx000a35000123`
+* AXI Ethernet 2 (Ethernet FMC port 2) → `enx000a35000124`
+* GEM1 (Ethernet FMC port 3) → `enx000a35000125`
+* GEM0 (board Ethernet port) → `enx000a35000126`
 
-To enable the on-board Ethernet port, remove the `&gem0 { status =
-"disabled"; }` stanza from `PetaLinux/bsp/<board>/project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi`.
-The cost of doing so is that U-Boot will crash on first boot due to a
-missing `phy-handle`; see the advanced page for the workaround used.
+The board's Ethernet port is enabled in the device tree with its PHY (address 0 on the ZedBoard
+and PicoZed, address 7 on the ZC706), so it can be used alongside the four FMC ports. Earlier
+versions of this repository disabled it.
 
 ### ZCU104, ZCU102 (HPC0), ZCU106 (HPC0), UltraZed-EG, UltraZed-EV, PYNQ-ZU, ZCU111, ZCU208
 
@@ -233,8 +224,8 @@ All four PS GEMs are used for the Ethernet FMC ports:
 * GEM2 (Ethernet FMC Port 2) → `end2`
 * GEM3 (Ethernet FMC Port 3) → `end3`
 
-Note that the Ethernet port of the dev board in these designs is not connected to any GEM and is
-thus unusable.
+The Ethernet port of the dev board in these designs is not connected to any GEM and is
+thus unusable (the PYNQ-ZU has none).
 
 ### ZCU102 (HPC1)
 
@@ -245,18 +236,29 @@ Three of the four FMC ports are wired and the on-board RJ45 stays connected:
 * GEM2 (Ethernet FMC Port 2) → `end2`
 * GEM3 (ZCU102 on-board Ethernet port) → `end3`
 
+## Log in
+
+Log in as `petalinux`. There is no password the first time; you are asked to choose one at the first
+login:
+
+```
+zcu102-zynq-gem-2025-2 login: petalinux
+You are required to change your password immediately (administrator enforced).
+New password:
+Retype new password:
+```
+
+The hostname is set per target: `<board>-zynq-gem-2025-2` (for example `zcu102-zynq-gem-2025-2`,
+`pynqzu-zynq-gem-2025-2`), and `zed-zynq-gem-2025-2` on the ZedBoard. Use `sudo` (with the password
+you chose) for commands that need root.
+
 ## Example Usage
 
-The PetaLinux 2025.2 images in this repo log in as user `petalinux` with
-password `petalinux` (you will be prompted to change the password on
-first login on most targets). The shell prompt is
-`<hostname>-zynq-gem-2025-2:~$` and commands that need root privilege are
-run via `sudo`. The hostname is set per-target (e.g. `zcu102-zynq-gem-2025-2`,
-`pynqzu-zynq-gem-2025-2`, `zed-zynq-gem-2025-2`).
-
-The examples below use `end1` (ZynqMP) as the interface name; substitute
-the actual name from the port-configuration table above for your target
-(`end<N>` on ZynqMP, `enx<mac>` on Zynq-7000).
+The examples below use `end1` (Zynq UltraScale+) as the interface name; substitute
+the actual name from the port configurations above for your target
+(`end<N>` on Zynq UltraScale+, `enx<mac>` on Zynq-7000). For link checks, PHY register reads and
+throughput tests with `iperf3` (and the results to expect), see
+[Using and testing the ports](testing.md).
 
 ### Enable port
 

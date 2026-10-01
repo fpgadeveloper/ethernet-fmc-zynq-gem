@@ -1,50 +1,77 @@
 # Stand-alone lwIP Echo Server
 
-These reference designs can be used with the stand-alone lwIP echo server application template that is 
-part of Vitis; however, some modifications are required. The lwIP library needs some modifications to be able to 
-properly configure the Marvell PHYs (88E1510) that are on the Ethernet FMC. The `Vitis` directory of the 
-source repository contains a script that can be used to setup a Vitis workspace containing the echo server 
-application and the modified lwIP library.
+The standalone (bare-metal) application is the lwIP TCP echo server from the Vitis
+`lwip_echo_server` template. It brings up **one** Ethernet FMC port, gets an IP address by
+DHCP (or falls back to a fixed address) and echoes back whatever is sent to TCP port 7. It is
+the quickest way to check the hardware without building Linux, and it can be built on Windows
+as well as on Linux.
 
-The build script does the following:
+The build adds the following to the stock template:
 
-1. Creates a Vitis workspace in the `Vitis` directory of the source repository.
-2. Creates a subdirectory called `embeddedsw` to be used as a local software repository
-   containing the modified lwIP library.
-3. Copies the sources from the `EmbeddedSw` directory of the repository to the local 
-   software repository (`embeddedsw`), then copies any remaining/unmodified sources
-   from the Vitis installation directory into the local software repository.
-4. Generates a lwIP Echo Server example application for each exported Vivado design
-   that is found in the `Vivado` directory. Most users will only have one exported
-   Vivado design.
+* A port selector (`ETHERNET_PORT` in `platform_config.h.in`) that picks which Ethernet FMC
+  port the application uses (see [Change the target port](#change-the-target-port)).
+* lwIP 2.2 with DHCP and an enlarged packet-buffer pool, and the `xiltimer` interval timer that
+  lwIP needs for its DHCP and TCP timers.
+* A modified lwIP adapter (in the `EmbeddedSw` directory of the repository) that configures the
+  Marvell 88E1510 PHYs of the Ethernet FMC, and, on Zynq UltraScale+, PS clock control so that
+  the GEM clock follows the negotiated link speed.
+* On the ZCU104, an FSBL that enables the FMC VADJ supply (see
+  [Board specific notes](supported_carriers.md#zcu104)).
 
-## Building the Vitis workspace
+## Build
 
-To build the Vitis workspace and example application, you must first generate
-the Vivado project hardware design (the bitstream) and export the hardware.
-Once the bitstream is generated and exported, then you can build the
-Vitis workspace using the provided scripts. Follow the
-[build instructions](/build_instructions.md#build-vitis-workspace) — the
-steps are the same on Windows and Linux.
+Prerequisites: Vivado 2025.2 and Vitis 2025.2 (see [Requirements](requirements.md)). From the
+root of the repository:
 
-## Run the application
+```
+./build.sh standalone --target <target>
+```
 
-You must have followed the build instructions before you can run the application.
+(`build.bat standalone --target <target>` from a Windows Command Prompt or PowerShell.) This
+builds the Vivado XSA first if needed, then creates the Vitis workspace
+`Vitis/<target>_workspace` (platform, BSP and the `echo_server` application) and packages the
+boot file:
 
-1. Launch the Xilinx Vitis GUI.
-2. When asked to select the workspace path, select the `Vitis/<target>_workspace` directory.
-3. Power up your hardware platform and ensure that the JTAG is connected properly.
-4. In the Vitis Explorer panel, double-click on the System project that you want to run -
-   this will reveal the application contained in the project. The System project will have 
-   the postfix "_system".
-5. Now right click on the application "echo_server" then navigate the
-   drop down menu to **Run As->Launch on Hardware (Single Application Debug (GDB)).**.
+| Output | Description |
+|--------|-------------|
+| `Vitis/boot/<target>/BOOT.BIN` | FSBL + bitstream + `echo_server` application, for SD card boot |
+| `Vitis/<target>_workspace/echo_server/build/echo_server.elf` | The application, for loading through JTAG |
+| `bootimages/ethernet-fmc-zynq-gem_<target>_standalone-2025-2.zip` | `BOOT.BIN` in a zip (made by `./build.sh package` or `all`) |
 
-![Vitis Launch on hardware](images/vitis-launch-on-hardware.png)
+See [Build instructions](build_instructions.md) for the list of targets.
 
-The run configuration will first program the FPGA with the bitstream, then load and run the 
-application. You can view the UART output of the application in a console window and it should
-appear as follows:
+## Hardware setup
+
+1. Plug the [Ethernet FMC] into the FMC connector given for your target in the
+   [target designs](build_instructions.md#target-designs) table, and check that its voltage
+   variant matches the board's VADJ ([Choosing the FMC variant](requirements.md#choosing-the-fmc-variant)).
+2. Connect the Ethernet FMC port that the application uses (port 0 by default) to your PC, or to
+   a router or switch on your network.
+3. Connect the board's USB-UART to your PC and open a terminal emulator (for example [Putty] on
+   Windows, or `screen /dev/ttyUSB0 115200` on Linux) at **115200 baud**, 8 data bits, no
+   parity, 1 stop bit.
+
+## Run the application from the SD card
+
+1. Copy `Vitis/boot/<target>/BOOT.BIN` to the first (FAT32) partition of an SD card.
+2. Set the board to boot from the SD card. The boot-mode switch settings for each board are listed
+   in [Boot PetaLinux](petalinux.md#boot-petalinux); see also the board's user guide (linked from the
+   [Supported boards](supported_carriers.md) page).
+3. Insert the card and power up the board. The FSBL programs the FPGA and starts the application.
+
+## Run the application through JTAG
+
+You need the JTAG cable drivers installed (see the tip in [Boot via JTAG](petalinux.md#boot-via-jtag)),
+and the board set to boot from JTAG.
+
+1. Open the workspace in the Vitis Unified IDE: `vitis -w Vitis/<target>_workspace`
+2. Select the `echo_server` application component.
+3. In the **Flow** view, click **Run**. Vitis programs the FPGA with the bitstream, initializes
+   the PS and downloads and starts the application.
+
+## Expected output
+
+On the UART console, the application should print something like this:
 
 ```
 -----lwIP TCP echo server ------
@@ -61,16 +88,8 @@ TCP echo server started @ port 7
 
 The above output results when the target port is connected to a router with DHCP. The assigned
 board IP can vary. On Zynq-7000 designs the link-speed line may instead read
-`auto-negotiated link speed: 1000` depending on which lwIP MAC backend the
-selected port uses.
-
-## UART settings
-
-To receive the UART output of this standalone application, you will need to connect the
-USB-UART of the development board to your PC and run a console program such as 
-[Putty]. The following UART settings must be used:
-
-* 115200 baud
+`auto-negotiated link speed: 1000` depending on which lwIP MAC backend the selected port uses
+(AXI Ethernet for ports 0-2, GEM for port 3).
 
 ## IP address
 
@@ -83,49 +102,54 @@ server's IP address will default to 192.168.1.10. To be able to communicate with
 from the PC, the PC should be configured with a fixed IP address on the same subnet, for example:
 192.168.1.20.
 
-## Change the target port
-
-The echo server example design currently can only target one Ethernet port at a time.
-Selection of the Ethernet port can be changed by modifying the ``ETHERNET_PORT`` define
-in the ``platform_config.h.in`` file located in the workspace application sources
-(eg. ``<target>_workspace/echo_server/src/platform_config.h.in``).
-Set ``ETHERNET_PORT`` to one of the following values:
-
-* ``0``: Ethernet FMC Port 0
-* ``1``: Ethernet FMC Port 1
-* ``2``: Ethernet FMC Port 2
-* ``3``: Ethernet FMC Port 3
-
-The correct base address for the selected port is resolved automatically based on the
-target hardware. On Zynq-7000 designs (ZedBoard, PicoZed), ports 0-2 are routed through
-AXI Ethernet and port 3 uses a PS GEM. On Zynq UltraScale+ designs, all four ports
-use PS GEMs.
-
-## Example usage
+## Test the port
 
 ### Ping the port
 
-The echo server can be "pinged" from a connected PC, or if connected to a network, from
-another device on the network. The UART console output will tell you what the IP address of the 
-echo server is. To ping the echo server, use the `ping` command from a command console of a PC
-that is connected to the echo server (either directly or via network).
+From a PC connected to the echo server (directly, or through the same network), ping the address
+that the console printed:
 
-Example command: `ping 192.168.1.10`
+```
+ping 192.168.1.10
+```
 
 ### Connect with telnet
 
-We can also connect to the echo server using telnet and confirm that it is sending back (echoing) the data
-that we are sending it. From the command prompt of a PC on the same network as the echo server, run the
-following command:
+Connect to TCP port 7 of the echo server and type a few characters; each line you send comes
+back:
 
-Example command: `telnet 192.168.1.10 7`
+```
+telnet 192.168.1.10 7
+```
 
-The first argument of the telnet command specifies the IP address of the device to connect to (in our case
-the echo server). The last argument in the command specifies the port number, which should be 7 for the 
-echo server.
+The first argument of the telnet command is the IP address of the echo server and the second is
+the port number, which should be 7.
 
-In the blank screen that opens after running the command, you can type letters and they will be sent to the 
-echo server and be echoed back.
+## Change the target port
 
+The echo server can only use one Ethernet port at a time. The port is selected by the
+`ETHERNET_PORT` define in the application's `platform_config.h.in`
+(`Vitis/<target>_workspace/echo_server/src/platform_config.h.in`). Set it to one of:
+
+* `0`: Ethernet FMC port 0
+* `1`: Ethernet FMC port 1
+* `2`: Ethernet FMC port 2
+* `3`: Ethernet FMC port 3 (not available on `zcu102_hpc1`, which has ports 0-2 only)
+
+The MAC for the selected port is resolved automatically from the target hardware: on the
+Zynq-7000 designs (ZedBoard, PicoZed, ZC706) ports 0-2 use the AXI Ethernet cores and port 3 uses
+the PS GEM1; on the Zynq UltraScale+ designs port *n* uses GEM*n*.
+
+After changing the port, rebuild the application in the Vitis IDE (select the `echo_server`
+component and click **Build** in the **Flow** view). To run it through JTAG, click **Run**. To make
+a new SD card boot file, run
+`./build.sh standalone --target <target>` afterwards; the runner re-packages `BOOT.BIN` whenever
+the application is newer than the boot file.
+
+```{note}
+On the Zynq-7000 boards, power-cycle the board when you switch between port 3 (GEM1) and one of
+ports 0-2 (AXI Ethernet); see [Board specific notes](supported_carriers.md#zedboard-picozed-and-zc706).
+```
+
+[Ethernet FMC]: https://docs.opsero.com/op031/datasheet/overview/
 [Putty]: https://www.putty.org
-

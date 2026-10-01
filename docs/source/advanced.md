@@ -4,7 +4,7 @@ This section is intended for users who want to modify the reference
 designs — adding IP to the block design, changing constraints, modifying
 the standalone application, or adding packages or drivers to the
 PetaLinux project. It describes how the repository is laid out, how the
-build flow works, how the Vitis and PetaLinux sides are
+build flow works, how the Vitis, PetaLinux and Yocto sides are
 organised, and what modifications have been added on top of the stock
 AMD BSPs.
 
@@ -29,6 +29,11 @@ it.
 │   └── bsp/                   <- Per-board and per-port-config BSP fragments
 │       ├── pz/, uzev/, zcu102/, …          <- board-specific overlays
 │       └── ports-0123/, ports-012-/, …     <- port-config overlays
+├── Yocto/
+│   ├── scripts/               <- Yocto / EDF engine (workspace, configure, build, package)
+│   └── bsp/
+│       ├── pz/, uzev/, zcu102/, …          <- per-board layers (local.conf.append + meta-user)
+│       └── port-configs/ports-*/           <- port-config overlay layers
 ├── Vivado/
 │   ├── scripts/
 │   │   ├── build.tcl          <- Project creation + block design assembly
@@ -52,7 +57,7 @@ it.
 ```
 
 Per-target build outputs are written to `Vivado/<target>/`,
-`Vitis/<target>_workspace/`, and `PetaLinux/<target>/`; packaged
+`Vitis/<target>_workspace/`, `PetaLinux/<target>/` and `Yocto/<target>/`; packaged
 boot-image zips are written to `bootimages/`. None of these are
 committed.
 
@@ -69,7 +74,9 @@ for boards with multiple FMC connectors, the connector:
 Examples: `uzev`, `zcu102_hpc0`, `zcu102_hpc1`, `zc706_lpc`,
 `uzeg_pci`, `zedboard`, `pynqzu`. The first underscore-delimited token
 is taken as the *target board* and is what the build runner uses
-to select the BSP under `PetaLinux/bsp/<board>/`.
+to select the BSP under `PetaLinux/bsp/<board>/` and `Yocto/bsp/<board>/`
+(`zcu102_hpc0` and `zcu102_hpc1` share the `zcu102` BSP; the PicoZed
+target `pz_7030` uses `pz`).
 
 The complete list of valid targets comes from `config/data.json`; run
 `./build.sh list` (or `./build.sh labels` for one per line) to print it.
@@ -78,8 +85,9 @@ The complete list of valid targets comes from `config/data.json`; run
 
 `config/data.json` is the canonical source of truth for the set of
 supported designs and their per-target metadata (board name, processor
-family, FMC connector, port lane mapping, baremetal-vs-PetaLinux
-support, etc.). The `build.py` runner reads it directly at runtime, so
+family, FMC connector, port lane mapping, which flows the target supports
+(`baremetal`, `petalinux`, `yocto`), and the port-config overlay of the
+target (`portcfg`), etc.). The `build.py` runner reads it directly at runtime, so
 the target list is never hand-maintained.
 
 `config/update.py` reads `data.json` and regenerates the auto-managed
@@ -110,7 +118,8 @@ The build is organised into stages, each available as a sub-command:
 | `xsa`        | Synthesise, implement and export the hardware (`.xsa`).                                         |
 | `standalone` | Create the Vitis workspace, build the baremetal app, package `BOOT.BIN`.                        |
 | `petalinux`  | Create the PetaLinux project from the XSA, apply the BSP overlays, build and package.           |
-| `package`    | Gather the built boot artifacts into `bootimages/*.zip`.                                        |
+| `yocto`      | Create the Yocto workspace, generate the machine from the XSA, apply the BSP layers, build.     |
+| `package`    | Gather the built boot artifacts into `bootimages/*.zip` (rewritten when the artifacts are newer). |
 | `all`        | Build every stage the target supports, then `package`.                                          |
 
 Run `./build.sh list` to see the targets and their attributes, `./build.sh
@@ -127,6 +136,9 @@ Because each stage builds its prerequisites first, a single `./build.sh all
   -> petalinux   : petalinux-create -> -config --get-hw-description <XSA>
                    -> copy bsp/<board>/project-spec/* and bsp/<port-config>/project-spec/*
                    -> petalinux-build -> petalinux-package
+  -> yocto       : repo init/sync -> sdtgen (XSA -> System Device Tree)
+                   -> gen-machineconf parse-sdt -> add bsp/<board> + port-configs/<portcfg>
+                   -> bitbake edf-linux-disk-image -> gather images/linux/
   -> package     : zip the boot files into bootimages/
 ```
 
@@ -145,11 +157,20 @@ The block-design scripts live under `Vivado/src/bd/`, one per
 processor family:
 
 * `bd_zynq.tcl`   — Zynq-7000 targets (`pz_7030`, `zc706_lpc`,
-  `zedboard`). The Zynq-7000 only has two hard GEMs, so these designs
-  use one for the on-board RJ45 and the other for one of the Ethernet
-  FMC ports. The remaining ports use AXI Ethernet Subsystem IP.
+  `zedboard`). The Zynq-7000 only has two hard GEMs: GEM0 stays on MIO
+  for the on-board RJ45 (configured by the board preset, it does not
+  pass through the PL), and GEM1 is
+  enabled on EMIO for Ethernet FMC port 3 through a GMII-to-RGMII core.
+  Ports 0-2 use AXI Ethernet Subsystem cores with AXI DMAs.
 * `bd_zynqmp.tcl` — Zynq UltraScale+ targets. These use the PS GEMs
-  (GEM0–GEM3) with PL-side GMII-to-RGMII bridges.
+  (GEM0–GEM3) on EMIO with PL-side GMII-to-RGMII bridges. The number of
+  GEMs comes from the target's port list (`num_gems`); with three GEMs
+  (`zcu102_hpc1`) GEM3 is left as the board preset configures it (on
+  the ZCU102: MIO, for the on-board RJ45).
+
+The block diagrams on the [Description](description.md) page are
+generated from these scripts by `docs/source/images/gen_block_diagram.py`
+(matplotlib); re-run it after changing the block design.
 
 Each script contains per-board conditional blocks where a target needs
 to deviate from the family defaults — typically for clock-source
@@ -213,8 +234,11 @@ each target's XDC — there is no shared XDC.
 ## Vitis side
 
 The standalone (baremetal) build runs the lwIP echo-server example
-against the FMC Ethernet ports. The application source is shared
-across all targets.
+against the FMC Ethernet ports. The application is the Vitis
+`lwip_echo_server` template, the same for all targets; the
+`pre_build.py` hook adds the port selector (`ETHERNET_PORT`) to its
+`platform_config.h.in`, and the patched lwIP adapter and ZynqMP FSBL
+come from the `EmbeddedSw/` overlay of the repository.
 
 ### Layout
 
@@ -226,8 +250,6 @@ Vitis/
 │   ├── make-boot.py          <- BOOT.BIN packaging
 │   ├── pre_build.py          <- Hook run before each app build
 │   └── pre_platform_build.py <- Hook run before each platform build
-├── common/
-│   └── src/                  <- Application source (echo_server)
 ├── boot/<target>/            <- Per-target packaged boot files
 └── <target>_workspace/       <- Generated Vitis workspace per target
 ```
@@ -242,16 +264,21 @@ the universal `build-vitis.py` driver. Key fields:
 * `app_template` — `lwip_echo_server`.
 * `bsp_libs` — `lwip220` with DHCP + ACD check + enlarged pbuf pool,
   and `xiltimer` with the interval timer enabled.
-* `src` — `"all": "common/src"`, every target uses the same source.
+* `src` — `"all": "common/src"`: an optional directory of source files
+  that would replace the template's; the repository does not ship one, so
+  the unmodified template sources are used.
 * `combine_bit_elf` — `true`, so the bitstream and ELF are combined
   into a single download image where applicable.
 
 ### Modifying the standalone application
 
-Edit `Vitis/common/src/*.c` directly. The next `./build.sh standalone
---target <t>` rebuilds the application against the existing platform; if
-you've changed the hardware (XSA) you'll need a fresh workspace
-(`./build.sh clean --target <t> --stage standalone` first).
+Edit the sources in `Vitis/<target>_workspace/echo_server/src/` and
+rebuild in the Vitis IDE; `./build.sh standalone --target <t>` then
+re-packages `BOOT.BIN`. To make a change for every target, put the
+modified sources in `Vitis/common/src/` (the `src` entry of `args.json`)
+so that new workspaces pick them up. If you've changed the hardware (XSA)
+you'll need a fresh workspace (`./build.sh clean --target <t> --stage
+standalone` first).
 
 ### Modifying BSP libraries or build hooks
 
@@ -274,10 +301,9 @@ from two BSP fragments copied into the target's project directory:
    Provides `port-config.dtsi` — the device-tree fragment that wires
    up the Ethernet ports active on this target.
 
-The mapping from target to (board BSP, port-config overlay) is encoded
-in `PetaLinux/Makefile`'s `UPDATER` block. The last column names the
-port-config overlay; the board BSP is derived from the first token of
-the target name.
+The port-config overlay of each target is the `portcfg` attribute in
+`config/data.json` (the same name is used by the Yocto flow); the board
+BSP is derived from the first token of the target name.
 
 The port-config overlay variants are:
 
@@ -287,11 +313,14 @@ The port-config overlay variants are:
   ZynqMP targets except `zcu102_hpc1`.
 * `ports-012-` — three-port designs (currently `zcu102_hpc1`, where
   the FMC routes only three lanes).
-* `ports-0123-axieth` — four-port designs that use the AXI Ethernet
-  Subsystem IP instead of PS GEMs. The overlay configures
-  `axi_ethernet_0`…`axi_ethernet_3` with `phy-mode = "rgmii-rxid"`.
-  Used by the Zynq-7000 targets (`pz_7030`, `zc706_lpc`, `zedboard`),
-  which don't have enough PS GEMs to drive all four FMC ports.
+* `ports-0123-axieth` — the Zynq-7000 targets (`pz_7030`, `zc706_lpc`,
+  `zedboard`), which don't have enough PS GEMs to drive all four FMC
+  ports. The overlay configures `axi_ethernet_0`…`axi_ethernet_2` (FMC
+  ports 0-2) with `phy-mode = "rgmii-rxid"`, `gem1` (FMC port 3, with its
+  GMII-to-RGMII core at MDIO address 8) and `gem0`, the board's own
+  Ethernet port (`phy-mode = "rgmii-id"`, PHY at address 0, MAC
+  `00:0a:35:00:01:26`). The ZC706 board file moves the `gem0` PHY to
+  address 7.
 * `ports-3` — port-3-only fragment, currently not assigned to any
   active target; retained as a starting point for single-port
   variants.
@@ -417,24 +446,33 @@ the stock one?"* — it is what to re-apply if you ever do that.
   AMD-authored (the upstream tag is `[UBOOT PATCH] ubifs: distroboot
   support`) and is replicated verbatim under each ZynqMP board BSP.
 
-### Zynq-7000 BSPs (gem-disable workaround)
+### Zynq-7000 BSPs (board Ethernet port on GEM0)
 
-The `system-user.dtsi` for `pz_7030`, `zc706_lpc`, and `zedboard`
-disables the PS `&gem0` node:
+The on-board RJ45 of the ZedBoard, PicoZed and ZC706 is wired to the PS
+GEM0 through MIO. In PetaLinux 2025.2, `pcw.dtsi` exports `gem0`
+without a `phy-handle`, and the 2025.01 U-Boot data-aborts when it walks
+such a node looking for a PHY. Earlier versions of this repository
+therefore disabled `gem0`, which left the board port unusable. The
+`ports-0123-axieth` overlay now describes `gem0` with its PHY and a MAC
+address, which avoids the crash, so `gem0` stays enabled and the board
+port works in Linux. The `system-user.dtsi` of these boards no longer
+touches `gem0`, except on the ZC706, where it replaces the overlay's
+PHY at address 0 with the ZC706's board PHY at address 7:
 
 ```dts
 &gem0 {
-    status = "disabled";
+    phy-handle = <&gem0_phy>;
+    mdio {
+        /delete-node/ phy@0;
+        gem0_phy: phy@7 {
+            device_type = "ethernet-phy";
+            reg = <7>;
+        };
+    };
 };
 ```
 
-The Vivado designs route the on-board PHY to `&gem1` and the FMC ports
-to AXI Ethernet, so `gem0` is unused. In PetaLinux 2025.2, however,
-`pcw.dtsi` exports `gem0` without a `phy-handle` and the 2025.01 U-Boot
-data-aborts when it walks the node looking for a PHY. Disabling
-`gem0` in the device tree avoids the crash. This is specific to the
-Zynq-7000 targets in this repo and is *not* needed on ZynqMP, which
-populates the GEM phy-handles via the `ports-0123` overlay.
+This device tree is also U-Boot's control device tree.
 
 ### Zynq-7000 BSPs (U-Boot storage probes)
 
@@ -485,6 +523,95 @@ that wires up the FMC Ethernet ports. Each contains a single
 that Yocto picks it up via the `SRC_URI:append = " file://port-config.dtsi"`
 line in `device-tree.bbappend`).
 
+## Yocto side
+
+The Yocto (AMD EDF) flow lives in `Yocto/`; `Yocto/README.md` describes
+the engine in detail. In short, `./build.sh yocto --target <t>`:
+
+1. creates the workspace `Yocto/<t>/` and fetches the EDF layers with
+   `repo` (`scripts/init-workspace.sh`);
+2. turns the XSA into a System Device Tree with `sdtgen` and generates a
+   Yocto machine (`zynqgem-<t>`) and the Linux device tree from it with
+   `gen-machineconf parse-sdt`, then adds the board layer
+   `bsp/<board>/meta-user`, its `conf/local.conf.append`, and the
+   port-config layer `bsp/port-configs/<portcfg>` (`scripts/configure-build.sh`);
+3. builds `edf-linux-disk-image` (`scripts/build-image.sh`) and gathers
+   the results into `Yocto/<t>/images/linux/` (`scripts/package-output.sh`).
+
+### Layout of a board layer
+
+```
+Yocto/bsp/<board>/
+├── conf/local.conf.append      <- kernel arguments (BSP_EXTRA_BOOTARGS), hostname,
+│                                  serial consoles (PYNQ-ZU)
+└── meta-user/
+    ├── recipes-bsp/device-tree/      <- system-user.dtsi (+ zc706-gem0-phy.dtsi)
+    ├── recipes-bsp/u-boot/u-boot-edf-scr_%.bbappend
+    │                                 <- appends BSP_EXTRA_BOOTARGS to boot.scr
+    ├── recipes-bsp/embeddedsw/       <- zcu104: FSBL VADJ patch
+    ├── recipes-core/images/edf-linux-disk-image.bbappend
+    │                                 <- extra packages (ethtool, phytool, iperf3, ...)
+    ├── recipes-kernel/linux/         <- bsp.cfg kernel fragment (+ PYNQ-ZU Wi-Fi patches)
+    ├── recipes-bsp/wilc3000-firmware/        <- PYNQ-ZU only
+    └── recipes-connectivity/wifi-sta-config/ <- PYNQ-ZU only
+```
+
+### Changes made by the board layers
+
+* **Kernel arguments.** The EDF boot script (`boot.scr`) builds the
+  kernel command line from the device tree's `/chosen/bootargs` and
+  fixed root arguments, and ignores the usual `APPEND` setting.
+  `u-boot-edf-scr_%.bbappend` appends `BSP_EXTRA_BOOTARGS` (set in
+  `local.conf.append`) to the script's `setenv bootargs` line. On
+  Zynq-7000 the device tree has no bootargs, so the console arguments are
+  part of `BSP_EXTRA_BOOTARGS` there.
+* **Hostname.** `hostname:pn-base-files:forcevariable` sets
+  `<board>-zynqgem-2025-2` (a plain `hostname` assignment loses to the
+  EDF distribution's default `amd-edf`).
+* **Zynq-7000 root compatible.** The generated device tree has only the
+  board string as root `compatible`; the kernel's Zynq machine matches on
+  `xlnx,zynq-7000`, without which it panics during clock setup. The board
+  `system-user.dtsi` sets `compatible = "xlnx,zynq-7000"`.
+* **ZC706 late include.** The port-config overlay is included after
+  `system-user.dtsi`, so a board file cannot override it. The ZC706's
+  `device-tree.bbappend` therefore appends `zc706-gem0-phy.dtsi` (the
+  board PHY at address 7) after everything else
+  (`LATE_DT_INCLUDE_FILES`).
+* **ZynqMP UART numbering.** The generated device tree gives both PS
+  UARTs `port-number = <0>`; the board files pin the port numbers and the
+  `serial0`/`serial1` aliases so that the console is `ttyPS0`.
+* **ZCU104 FSBL.** `fsbl-firmware_%.bbappend` applies
+  `zcu104_vadj_fsbl.patch` (the same patch as in the PetaLinux BSP) so
+  that the FSBL enables VADJ for the FMC. Because the 2025.2 embeddedsw
+  class copies the sources after `do_patch`, the patch is applied by an
+  extra task between `do_copy_shared_src` and `do_configure`.
+* **SD card on ZCU104.** `sdhci1` gets `no-1-8-v`,
+  `disable-wp`, `broken-cd` and a 50 MHz cap; without them Linux times
+  out initialising the SD card.
+* **PYNQ-ZU Wi-Fi.**
+  * `0010-wifi-wilc1000-backport-WILC3000-support.patch` adds WILC3000
+    support to the in-tree `wilc1000` driver of the 6.12 kernel (backport
+    of the mainline support), enabled as `CONFIG_WILC1000_SDIO=m`.
+  * `0011-wifi-wilc1000-refuse-config-requests-before-the-first-open.patch`:
+    a station query (as `systemd-networkd` sends for every Wi-Fi link) on
+    `wlan0` before its first open was queued although no firmware ran yet,
+    and broke the next firmware start ("Failed to configure firmware",
+    "WLAN initialization FAILED"). The driver now refuses such requests
+    until the firmware runs.
+  * `wilc3000-firmware` installs `atmel/wilc3000_wifi_firmware-1.bin`
+    (v16.1.2), fetched from the linux-firmware repository.
+  * `wifi-sta-config` installs `wifi-sta-setup`, the `25-wlan0.network`
+    DHCP configuration (`ActivationPolicy=manual`: only `wpa_supplicant`
+    raises `wlan0`), a `wpa_supplicant@wlan0` drop-in (runs only when the
+    credentials file exists, retries raising `wlan0` once, turns power
+    saving off) and a device-bound start of the service when `wlan0`
+    appears. No credentials are shipped.
+  * The device tree powers the WILC3000 up with stock drivers: CHIP_EN
+    (MIO4) as the SD1 `vmmc` regulator and RESETN (MIO5) through
+    `mmc-pwrseq-simple`.
+  * `SERIAL_CONSOLES = "115200;ttyPS0"`: no login service on `ttyPS1`,
+    which is not wired to the USB-UART on the PYNQ-ZU.
+
 ## Where build outputs land
 
 | Path                                | Contents                                                                       |
@@ -497,6 +624,8 @@ line in `device-tree.bbappend`).
 | `PetaLinux/<target>/`               | PetaLinux project. All Yocto build state lives here.                            |
 | `PetaLinux/<target>/images/linux/`  | `BOOT.BIN`, `image.ub`, `boot.scr`, `rootfs.tar.gz`, etc.                       |
 | `PetaLinux/<target>/build/build.log`| PetaLinux build log.                                                            |
-| `bootimages/`                       | Per-target zipped boot files (`<prj>_<target>_petalinux-<ver>.zip` and `<prj>_<target>_standalone-<ver>.zip`). |
+| `Yocto/<target>/`                   | Yocto workspace (layers, build directory, sstate).                              |
+| `Yocto/<target>/images/linux/`      | `BOOT.BIN`, `boot.scr`, kernel, `system.dtb`, `rootfs.wic.xz` + `.bmap`, `rootfs.tar.gz`. |
+| `bootimages/`                       | Per-target zipped boot files (`<prj>_<target>_standalone-<ver>.zip`, `<prj>_<target>_petalinux-<ver>.zip` and `<prj>_<target>_yocto-<ver>.zip`). |
 
 None of these directories are committed to the repository.
