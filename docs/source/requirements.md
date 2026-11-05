@@ -30,9 +30,9 @@ specification, even if the ports appear to work.
 | Board | VADJ on the FMC connector | Card variant |
 |-------|---------------------------|--------------|
 | ZCU102, ZCU104, ZCU106, ZCU111, ZCU208 | 1.8 V | 1.8 V (OP031-1V8 / OP041-1V8) |
-| PYNQ-ZU | 1.8 V | 1.8 V |
+| PYNQ-ZU, UltraZed-EV Carrier | 1.8 V | 1.8 V |
 | ZC706 | 2.5 V | 2.5 V (OP031-2V5 / OP041-2V5) |
-| ZedBoard, PicoZed FMC Carrier V2, UltraZed-EG PCIe Carrier, UltraZed-EV Carrier | set on the carrier (jumper or power configuration) | the variant that matches the VADJ you select; refer to the carrier's user guide |
+| ZedBoard, PicoZed FMC Carrier V2, UltraZed-EG PCIe Carrier | set on the carrier (jumper or power configuration) | the variant that matches the VADJ you select; refer to the carrier's user guide |
 
 On the ZCU104, VADJ is switched on by the first-stage boot loader (FSBL) after it reads the
 voltage record from the FMC card's EEPROM; the FSBL in this repository is patched so that it does
